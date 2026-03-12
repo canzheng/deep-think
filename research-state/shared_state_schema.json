@@ -1,0 +1,51 @@
+{
+  "routing": {
+    "task": "",
+    "domain": "",
+    "output_mode": "",
+    "evidence_mode": "",
+    "uncertainty_mode": "",
+    "decision_mode": "",
+    "time_horizon": "",
+    "unit_of_analysis": "",
+    "assumptions": []
+  },
+  "boundary": {
+    "core_system": "",
+    "adjacent_systems": [],
+    "out_of_scope": []
+  },
+  "structure": {
+    "stakeholders": [],
+    "incentives": [],
+    "constraints": [],
+    "mechanism": [],
+    "killer_variables": [],
+    "bottlenecks": []
+  },
+  "scenarios": [],
+  "questions": {
+    "structural": [],
+    "stakeholder": [],
+    "evidence": [],
+    "task_specific": [],
+    "decision_specific": [],
+    "killer_questions": []
+  },
+  "evidence_plan": {
+    "preferred_sources": [],
+    "backup_sources": [],
+    "conflict_rules": [],
+    "reducible_unknowns": [],
+    "irreducible_unknowns": []
+  },
+  "decision_logic": {
+    "must_know_before_action": [],
+    "can_learn_after_action": [],
+    "evidence_threshold": "",
+    "sizing_staging_logic": "",
+    "kill_criteria": []
+  },
+  "signals": [],
+  "rendered_output": {}
+}

@@ -1,0 +1,9 @@
+{
+  "stage": "structure",
+  "reads": ["routing", "boundary", "module_selection"],
+  "writes": ["structure"],
+  "output_format": "json_state_update",
+  "feedback": {
+    "supported": false
+  }
+}

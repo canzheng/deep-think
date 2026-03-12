@@ -1,0 +1,17 @@
+{
+  "stage": "question_generation",
+  "reads": ["routing", "boundary", "structure", "scenarios", "module_selection"],
+  "writes": ["questions"],
+  "output_format": "json_state_update",
+  "feedback": {
+    "supported": true,
+    "field": "feedback",
+    "schema": {
+      "needed": false,
+      "target_stage": "structure",
+      "reason": "",
+      "state_sections_to_revisit": ["structure"],
+      "invalidate_downstream_sections": ["questions", "evidence_plan", "uncertainty_map", "decision_logic", "signals", "monitoring", "synthesis"]
+    }
+  }
+}

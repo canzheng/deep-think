@@ -1,0 +1,9 @@
+{
+  "stage": "monitoring_layer",
+  "reads": ["signals", "uncertainty_map", "decision_logic", "scenarios"],
+  "writes": ["monitoring"],
+  "output_format": "json_state_update",
+  "feedback": {
+    "supported": false
+  }
+}

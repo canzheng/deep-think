@@ -1,0 +1,10 @@
+{
+  "stage": "renderer",
+  "reads": ["routing", "module_selection", "boundary", "structure", "scenarios", "questions", "evidence_plan", "uncertainty_map", "decision_logic", "signals", "monitoring", "synthesis"],
+  "writes": [],
+  "output_format": "rendered_deliverable",
+  "renderer_uses_state_as_sole_analysis_input": true,
+  "feedback": {
+    "supported": false
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "stage": "decision_logic",
+  "reads": ["routing", "structure", "scenarios", "questions", "evidence_plan", "uncertainty_map", "module_selection"],
+  "writes": ["decision_logic", "synthesis"],
+  "output_format": "json_state_update",
+  "feedback": {
+    "supported": false
+  }
+}

@@ -1,0 +1,31 @@
+# Repository Guidance
+
+The source of truth for the question generator is:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md`
+
+Modular components live under:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/`
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/`
+
+Stage prompt templates live under:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
+
+Stage guidance extracts live under:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
+
+Stage input/output contracts live under:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/`
+
+Rules:
+- Stage prompt templates must remain consistent with the modular generator source.
+- If the modular generator changes, update affected stage templates and contracts.
+- Stage guidance files under `stages/` should be extracted from the `Reads`,
+  `Writes`, and output sections of the stage templates.
+- The renderer must use the shared state file as its sole analysis input.
+- Feedback loops are orchestrator-controlled; stage prompts may request feedback but should not jump stages themselves.
+- Canonical workflow stage names are:
+  `Routing`, `Boundary`, `Structure`, `Scenarios`, `Question Generation`,
+  `Evidence Planning`, `Decision Logic`, `Signal Translation`, `Monitoring`,
+  `Render`.
+- Adapter influence levels must use only: `Primary`, `Modulating`, `Light`,
+  or `None`.

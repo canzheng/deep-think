@@ -1,0 +1,9 @@
+{
+  "stage": "signal_translation",
+  "reads": ["questions", "evidence_plan", "uncertainty_map", "decision_logic"],
+  "writes": ["signals"],
+  "output_format": "json_state_update",
+  "feedback": {
+    "supported": false
+  }
+}

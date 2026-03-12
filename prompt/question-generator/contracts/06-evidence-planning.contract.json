@@ -1,0 +1,17 @@
+{
+  "stage": "evidence_planning",
+  "reads": ["routing", "questions", "scenarios", "module_selection"],
+  "writes": ["evidence_plan", "uncertainty_map"],
+  "output_format": "json_state_update",
+  "feedback": {
+    "supported": true,
+    "field": "feedback",
+    "schema": {
+      "needed": false,
+      "target_stage": "scenarios",
+      "reason": "",
+      "state_sections_to_revisit": ["scenarios"],
+      "invalidate_downstream_sections": ["evidence_plan", "uncertainty_map", "decision_logic", "signals", "monitoring", "synthesis"]
+    }
+  }
+}
