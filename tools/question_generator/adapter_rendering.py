@@ -20,17 +20,17 @@ STAGE_LABELS = {
 }
 
 WRAPPER_TEMPLATES = {
-    "task": "### Because this is a `{value}` task, apply this steering:",
-    "domain": "### Because this problem sits in `{value}`, apply this steering:",
-    "evidence_mode": "### Because the preferred evidence mode is `{value}`, apply this steering:",
-    "uncertainty_mode": "### Because the dominant uncertainty is `{value}`, apply this steering:",
-    "decision_mode": "### Because the action problem is `{value}`, apply this steering:",
-    "output_mode": "### Because the deliverable is `{value}`, apply this steering:",
+    "task": "### Because this is a `{value}` task, follow this guidance with stated importance:",
+    "domain": "### Because this problem sits in `{value}`, follow this guidance with stated importance:",
+    "evidence_mode": "### Because the preferred evidence mode is `{value}`, follow this guidance with stated importance:",
+    "uncertainty_mode": "### Because the dominant uncertainty is `{value}`, follow this guidance with stated importance:",
+    "decision_mode": "### Because the action problem is `{value}`, follow this guidance with stated importance:",
+    "output_mode": "### Because the deliverable is `{value}`, follow this guidance with stated importance:",
 }
 
 
 def render_adapter_sections(stage: str, resolved_modules: dict[str, ResolvedModule]) -> str:
-    rendered = ["## Stage Guidance"]
+    rendered = ["## Stage Guidance \n(Note: each guidance will be marked with a level of importance (Primary|Modulating|Light). You should follow the guidance with stated level of importance.)"]
     for dimension in resolved_modules:
         module = resolved_modules[dimension]
         rendered.extend(
@@ -73,7 +73,7 @@ def _extract_stage_steering(module: ResolvedModule, stage: str) -> str:
         if relevance is not None and line.strip():
             collected_lines.append(line.rstrip())
 
-    body_lines = [f"Relevance: {relevance}"] if relevance is not None else []
+    body_lines = [f"Importance: {relevance}"] if relevance is not None else []
     body_lines.extend(collected_lines)
     return "\n".join(body_lines).strip()
 

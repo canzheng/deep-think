@@ -21,6 +21,7 @@ Rules:
 - If the modular generator changes, update affected stage templates and contracts.
 - The renderer must use the shared state file as its sole analysis input.
 - Feedback loops are orchestrator-controlled; stage prompts may request feedback but should not jump stages themselves.
+- Always run Python commands through the Conda-managed environment instead of the system Python so dependency resolution stays consistent.
 - Contracts are the source of truth for stage dependencies, adapter
   dependencies, and output schemas.
 - Canonical workflow stage names are:
