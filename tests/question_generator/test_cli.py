@@ -31,7 +31,7 @@ class CliTest(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
-        self.assertIn("## Stage 7 - Decision Logic", output)
+        self.assertIn("You are converting the current analysis into decision logic.", output)
         self.assertIn("## Current State", output)
         self.assertIn("## Active Steering", output)
         self.assertIn("## Required Output", output)

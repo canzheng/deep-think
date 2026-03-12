@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/routing.schema.json",
+  "title": "Routing",
+  "type": "object",
+  "required": [
+    "question",
+    "explicit_constraints",
+    "desired_output",
+    "risk_tolerance",
+    "decision_context",
+    "task",
+    "secondary_task",
+    "domain",
+    "secondary_domain",
+    "output_mode",
+    "secondary_output_mode",
+    "evidence_mode",
+    "secondary_evidence_mode",
+    "uncertainty_mode",
+    "secondary_uncertainty_mode",
+    "decision_mode",
+    "secondary_decision_mode",
+    "classification_rationales",
+    "time_horizon",
+    "unit_of_analysis",
+    "assumptions"
+  ],
+  "properties": {
+    "question": {
+      "type": "string"
+    },
+    "explicit_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "desired_output": {
+      "type": "string"
+    },
+    "risk_tolerance": {
+      "type": "string"
+    },
+    "decision_context": {
+      "type": "string"
+    },
+    "task": {
+      "type": "string"
+    },
+    "secondary_task": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "secondary_domain": {
+      "type": "string"
+    },
+    "output_mode": {
+      "type": "string"
+    },
+    "secondary_output_mode": {
+      "type": "string"
+    },
+    "evidence_mode": {
+      "type": "string"
+    },
+    "secondary_evidence_mode": {
+      "type": "string"
+    },
+    "uncertainty_mode": {
+      "type": "string"
+    },
+    "secondary_uncertainty_mode": {
+      "type": "string"
+    },
+    "decision_mode": {
+      "type": "string"
+    },
+    "secondary_decision_mode": {
+      "type": "string"
+    },
+    "classification_rationales": {
+      "type": "object",
+      "required": [
+        "task",
+        "secondary_task",
+        "domain",
+        "secondary_domain",
+        "output_mode",
+        "secondary_output_mode",
+        "evidence_mode",
+        "secondary_evidence_mode",
+        "uncertainty_mode",
+        "secondary_uncertainty_mode",
+        "decision_mode",
+        "secondary_decision_mode"
+      ],
+      "properties": {
+        "task": {
+          "type": "string"
+        },
+        "secondary_task": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "secondary_domain": {
+          "type": "string"
+        },
+        "output_mode": {
+          "type": "string"
+        },
+        "secondary_output_mode": {
+          "type": "string"
+        },
+        "evidence_mode": {
+          "type": "string"
+        },
+        "secondary_evidence_mode": {
+          "type": "string"
+        },
+        "uncertainty_mode": {
+          "type": "string"
+        },
+        "secondary_uncertainty_mode": {
+          "type": "string"
+        },
+        "decision_mode": {
+          "type": "string"
+        },
+        "secondary_decision_mode": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "time_horizon": {
+      "type": "string"
+    },
+    "unit_of_analysis": {
+      "type": "string"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

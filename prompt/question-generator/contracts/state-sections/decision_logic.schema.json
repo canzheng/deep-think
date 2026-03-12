@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/decision_logic.schema.json",
+  "title": "Decision Logic",
+  "type": "object",
+  "required": [
+    "must_know_before_action",
+    "can_learn_after_action",
+    "appropriate_evidence_threshold",
+    "reversibility_logic",
+    "sizing_logic",
+    "staging_logic",
+    "hedge_exit_kill_criteria",
+    "triggers"
+  ],
+  "properties": {
+    "must_know_before_action": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "can_learn_after_action": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "appropriate_evidence_threshold": {
+      "type": "string"
+    },
+    "reversibility_logic": {
+      "type": "string"
+    },
+    "sizing_logic": {
+      "type": "string"
+    },
+    "staging_logic": {
+      "type": "string"
+    },
+    "hedge_exit_kill_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

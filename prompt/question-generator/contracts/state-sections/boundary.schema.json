@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/boundary.schema.json",
+  "title": "Boundary",
+  "type": "object",
+  "required": [
+    "exact_object_of_analysis",
+    "core_system",
+    "adjacent_systems",
+    "out_of_scope_factors",
+    "scope_assumptions"
+  ],
+  "properties": {
+    "exact_object_of_analysis": {
+      "type": "string"
+    },
+    "core_system": {
+      "type": "string"
+    },
+    "adjacent_systems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "out_of_scope_factors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scope_assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

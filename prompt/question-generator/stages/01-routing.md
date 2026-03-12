@@ -1,20 +1,49 @@
-## Stage 1 - Routing
+You are performing the routing step of a question-generation workflow.
+
+Your job is to classify and normalize the problem before deeper analysis begins.
+
+Input topic:
+{{topic}}
 
 Purpose:
 - classify the problem before analysis starts
-- choose the active adapter set
+- normalize the topic into a structured problem frame
+- choose the right analysis configuration for downstream work
 
-Uses:
-- routing layer from the modular source prompt
-- adapter names and file paths
+This step should:
+- infer the primary task
+- infer the primary domain
+- infer the output mode
+- infer the evidence mode
+- infer the uncertainty mode
+- infer the decision mode
+- identify any justified secondary classifications
+- define the time horizon, unit of analysis, and decision context if relevant
+- state key assumptions when the input is ambiguous
 
-Should not:
+This step should not:
 - build full scenarios
 - collect evidence
-- make decisions
-- render the final output
+- make downstream decisions
+- render the final deliverable
 
-STEP 1 - DETERMINE PRIMARY TASK
+Working rules:
+- Use the provided topic as the primary input.
+- Normalize ambiguity into the most decision-useful framing.
+- Prefer one primary classification per axis.
+- Assign a secondary classification only when it materially changes downstream analysis.
+- If a field is not relevant, leave it empty rather than inventing detail.
+- State assumptions explicitly when classification requires inference.
+
+Routing rules:
+- Task defines the objective.
+- Domain defines the ontology.
+- Output mode defines the deliverable.
+- Evidence mode defines the proof standard.
+- Uncertainty mode defines the skepticism and update logic.
+- Decision mode defines the action logic.
+
+## Step 1 - Determine Primary Task
 
 Classify the primary task as one of:
 - Explain
@@ -33,21 +62,13 @@ Definitions:
 - Design / Influence = determine how to shape outcomes through levers, interventions, or strategy
 
 Also determine:
-- Time horizon
-- Unit of analysis
-- Decision context if relevant
+- time horizon
+- unit of analysis
+- decision context if relevant
 
 If unclear, infer the most decision-useful version and state assumptions explicitly.
 
-Return:
-- Primary task
-- Secondary task if any
-- Time horizon
-- Unit of analysis
-- Decision context
-- Key assumptions
-
-STEP 2 - DETERMINE PRIMARY DOMAIN
+## Step 2 - Determine Primary Domain
 
 Infer the primary domain from the topic.
 
@@ -60,12 +81,7 @@ Choose one primary domain:
 
 You may assign one secondary domain if needed.
 
-Return:
-- Primary domain
-- Secondary domain if any
-- Why the domain classification fits
-
-STEP 3 - DETERMINE OUTPUT MODE
+## Step 3 - Determine Output Mode
 
 Choose one primary output mode:
 - Research Memo
@@ -77,12 +93,7 @@ Choose one primary output mode:
 
 You may choose one secondary output mode if clearly helpful.
 
-Return:
-- Primary output mode
-- Secondary output mode if any
-- Why this output mode fits
-
-STEP 4 - DETERMINE EVIDENCE MODE
+## Step 4 - Determine Evidence Mode
 
 Choose one primary evidence mode:
 - Primary-Source-Heavy
@@ -93,12 +104,7 @@ Choose one primary evidence mode:
 
 You may assign one secondary evidence mode if clearly needed.
 
-Return:
-- Primary evidence mode
-- Secondary evidence mode if any
-- Why this evidence mode is appropriate
-
-STEP 5 - DETERMINE UNCERTAINTY MODE
+## Step 5 - Determine Uncertainty Mode
 
 Choose one primary uncertainty mode:
 - Known-Unknown Dominated
@@ -111,12 +117,7 @@ Choose one primary uncertainty mode:
 
 You may assign one secondary uncertainty mode if clearly needed.
 
-Return:
-- Primary uncertainty mode
-- Secondary uncertainty mode if any
-- Why this uncertainty mode fits
-
-STEP 6 - DETERMINE DECISION MODE
+## Step 6 - Determine Decision Mode
 
 Choose one primary decision mode:
 - Latent / No Immediate Commitment
@@ -140,15 +141,18 @@ Definitions:
 
 If unclear, infer the most decision-useful mode and state assumptions explicitly.
 
-Return:
-- Primary decision mode
-- Secondary decision mode if any
-- Why this decision mode fits
+Output requirements:
+- Produce a result fully consistent with the provided output schema.
+- Include the primary classification for each axis.
+- Include a secondary classification only when justified.
+- Include time horizon, unit of analysis, and decision context if relevant.
+- Include key assumptions.
+- Include a rationale for each classification.
 
-Rule:
-Task defines the objective.
-Domain defines the ontology.
-Output mode defines the deliverable.
-Evidence mode defines the proof standard.
-Uncertainty mode defines the skepticism and update logic.
-Decision mode defines the action logic.
+{{required_output}}
+
+Quality bar:
+- Prefer precise, usable classifications over generic ones.
+- Do not assign secondary classifications without clear downstream value.
+- Do not leave the routing internally inconsistent across axes.
+- Make the result useful for downstream stage execution.

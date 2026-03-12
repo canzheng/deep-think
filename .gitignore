@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+prompt/question-generator/examples/00-placeholder-review-bundle.md
+tests/question_generator/artifacts/*

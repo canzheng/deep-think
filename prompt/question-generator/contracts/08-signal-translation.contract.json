@@ -26,35 +26,7 @@
     "required": ["signals"],
     "properties": {
       "signals": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "required": [
-            "signal",
-            "linked_question",
-            "preferred_evidence_source",
-            "backup_evidence_source",
-            "cadence",
-            "thresholds",
-            "update_rules",
-            "belief_update_implications",
-            "confidence_under_current_uncertainty_mode",
-            "changes_action_vs_belief"
-          ],
-          "properties": {
-            "signal": {"type": "string"},
-            "linked_question": {"type": "string"},
-            "preferred_evidence_source": {"type": "string"},
-            "backup_evidence_source": {"type": "string"},
-            "cadence": {"type": "string"},
-            "thresholds": {"type": "array", "items": {"type": "string"}},
-            "update_rules": {"type": "array", "items": {"type": "string"}},
-            "belief_update_implications": {"type": "array", "items": {"type": "string"}},
-            "confidence_under_current_uncertainty_mode": {"type": "string"},
-            "changes_action_vs_belief": {"type": "string"}
-          },
-          "additionalProperties": false
-        }
+        "$ref": "./state-sections/signals.schema.json"
       }
     },
     "additionalProperties": false

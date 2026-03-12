@@ -26,50 +26,10 @@
     "required": ["evidence_plan", "uncertainty_map"],
     "properties": {
       "evidence_plan": {
-        "type": "object",
-        "required": [
-          "evidence_hierarchy",
-          "preferred_source_types",
-          "backup_source_types",
-          "conflict_resolution_rules",
-          "question_to_evidence_mapping"
-        ],
-        "properties": {
-          "evidence_hierarchy": {"type": "array", "items": {"type": "string"}},
-          "preferred_source_types": {"type": "array", "items": {"type": "string"}},
-          "backup_source_types": {"type": "array", "items": {"type": "string"}},
-          "conflict_resolution_rules": {"type": "array", "items": {"type": "string"}},
-          "question_to_evidence_mapping": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["question", "preferred_sources", "backup_sources"],
-              "properties": {
-                "question": {"type": "string"},
-                "preferred_sources": {"type": "array", "items": {"type": "string"}},
-                "backup_sources": {"type": "array", "items": {"type": "string"}}
-              },
-              "additionalProperties": false
-            }
-          }
-        },
-        "additionalProperties": false
+        "$ref": "./state-sections/evidence_plan.schema.json"
       },
       "uncertainty_map": {
-        "type": "object",
-        "required": [
-          "reducible_unknowns",
-          "partially_reducible_unknowns",
-          "irreducible_uncertainties",
-          "task_material_uncertainties"
-        ],
-        "properties": {
-          "reducible_unknowns": {"type": "array", "items": {"type": "string"}},
-          "partially_reducible_unknowns": {"type": "array", "items": {"type": "string"}},
-          "irreducible_uncertainties": {"type": "array", "items": {"type": "string"}},
-          "task_material_uncertainties": {"type": "array", "items": {"type": "string"}}
-        },
-        "additionalProperties": false
+        "$ref": "./state-sections/uncertainty_map.schema.json"
       }
     },
     "additionalProperties": false

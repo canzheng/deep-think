@@ -248,9 +248,11 @@ Key implementation choices:
 - Adapter files remain responsible for the substantive stage guidance.
 - The renderer extracts the correct stage block from the adapter's
   `## Stage Relevance` section.
-- Output-mode files are treated differently: the current implementation injects
-  the full output-mode document rather than parsing stage-specific relevance
-  from it.
+- Output-mode files are treated differently:
+  - `Render` receives the full output-mode document
+  - non-render stages receive a short modulating note that keeps them aligned to
+    the eventual deliverable without pulling final-format section outlines into
+    upstream analysis stages
 
 Why output mode is special:
 - output modes are authored as deliverable definitions rather than stage-style
@@ -259,8 +261,9 @@ Why output mode is special:
   decision-oriented stages
 
 Tradeoff:
-- full output-mode injection is simple and transparent
-- it is also longer than a future stage-aware output-mode rendering model
+- full output-mode injection remains simple and transparent for `Render`
+- upstream stages avoid prompt confusion from seeing final-deliverable section
+  lists in the middle of analytical work
 
 ### `assembler.py`
 
@@ -270,18 +273,27 @@ File:
 Responsibilities:
 - orchestrate the full prompt assembly for one stage
 
-Current assembly order:
-1. stage template
-2. rendered current state
-3. rendered active steering, if any
-4. required output schema
-5. feedback schema, if supported
+Current assembly flow:
+1. load the stage template
+2. resolve required and selected optional state sections
+3. resolve the routed modules
+4. render prompt blocks:
+   - topic
+   - current state
+   - active steering, if any
+   - required output schema
+   - feedback schema, if supported
+5. interpolate any matching placeholders in the stage template
+6. append any unplaced blocks in legacy order
+7. return one markdown prompt string
 
 Key implementation choices:
 - The assembler is intentionally a renderer, not a workflow executor.
 - It does not call the model.
 - It does not validate model output.
 - It does not merge state updates.
+- Placeholder support is intentionally lightweight and uses a small fixed set of
+  supported tokens rather than a general templating engine.
 
 Those behaviors are left to a future orchestrator.
 
@@ -290,6 +302,19 @@ Why this split was chosen:
 - prompt debugging is easier when assembly can be run independently
 - it keeps the current implementation testable without introducing model or API
   dependencies
+
+Supported placeholders:
+- `{{topic}}` -> markdown-safe rendered topic block
+- `{{current_state}}` -> rendered current-state block
+- `{{active_steering}}` -> rendered steering block
+- `{{required_output}}` -> rendered output-schema block
+- `{{feedback}}` -> rendered feedback-schema block when supported
+
+Backward-compatibility rule:
+- when a template explicitly places a block placeholder, that block is rendered
+  there and not appended again
+- when a template omits a block placeholder, the assembler appends that block
+  after the template using the legacy order
 
 ### `cli.py`
 
@@ -460,18 +485,22 @@ For a stage like `decision_logic`, the runtime currently does this:
 2. load `07-decision-logic.md`
 3. resolve required and selected optional state sections
 4. resolve routed modules from `routing`
-5. render current state
-6. render active steering
-7. append required output schema
-8. append feedback schema if supported
-9. return one markdown prompt string
+5. render prompt blocks for:
+   - topic
+   - current state
+   - active steering
+   - required output
+   - feedback, if supported
+6. interpolate any matching placeholders in the template
+7. append any remaining unplaced blocks in legacy order
+8. return one markdown prompt string
 
 This gives a prompt shaped like:
-- stage instructions
-- current state
-- active steering
-- required output
-- feedback, if needed
+- stage instructions with optional explicit placeholders
+- current state, either interpolated or appended
+- active steering, either interpolated or appended
+- required output, either interpolated or appended
+- feedback, if needed and either interpolated or appended
 
 ## Why We Chose Markdown Templates Plus Code
 
@@ -487,6 +516,7 @@ Reasons:
 
 So the implementation treats prompt assembly as:
 - render structured inputs into a markdown prompt
+- optionally interpolate them into authored placeholder locations
 
 not:
 - compile a new intermediate language first

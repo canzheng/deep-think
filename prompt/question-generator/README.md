@@ -71,10 +71,24 @@ Assembler runtime:
 
 Assembly model:
 - stage template supplies the core prompt body
+- stage template may explicitly place assembler-provided placeholders
 - contract supplies required and optional stage dependencies, adapter
   dependencies, and output schema
 - shared state supplies the routed context and prior stage outputs
 - routed adapters supply stage-specific steering
+
+Supported template placeholders:
+- `{{topic}}` -> a markdown-safe rendered topic block from shared state
+- `{{current_state}}` -> the rendered current-state block
+- `{{active_steering}}` -> the rendered steering block for the routed modules
+- `{{required_output}}` -> the rendered output-schema block
+- `{{feedback}}` -> the rendered feedback-schema block when supported
+
+Placeholder fallback rule:
+- if a template includes one of these placeholders, the assembler injects the
+  matching content at that location
+- if a template does not include a given block placeholder, the assembler
+  appends that block after the template using the legacy order
 
 CLI usage:
 ```bash

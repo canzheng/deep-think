@@ -46,7 +46,9 @@ def render_adapter_sections(stage: str, resolved_modules: dict[str, ResolvedModu
 def _extract_stage_steering(module: ResolvedModule, stage: str) -> str:
     content = module.path.read_text()
     if module.dimension == "output_mode":
-        return content.strip()
+        if normalize_stage_name(stage) == "render":
+            return content.strip()
+        return _render_non_render_output_mode_guidance(module.value)
 
     stage_relevance = content.split("## Stage Relevance", maxsplit=1)[-1]
     desired_label = STAGE_LABELS[normalize_stage_name(stage)]
@@ -74,3 +76,14 @@ def _extract_stage_steering(module: ResolvedModule, stage: str) -> str:
     body_lines = [f"Relevance: {relevance}"] if relevance is not None else []
     body_lines.extend(collected_lines)
     return "\n".join(body_lines).strip()
+
+
+def _render_non_render_output_mode_guidance(output_mode: str) -> str:
+    return "\n".join(
+        [
+            "Relevance: Modulating",
+            f"- Keep this stage consistent with the eventual `{output_mode}` deliverable.",
+            "- Let the deliverable shape influence emphasis and prioritization, not final section formatting.",
+            "- Do not drift into writing the final artifact in this stage.",
+        ]
+    )

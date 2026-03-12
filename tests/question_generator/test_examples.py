@@ -35,7 +35,7 @@ class ExampleAssemblyTest(unittest.TestCase):
             optional_reads=["structure", "question_generation"],
         )
 
-        self.assertIn("## Stage 7 - Decision Logic", prompt)
+        self.assertIn("You are converting the current analysis into decision logic.", prompt)
         self.assertIn("Because this problem sits in `Investing / Markets`", prompt)
         self.assertIn("Because the action problem is `Portfolio Construction`", prompt)
         self.assertIn('"decision_logic"', prompt)
