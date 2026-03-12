@@ -20,6 +20,67 @@
   "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["scenarios"],
   "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["scenarios"],
+    "properties": {
+      "scenarios": {
+        "type": "object",
+        "required": ["base_case", "alternative_scenarios"],
+        "properties": {
+          "base_case": {
+            "type": "object",
+            "required": [
+              "name",
+              "summary",
+              "branch_points",
+              "branch_triggers",
+              "reversibility",
+              "probability_logic",
+              "decision_mode_implications"
+            ],
+            "properties": {
+              "name": {"type": "string"},
+              "summary": {"type": "string"},
+              "branch_points": {"type": "array", "items": {"type": "string"}},
+              "branch_triggers": {"type": "array", "items": {"type": "string"}},
+              "reversibility": {"type": "string"},
+              "probability_logic": {"type": "string"},
+              "decision_mode_implications": {"type": "array", "items": {"type": "string"}}
+            },
+            "additionalProperties": false
+          },
+          "alternative_scenarios": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "summary",
+                "branch_points",
+                "branch_triggers",
+                "reversibility",
+                "probability_logic",
+                "decision_mode_implications"
+              ],
+              "properties": {
+                "name": {"type": "string"},
+                "summary": {"type": "string"},
+                "branch_points": {"type": "array", "items": {"type": "string"}},
+                "branch_triggers": {"type": "array", "items": {"type": "string"}},
+                "reversibility": {"type": "string"},
+                "probability_logic": {"type": "string"},
+                "decision_mode_implications": {"type": "array", "items": {"type": "string"}}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
   "feedback": {
     "supported": false
   }

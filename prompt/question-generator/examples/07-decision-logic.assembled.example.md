@@ -28,7 +28,33 @@ current routed modules included below.
 ```json
 {
   "stage": "decision_logic",
-  "reads": ["routing", "structure", "scenarios", "questions", "evidence_plan", "uncertainty_map", "module_selection"],
+  "reads_required": ["routing", "scenarios", "evidence_planning"],
+  "reads_optional": [
+    {
+      "stage": "structure",
+      "kind": "situation",
+      "when": [
+        "action depends on specific bottlenecks or mechanism details",
+        "scenario summaries are too compressed",
+        "portfolio or adversarial logic needs more structural detail"
+      ]
+    },
+    {
+      "stage": "question_generation",
+      "kind": "situation",
+      "when": [
+        "killer questions are directly tied to action gating"
+      ]
+    },
+    {
+      "stage": "boundary",
+      "kind": "situation",
+      "when": [
+        "action scope is still ambiguous"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["decision_logic", "synthesis"],
   "output_format": "json_state_update",
   "feedback": {
@@ -484,4 +510,3 @@ Return a JSON object containing only:
 - `synthesis`
 
 The output should be directly mergeable into the shared state.
-

@@ -1,0 +1,63 @@
+import unittest
+
+
+from tools.question_generator.contracts import load_contract
+from tools.question_generator.state_resolution import resolve_state_sections
+
+
+STATE = {
+    "topic": "Should we add to NVDA ahead of earnings?",
+    "routing": {"task": "Decide", "output_mode": "Decision Memo"},
+    "boundary": {"core_system": "NVIDIA earnings setup"},
+    "structure": {"bottlenecks": ["datacenter demand durability"]},
+    "scenarios": {"base_case": {"summary": "In-line print"}},
+    "questions": {"top_killer_questions": [{"question": "Is demand pull-forward?"}]},
+    "evidence_plan": {"evidence_hierarchy": ["guidance", "revisions"]},
+    "uncertainty_map": {"irreducible_uncertainties": ["management tone"]},
+    "decision_logic": {"must_know_before_action": ["position sizing"]},
+    "synthesis": {"recommendation_or_action_frame": "small add"},
+    "signals": [{"signal": "estimate revisions"}],
+    "monitoring": {"what_to_watch": [{"item": "estimate revisions"}]},
+}
+
+
+class StateResolutionTest(unittest.TestCase):
+    def test_question_generation_uses_required_and_selected_optional_sections(self) -> None:
+        contract = load_contract("question_generation")
+
+        resolved = resolve_state_sections(contract, STATE, optional_reads=["boundary"])
+
+        self.assertEqual(
+            list(resolved.keys()),
+            ["routing", "structure", "scenarios", "boundary"],
+        )
+
+    def test_evidence_planning_maps_question_generation_to_questions(self) -> None:
+        contract = load_contract("evidence_planning")
+
+        resolved = resolve_state_sections(contract, STATE)
+
+        self.assertEqual(
+            list(resolved.keys()),
+            ["routing", "structure", "scenarios", "questions"],
+        )
+        self.assertEqual(resolved["questions"], STATE["questions"])
+
+    def test_decision_logic_optional_question_generation_maps_to_questions(self) -> None:
+        contract = load_contract("decision_logic")
+
+        resolved = resolve_state_sections(contract, STATE, optional_reads=["question_generation"])
+
+        self.assertIn("questions", resolved)
+        self.assertEqual(resolved["questions"], STATE["questions"])
+
+    def test_render_receives_full_state(self) -> None:
+        contract = load_contract("render")
+
+        resolved = resolve_state_sections(contract, STATE)
+
+        self.assertEqual(resolved, STATE)
+
+
+if __name__ == "__main__":
+    unittest.main()

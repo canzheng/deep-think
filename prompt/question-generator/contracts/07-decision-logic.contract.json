@@ -29,6 +29,53 @@
   "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["decision_logic", "synthesis"],
   "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["decision_logic", "synthesis"],
+    "properties": {
+      "decision_logic": {
+        "type": "object",
+        "required": [
+          "must_know_before_action",
+          "can_learn_after_action",
+          "appropriate_evidence_threshold",
+          "reversibility_logic",
+          "sizing_logic",
+          "staging_logic",
+          "hedge_exit_kill_criteria",
+          "triggers"
+        ],
+        "properties": {
+          "must_know_before_action": {"type": "array", "items": {"type": "string"}},
+          "can_learn_after_action": {"type": "array", "items": {"type": "string"}},
+          "appropriate_evidence_threshold": {"type": "string"},
+          "reversibility_logic": {"type": "string"},
+          "sizing_logic": {"type": "string"},
+          "staging_logic": {"type": "string"},
+          "hedge_exit_kill_criteria": {"type": "array", "items": {"type": "string"}},
+          "triggers": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      },
+      "synthesis": {
+        "type": "object",
+        "required": [
+          "recommendation_or_action_frame",
+          "why_now_or_why_not_now",
+          "what_must_be_true",
+          "key_risks_and_failure_modes"
+        ],
+        "properties": {
+          "recommendation_or_action_frame": {"type": "string"},
+          "why_now_or_why_not_now": {"type": "string"},
+          "what_must_be_true": {"type": "array", "items": {"type": "string"}},
+          "key_risks_and_failure_modes": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
   "feedback": {
     "supported": false
   }

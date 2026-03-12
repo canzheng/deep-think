@@ -9,13 +9,15 @@ It preserves the shared logic inline and references external modules for:
 - decision-mode adapters
 - output-mode definitions
 
-If an assembler is available:
-- inject this file first
-- then inject the selected module files based on routing
+The current python assembler lives under:
+- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
 
-If no assembler is available:
-- use this file as the base prompt
-- then append the referenced module files manually
+Assembly rule:
+- use the stage prompt template for the current stage
+- use the matching contract for stage dependencies and output schema
+- render the current shared state into the stage prompt
+- inject the selected module files based on routing and contract
+- keep stage templates and contracts consistent with this file
 
 Your job is NOT to answer the topic directly unless the requested output mode requires it.
 Your job is to convert any ambiguous topic into a structured research blueprint and then express that blueprint in the correct deliverable format.

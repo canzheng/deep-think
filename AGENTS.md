@@ -10,9 +10,6 @@ Modular components live under:
 Stage prompt templates live under:
 - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
 
-Stage guidance extracts live under:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
-
 Stage input/output contracts live under:
 - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/`
 
@@ -22,10 +19,10 @@ The shared state template lives at:
 Rules:
 - Stage prompt templates must remain consistent with the modular generator source.
 - If the modular generator changes, update affected stage templates and contracts.
-- Stage guidance files under `stages/` should be extracted from the `Reads`,
-  `Writes`, and output sections of the stage templates.
 - The renderer must use the shared state file as its sole analysis input.
 - Feedback loops are orchestrator-controlled; stage prompts may request feedback but should not jump stages themselves.
+- Contracts are the source of truth for stage dependencies, adapter
+  dependencies, and output schemas.
 - Canonical workflow stage names are:
   `Routing`, `Boundary`, `Structure`, `Scenarios`, `Question Generation`,
   `Evidence Planning`, `Decision Logic`, `Signal Translation`, `Monitoring`,

@@ -5,6 +5,31 @@
   "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["boundary"],
   "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["boundary"],
+    "properties": {
+      "boundary": {
+        "type": "object",
+        "required": [
+          "exact_object_of_analysis",
+          "core_system",
+          "adjacent_systems",
+          "out_of_scope_factors",
+          "scope_assumptions"
+        ],
+        "properties": {
+          "exact_object_of_analysis": {"type": "string"},
+          "core_system": {"type": "string"},
+          "adjacent_systems": {"type": "array", "items": {"type": "string"}},
+          "out_of_scope_factors": {"type": "array", "items": {"type": "string"}},
+          "scope_assumptions": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
   "feedback": {
     "supported": false
   }

@@ -1,0 +1,62 @@
+{
+  "topic": "Should we add to NVDA ahead of earnings?",
+  "routing": {
+    "task": "Decide",
+    "domain": "Investing / Markets",
+    "output_mode": "Decision Memo",
+    "evidence_mode": "Market-Tape / Price-Action-First",
+    "uncertainty_mode": "Hidden-Variable Dominated",
+    "decision_mode": "Portfolio Construction"
+  },
+  "boundary": {
+    "core_system": "NVIDIA earnings setup"
+  },
+  "structure": {
+    "bottlenecks": [
+      "datacenter demand durability"
+    ]
+  },
+  "scenarios": {
+    "base_case": {
+      "summary": "base"
+    }
+  },
+  "questions": {
+    "top_killer_questions": [
+      {
+        "question": "Is demand pull-forward?"
+      }
+    ]
+  },
+  "evidence_plan": {
+    "evidence_hierarchy": [
+      "guidance",
+      "revisions"
+    ]
+  },
+  "uncertainty_map": {
+    "irreducible_uncertainties": [
+      "management tone"
+    ]
+  },
+  "decision_logic": {
+    "must_know_before_action": [
+      "position sizing"
+    ]
+  },
+  "synthesis": {
+    "recommendation_or_action_frame": "small add"
+  },
+  "signals": [
+    {
+      "signal": "estimate revisions"
+    }
+  ],
+  "monitoring": {
+    "what_to_watch": [
+      {
+        "item": "estimate revisions"
+      }
+    ]
+  }
+}

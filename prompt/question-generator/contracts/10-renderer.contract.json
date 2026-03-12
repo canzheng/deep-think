@@ -3,7 +3,41 @@
   "depends_on": ["output_mode", "task", "domain", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": [],
   "output_format": "rendered_deliverable",
-  "renderer_uses_state_as_sole_analysis_input": true,
+  "output_schema": {
+    "type": "object",
+    "required": ["deliverable"],
+    "properties": {
+      "deliverable": {
+        "type": "object",
+        "required": [
+          "uses_shared_state_as_sole_analysis_input",
+          "required_sections",
+          "must_not_write_state",
+          "format_expectations"
+        ],
+        "properties": {
+          "uses_shared_state_as_sole_analysis_input": {
+            "type": "boolean",
+            "const": true
+          },
+          "required_sections": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "must_not_write_state": {
+            "type": "boolean",
+            "const": true
+          },
+          "format_expectations": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
   "feedback": {
     "supported": false
   }

@@ -68,9 +68,13 @@ The following items were not kept as durable state:
   - Those belong to output-mode modules and render-time formatting, not the
     pre-render shared state.
 
-## Known Follow-Up
+## Contract Output Schemas
 
-The state template is now richer than the current contracts' `writes` fields,
-but the contracts still do not contain explicit nested output schemas. The next
-cleanup step is to move the remaining guidance output checklists into contract
-level output schemas and then remove the guidance files.
+The contracts now carry explicit `output_schema` sections for each stage. Those
+schemas mirror the durable pre-render entities owned by each stage in
+`shared_state_schema.json`, while the render contract describes deliverable
+expectations instead of new state writes.
+
+This moves the detailed output expectations that previously lived only in
+guidance into the contract layer, so stage assembly and validation can rely on
+contracts for both ownership and output shape.
