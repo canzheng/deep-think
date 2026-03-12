@@ -1,6 +1,24 @@
 {
   "stage": "signal_translation",
-  "reads": ["questions", "evidence_plan", "uncertainty_map", "decision_logic"],
+  "reads_required": ["routing", "question_generation", "scenarios", "evidence_planning"],
+  "reads_optional": [
+    {
+      "stage": "decision_logic",
+      "kind": "user_requirement",
+      "when": [
+        "signals should trigger action, not just belief updates",
+        "staging, scaling, or kill criteria must be reflected"
+      ]
+    },
+    {
+      "stage": "structure",
+      "kind": "situation",
+      "when": [
+        "signals should track bottlenecks or latent drivers directly"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["signals"],
   "output_format": "json_state_update",
   "feedback": {

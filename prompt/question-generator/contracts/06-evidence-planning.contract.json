@@ -1,6 +1,24 @@
 {
   "stage": "evidence_planning",
-  "reads": ["routing", "questions", "scenarios", "module_selection"],
+  "reads_required": ["routing", "structure", "scenarios", "question_generation"],
+  "reads_optional": [
+    {
+      "stage": "boundary",
+      "kind": "situation",
+      "when": [
+        "source selection depends strongly on what is in vs out of scope",
+        "adjacent systems could create source creep"
+      ]
+    },
+    {
+      "stage": "decision_logic",
+      "kind": "user_requirement",
+      "when": [
+        "evidence planning must already align to stage-gates or action thresholds"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["evidence_plan", "uncertainty_map"],
   "output_format": "json_state_update",
   "feedback": {

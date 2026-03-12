@@ -9,7 +9,7 @@ file. Each stage should:
 - avoid redoing upstream work unless a feedback loop is explicitly triggered
 
 Canonical state template:
-- `/Users/canzheng/Work/sandbox/truth-seek/research-state/shared_state_schema.json`
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
 
 Reference prompt:
 - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md`
@@ -45,7 +45,7 @@ single source of truth for intermediate reasoning.
 ## How To Use The State File
 
 1. Initialize a fresh copy of
-   `/Users/canzheng/Work/sandbox/truth-seek/research-state/shared_state_schema.json`
+   `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
    for the current topic.
 2. Run the workflow stages in order.
 3. After each stage, update only the state sections that stage owns.
@@ -58,7 +58,6 @@ single source of truth for intermediate reasoning.
 
 State rules:
 - Routing must be completed before any downstream task runs.
-- Module selection should be recorded immediately after routing.
 - Downstream tasks should consume the selected adapters, not reclassify the
   problem casually.
 - The renderer should format accumulated state, not invent new analysis.

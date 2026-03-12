@@ -3,7 +3,6 @@ Reads:
 
 Writes:
 - `routing`
-- `module_selection`
 
 Required outputs:
 - primary task

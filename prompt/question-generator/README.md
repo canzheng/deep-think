@@ -21,6 +21,8 @@ Layout:
 - `adapters/decision-modes/`
 - `output-modes/`
 - `contracts/`
+  - `shared_state_schema.json`
+  - `implementation-notes.md`
 
 Consistency rules:
 - Stage templates under `stages/` are the canonical stage prompt sources and
@@ -28,7 +30,7 @@ Consistency rules:
 - Guidance files under `stages/` are extracted from the `Reads`, `Writes`, and
   output sections of the stage templates.
 - Contracts under `contracts/` define the state slices each stage may read and
-  write.
+  write, and also hold the shared state template.
 - Adapter stage relevance must use the canonical workflow stage names:
   `Routing`, `Boundary`, `Structure`, `Scenarios`, `Question Generation`,
   `Evidence Planning`, `Decision Logic`, `Signal Translation`, `Monitoring`,

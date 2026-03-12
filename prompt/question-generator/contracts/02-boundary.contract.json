@@ -1,6 +1,8 @@
 {
   "stage": "boundary",
-  "reads": ["routing"],
+  "reads_required": ["routing"],
+  "reads_optional": [],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": ["boundary"],
   "output_format": "json_state_update",
   "feedback": {

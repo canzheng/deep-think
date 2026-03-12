@@ -1,0 +1,267 @@
+{
+  "topic": "",
+  "routing": {
+    "question": "",
+    "explicit_constraints": [],
+    "desired_output": "",
+    "risk_tolerance": "",
+    "decision_context": "",
+    "task": "",
+    "secondary_task": "",
+    "domain": "",
+    "secondary_domain": "",
+    "output_mode": "",
+    "secondary_output_mode": "",
+    "evidence_mode": "",
+    "secondary_evidence_mode": "",
+    "uncertainty_mode": "",
+    "secondary_uncertainty_mode": "",
+    "decision_mode": "",
+    "secondary_decision_mode": "",
+    "classification_rationales": {
+      "task": "",
+      "secondary_task": "",
+      "domain": "",
+      "secondary_domain": "",
+      "output_mode": "",
+      "secondary_output_mode": "",
+      "evidence_mode": "",
+      "secondary_evidence_mode": "",
+      "uncertainty_mode": "",
+      "secondary_uncertainty_mode": "",
+      "decision_mode": "",
+      "secondary_decision_mode": ""
+    },
+    "time_horizon": "",
+    "unit_of_analysis": "",
+    "assumptions": []
+  },
+  "boundary": {
+    "exact_object_of_analysis": "",
+    "core_system": "",
+    "adjacent_systems": [],
+    "out_of_scope_factors": [],
+    "scope_assumptions": []
+  },
+  "structure": {
+    "stakeholders": [],
+    "decisive_stakeholders": [],
+    "incentives": [],
+    "constraints": [],
+    "causal_mechanism": [],
+    "killer_variables": [],
+    "bottlenecks": [],
+    "threshold_variables": [],
+    "scarce_resources": []
+  },
+  "scenarios": {
+    "base_case": {
+      "name": "",
+      "summary": "",
+      "branch_points": [],
+      "branch_triggers": [],
+      "reversibility": "",
+      "probability_logic": "",
+      "decision_mode_implications": []
+    },
+    "alternative_scenarios": [
+      {
+        "name": "",
+        "summary": "",
+        "branch_points": [],
+        "branch_triggers": [],
+        "reversibility": "",
+        "probability_logic": "",
+        "decision_mode_implications": []
+      }
+    ]
+  },
+  "questions": {
+    "clarifying": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "structural": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "stakeholder": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "evidence": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "task_specific": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "domain_specific": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "output_mode_specific": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "evidence_mode_specific": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "uncertainty_mode_specific": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "decision_mode_specific": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ],
+    "top_killer_questions": [
+      {
+        "question": "",
+        "why_it_matters": "",
+        "impact_on_final_judgment": "",
+        "uncertainty_reduction": "",
+        "observability": "",
+        "reducibility": "",
+        "decision_change_types": []
+      }
+    ]
+  },
+  "evidence_plan": {
+    "evidence_hierarchy": [],
+    "preferred_source_types": [],
+    "backup_source_types": [],
+    "conflict_resolution_rules": [],
+    "question_to_evidence_mapping": [
+      {
+        "question": "",
+        "preferred_sources": [],
+        "backup_sources": []
+      }
+    ]
+  },
+  "uncertainty_map": {
+    "reducible_unknowns": [],
+    "partially_reducible_unknowns": [],
+    "irreducible_uncertainties": [],
+    "task_material_uncertainties": []
+  },
+  "decision_logic": {
+    "must_know_before_action": [],
+    "can_learn_after_action": [],
+    "appropriate_evidence_threshold": "",
+    "reversibility_logic": "",
+    "sizing_logic": "",
+    "staging_logic": "",
+    "hedge_exit_kill_criteria": [],
+    "triggers": []
+  },
+  "synthesis": {
+    "recommendation_or_action_frame": "",
+    "why_now_or_why_not_now": "",
+    "what_must_be_true": [],
+    "key_risks_and_failure_modes": []
+  },
+  "signals": [
+    {
+      "signal": "",
+      "linked_question": "",
+      "preferred_evidence_source": "",
+      "backup_evidence_source": "",
+      "cadence": "",
+      "thresholds": [],
+      "update_rules": [],
+      "belief_update_implications": [],
+      "confidence_under_current_uncertainty_mode": "",
+      "changes_action_vs_belief": ""
+    }
+  ],
+  "monitoring": {
+    "what_to_watch": [
+      {
+        "item": "",
+        "why_it_matters": "",
+        "evidence_source_preference": [],
+        "escalation_triggers": [],
+        "action_triggers": [],
+        "noise_to_ignore": [],
+        "update_cadence": ""
+      }
+    ],
+    "signal_most_reducing_dominant_uncertainty": "",
+    "signal_most_likely_to_change_action": "",
+    "what_to_monitor_next": []
+  }
+}

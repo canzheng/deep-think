@@ -16,6 +16,9 @@ Stage guidance extracts live under:
 Stage input/output contracts live under:
 - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/`
 
+The shared state template lives at:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+
 Rules:
 - Stage prompt templates must remain consistent with the modular generator source.
 - If the modular generator changes, update affected stage templates and contracts.

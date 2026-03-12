@@ -1,7 +1,9 @@
 {
   "stage": "routing",
-  "reads": ["topic"],
-  "writes": ["routing", "module_selection"],
+  "reads_required": ["topic"],
+  "reads_optional": [],
+  "depends_on": [],
+  "writes": ["routing"],
   "output_format": "json_state_update",
   "feedback": {
     "supported": false
