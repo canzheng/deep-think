@@ -149,6 +149,14 @@ class AssemblerTest(unittest.TestCase):
         self.assertIn("Because this is a `Decide` task", prompt)
         self.assertIn('"required": [', prompt)
 
+    def test_decision_logic_prompt_expands_required_output_schema_refs(self) -> None:
+        prompt = assemble_stage_prompt("decision_logic", load_populated_state())
+
+        self.assertIn("## Required Output", prompt)
+        self.assertNotIn('"$ref"', prompt)
+        self.assertIn('"must_know_before_action"', prompt)
+        self.assertIn('"recommendation_or_action_frame"', prompt)
+
     def test_real_stage_templates_assemble_cleanly_with_populated_state(self) -> None:
         state = load_populated_state()
         state["topic"] = random_topic()

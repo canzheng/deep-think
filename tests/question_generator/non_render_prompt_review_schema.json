@@ -1,0 +1,104 @@
+{
+  "type": "object",
+  "required": [
+    "stage",
+    "hard_gates",
+    "scores",
+    "top_findings",
+    "overall_recommendation",
+    "summary"
+  ],
+  "properties": {
+    "stage": {
+      "type": "string",
+      "enum": [
+        "routing",
+        "boundary",
+        "structure",
+        "scenarios",
+        "question_generation",
+        "evidence_planning",
+        "decision_logic",
+        "signal_translation",
+        "monitoring"
+      ]
+    },
+    "hard_gates": {
+      "type": "object",
+      "required": [
+        "instruction_coherence",
+        "input_precedence_clarity",
+        "output_requirement_clarity",
+        "sufficient_starting_context"
+      ],
+      "properties": {
+        "instruction_coherence": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"]
+        },
+        "input_precedence_clarity": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"]
+        },
+        "output_requirement_clarity": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"]
+        },
+        "sufficient_starting_context": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "scores": {
+      "type": "object",
+      "required": [
+        "task_clarity",
+        "context_usefulness",
+        "guidance_and_constraint_clarity",
+        "readability",
+        "output_readiness",
+        "confidence_to_execute",
+        "context_efficiency",
+        "risk_of_misinterpretation"
+      ],
+      "properties": {
+        "task_clarity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "context_usefulness": {"type": "integer", "minimum": 1, "maximum": 5},
+        "guidance_and_constraint_clarity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "readability": {"type": "integer", "minimum": 1, "maximum": 5},
+        "output_readiness": {"type": "integer", "minimum": 1, "maximum": 5},
+        "confidence_to_execute": {"type": "integer", "minimum": 1, "maximum": 5},
+        "context_efficiency": {"type": "integer", "minimum": 1, "maximum": 5},
+        "risk_of_misinterpretation": {"type": "integer", "minimum": 1, "maximum": 5}
+      },
+      "additionalProperties": false
+    },
+    "top_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "why_it_matters", "prompt_evidence"],
+        "properties": {
+          "title": {"type": "string"},
+          "why_it_matters": {"type": "string"},
+          "prompt_evidence": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "overall_recommendation": {
+      "type": "string",
+      "enum": [
+        "Accept",
+        "Accept with minor improvements",
+        "Needs revision"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

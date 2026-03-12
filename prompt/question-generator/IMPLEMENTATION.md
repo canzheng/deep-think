@@ -307,8 +307,8 @@ Supported placeholders:
 - `{{topic}}` -> markdown-safe rendered topic block
 - `{{current_state}}` -> rendered `Relevant Context` block
 - `{{active_steering}}` -> rendered `Stage Guidance` block
-- `{{required_output}}` -> rendered output-schema block
-- `{{feedback}}` -> rendered feedback-schema block when supported
+- `{{required_output}}` -> rendered output-schema block with `$ref` entries expanded
+- `{{feedback}}` -> rendered feedback-schema block with `$ref` entries expanded when supported
 
 Backward-compatibility rule:
 - when a template explicitly places a block placeholder, that block is rendered

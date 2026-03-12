@@ -97,6 +97,8 @@ Current prompt-facing assembly:
 - state rendering uses a section-renderer registry under
   `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/`
   with a JSON fallback for sections that do not yet have a specialized renderer
+- assembled `Required Output` and `Feedback` blocks expand schema `$ref`
+  entries before rendering so stage prompts see concrete JSON shapes
 - `shared_state_schema.json` is a composed JSON Schema that references one
   schema file per top-level section under `contracts/state-sections/`
 - stage contracts reuse those section schemas inside `output_schema.properties`
