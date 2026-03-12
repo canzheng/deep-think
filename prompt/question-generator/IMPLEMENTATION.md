@@ -191,22 +191,22 @@ Responsibilities:
 - render resolved state sections into readable markdown blocks
 
 Current format:
-- one `## Current State` section
-- one human-readable heading per state section
-- one fenced JSON block per section
+- one `## Relevant Context` section
+- one section renderer per top-level shared-state section when available
+- JSON fallback for sections without a specialized renderer
 
 Key implementation choices:
-- The renderer uses readable headings instead of dumping raw keys without
-  framing.
-- The payloads remain JSON because the state is already structured and we want
-  faithful visibility into what the stage is reading.
-- This is intentionally simple. We chose not to introduce a separate
-  intermediate prompt representation.
+- The renderer is registry-driven through
+  `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/registry.py`.
+- Specialized section renderers summarize the most useful fields first while
+  keeping headings stable and prompt-friendly.
+- Unknown sections still fall back to the legacy JSON block rendering so new
+  sections can be added incrementally.
 
 Tradeoff:
-- JSON blocks are more literal and easier to debug.
-- They are less polished than prose summaries, but more transparent and less
-  likely to hide state shape issues during early implementation.
+- Specialized summaries are easier for the model to scan and reason over.
+- JSON fallback preserves transparency and keeps rollout incremental where a
+  custom summary is not worth the complexity yet.
 
 ### `adapter_resolution.py`
 
@@ -238,7 +238,7 @@ Responsibilities:
 - render active module steering for the current stage
 
 Current format:
-- one `## Active Steering` section
+- one `## Stage Guidance` section
 - one wrapper heading per resolved adapter dimension
 - one stage-specific extracted steering block
 
@@ -248,9 +248,11 @@ Key implementation choices:
 - Adapter files remain responsible for the substantive stage guidance.
 - The renderer extracts the correct stage block from the adapter's
   `## Stage Relevance` section.
-- Output-mode files are treated differently: the current implementation injects
-  the full output-mode document rather than parsing stage-specific relevance
-  from it.
+- Output-mode files are treated differently:
+  - `Render` receives the full output-mode document
+  - non-render stages receive a short modulating note that keeps them aligned to
+    the eventual deliverable without pulling final-format section outlines into
+    upstream analysis stages
 
 Why output mode is special:
 - output modes are authored as deliverable definitions rather than stage-style
@@ -259,8 +261,9 @@ Why output mode is special:
   decision-oriented stages
 
 Tradeoff:
-- full output-mode injection is simple and transparent
-- it is also longer than a future stage-aware output-mode rendering model
+- full output-mode injection remains simple and transparent for `Render`
+- upstream stages avoid prompt confusion from seeing final-deliverable section
+  lists in the middle of analytical work
 
 ### `assembler.py`
 
@@ -270,18 +273,27 @@ File:
 Responsibilities:
 - orchestrate the full prompt assembly for one stage
 
-Current assembly order:
-1. stage template
-2. rendered current state
-3. rendered active steering, if any
-4. required output schema
-5. feedback schema, if supported
+Current assembly flow:
+1. load the stage template
+2. resolve required and selected optional state sections
+3. resolve the routed modules
+4. render prompt blocks:
+   - topic
+   - relevant context
+   - stage guidance, if any
+   - required output schema
+   - feedback schema, if supported
+5. interpolate any matching placeholders in the stage template
+6. append any unplaced blocks in legacy order
+7. return one markdown prompt string
 
 Key implementation choices:
 - The assembler is intentionally a renderer, not a workflow executor.
 - It does not call the model.
 - It does not validate model output.
 - It does not merge state updates.
+- Placeholder support is intentionally lightweight and uses a small fixed set of
+  supported tokens rather than a general templating engine.
 
 Those behaviors are left to a future orchestrator.
 
@@ -290,6 +302,19 @@ Why this split was chosen:
 - prompt debugging is easier when assembly can be run independently
 - it keeps the current implementation testable without introducing model or API
   dependencies
+
+Supported placeholders:
+- `{{topic}}` -> markdown-safe rendered topic block
+- `{{current_state}}` -> rendered `Relevant Context` block
+- `{{active_steering}}` -> rendered `Stage Guidance` block
+- `{{required_output}}` -> rendered output-schema block
+- `{{feedback}}` -> rendered feedback-schema block when supported
+
+Backward-compatibility rule:
+- when a template explicitly places a block placeholder, that block is rendered
+  there and not appended again
+- when a template omits a block placeholder, the assembler appends that block
+  after the template using the legacy order
 
 ### `cli.py`
 
@@ -321,7 +346,9 @@ It is best understood as a stage prompt generator, not a full workflow runner.
 The shared state template lives at:
 - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
 
-It is the durable pre-render state for the workflow.
+It is the durable pre-render state for the workflow and now composes one schema
+file per top-level section from
+`/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/`.
 
 Main sections:
 - `topic`
@@ -394,6 +421,10 @@ Each stage contract contains:
 - `feedback`
 - `output_schema`
 
+Implementation note:
+- non-render stage contracts keep an inline outer `output_schema` object but
+  now reuse shared section schemas inside `properties` via `$ref`
+
 ### `reads_required`
 
 Required upstream stage dependencies.
@@ -460,18 +491,22 @@ For a stage like `decision_logic`, the runtime currently does this:
 2. load `07-decision-logic.md`
 3. resolve required and selected optional state sections
 4. resolve routed modules from `routing`
-5. render current state
-6. render active steering
-7. append required output schema
-8. append feedback schema if supported
-9. return one markdown prompt string
+5. render prompt blocks for:
+   - topic
+   - current state
+   - active steering
+   - required output
+   - feedback, if supported
+6. interpolate any matching placeholders in the template
+7. append any remaining unplaced blocks in legacy order
+8. return one markdown prompt string
 
 This gives a prompt shaped like:
-- stage instructions
-- current state
-- active steering
-- required output
-- feedback, if needed
+- stage instructions with optional explicit placeholders
+- current state, either interpolated or appended
+- active steering, either interpolated or appended
+- required output, either interpolated or appended
+- feedback, if needed and either interpolated or appended
 
 ## Why We Chose Markdown Templates Plus Code
 
@@ -487,6 +522,7 @@ Reasons:
 
 So the implementation treats prompt assembly as:
 - render structured inputs into a markdown prompt
+- optionally interpolate them into authored placeholder locations
 
 not:
 - compile a new intermediate language first

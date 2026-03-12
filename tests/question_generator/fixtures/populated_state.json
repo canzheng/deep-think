@@ -1,0 +1,477 @@
+{
+  "topic": "placeholder",
+  "routing": {
+    "question": "Should we stage an expansion of the Atlas forecasting product into regulated healthcare workflows over the next two quarters?",
+    "explicit_constraints": [
+      "Prefer reversible moves",
+      "Avoid irreversible compliance exposure before validation"
+    ],
+    "desired_output": "Decision memo with monitoring guidance",
+    "risk_tolerance": "Moderate",
+    "decision_context": "Whether to launch a staged pilot before full rollout",
+    "task": "Decide",
+    "secondary_task": "Monitor",
+    "domain": "Company / Product Strategy",
+    "secondary_domain": "Policy / Regulation",
+    "output_mode": "Decision Memo",
+    "secondary_output_mode": "Monitoring Dashboard",
+    "evidence_mode": "Operating-Metric-First",
+    "secondary_evidence_mode": "Policy / Legal-Text-First",
+    "uncertainty_mode": "Hidden-Variable Dominated",
+    "secondary_uncertainty_mode": "Slow-Feedback / Irreversible-Decision",
+    "decision_mode": "Optionality / Staged Commitment",
+    "secondary_decision_mode": "",
+    "classification_rationales": {
+      "task": "The main need is to decide whether to act now under uncertainty.",
+      "secondary_task": "Ongoing monitoring matters because early rollout signals should change commitment level.",
+      "domain": "This is primarily a product and go-to-market strategy question.",
+      "secondary_domain": "Healthcare compliance and policy constraints materially shape execution.",
+      "output_mode": "A decision memo matches the action-oriented need.",
+      "secondary_output_mode": "A monitoring dashboard shape is also useful after launch.",
+      "evidence_mode": "Operating metrics are the strongest near-term evidence.",
+      "secondary_evidence_mode": "Regulatory text still matters for guardrails.",
+      "uncertainty_mode": "Adoption quality and workflow fit are only partially visible today.",
+      "secondary_uncertainty_mode": "Some consequences will only become visible slowly and may be costly to reverse.",
+      "decision_mode": "The decision can be staged through pilots and gated expansion.",
+      "secondary_decision_mode": ""
+    },
+    "time_horizon": "next 2 quarters",
+    "unit_of_analysis": "one staged product rollout into a regulated segment",
+    "assumptions": [
+      "The company can run a limited pilot before broad release.",
+      "Healthcare buyers care more about workflow reliability than novelty.",
+      "Internal compliance support is limited."
+    ]
+  },
+  "boundary": {
+    "exact_object_of_analysis": "staged launch of Atlas forecasting into regulated healthcare operations teams",
+    "core_system": "product-market fit and rollout viability for Atlas in healthcare workflows",
+    "adjacent_systems": [
+      "hospital procurement",
+      "compliance review",
+      "customer onboarding capacity"
+    ],
+    "out_of_scope_factors": [
+      "long-run international expansion",
+      "adjacent product lines not used in healthcare"
+    ],
+    "scope_assumptions": [
+      "The first release is pilot-only and feature-limited.",
+      "The launch decision is evaluated separately from full enterprise expansion."
+    ]
+  },
+  "structure": {
+    "stakeholders": [
+      "product leadership",
+      "compliance team",
+      "healthcare pilot customers",
+      "sales",
+      "implementation team"
+    ],
+    "decisive_stakeholders": [
+      "product leadership",
+      "compliance team",
+      "pilot customers"
+    ],
+    "incentives": [
+      "product leadership wants near-term growth and proof of expansion viability",
+      "compliance wants to minimize regulatory exposure",
+      "pilot customers want reliable workflow improvement with low disruption"
+    ],
+    "constraints": [
+      "limited onboarding bandwidth",
+      "limited compliance review capacity",
+      "slow procurement cycles"
+    ],
+    "causal_mechanism": [
+      "Pilot adoption quality determines whether credible case studies emerge",
+      "Credible case studies shape commercial confidence and expansion budget",
+      "Compliance friction can delay or narrow the rollout path"
+    ],
+    "killer_variables": [
+      "measured workflow improvement",
+      "time-to-compliance approval",
+      "pilot retention"
+    ],
+    "bottlenecks": [
+      "compliance review capacity",
+      "implementation bandwidth"
+    ],
+    "threshold_variables": [
+      "minimum workflow accuracy target",
+      "maximum acceptable onboarding time"
+    ],
+    "scarce_resources": [
+      "specialist implementation time",
+      "internal compliance attention"
+    ]
+  },
+  "scenarios": {
+    "base_case": {
+      "name": "Measured pilot success",
+      "summary": "A narrow pilot works well enough to justify staged expansion.",
+      "branch_points": [
+        "pilot adoption quality",
+        "compliance clearance timing"
+      ],
+      "branch_triggers": [
+        "pilot usage sustains after onboarding",
+        "no major compliance blockers emerge"
+      ],
+      "reversibility": "highly reversible",
+      "probability_logic": "Most plausible if product fit is good but expansion remains capacity-constrained.",
+      "decision_mode_implications": [
+        "expand only after pilot thresholds are met"
+      ]
+    },
+    "alternative_scenarios": [
+      {
+        "name": "Compliance drag stalls rollout",
+        "summary": "The product is promising but legal and process friction delay expansion.",
+        "branch_points": [
+          "policy interpretation",
+          "buyer review cycles"
+        ],
+        "branch_triggers": [
+          "extended review requests",
+          "data handling objections"
+        ],
+        "reversibility": "partially reversible",
+        "probability_logic": "Plausible if buyers like the product but the operating environment is slow-moving.",
+        "decision_mode_implications": [
+          "delay expansion and narrow scope"
+        ]
+      },
+      {
+        "name": "Weak workflow fit",
+        "summary": "The pilot does not create enough operational value to justify expansion.",
+        "branch_points": [
+          "measured workflow gains",
+          "user retention"
+        ],
+        "branch_triggers": [
+          "low repeat usage",
+          "limited operational impact"
+        ],
+        "reversibility": "highly reversible",
+        "probability_logic": "Plausible if the product solves a visible but not decisive workflow pain point.",
+        "decision_mode_implications": [
+          "stop rollout and rework product"
+        ]
+      }
+    ]
+  },
+  "questions": {
+    "clarifying": [
+      {
+        "question": "What exact workflow is Atlas improving for the pilot customers?",
+        "why_it_matters": "The rollout should be judged against one concrete workflow, not a vague value story.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "staging",
+          "monitoring"
+        ]
+      }
+    ],
+    "structural": [
+      {
+        "question": "Which bottleneck is more binding: compliance review or implementation bandwidth?",
+        "why_it_matters": "The dominant bottleneck determines where to buy speed or reduce scope.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "Medium",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "timing",
+          "staging"
+        ]
+      }
+    ],
+    "stakeholder": [
+      {
+        "question": "What evidence would make the compliance team comfortable with a limited pilot?",
+        "why_it_matters": "The rollout path depends on internal approval criteria, not just customer demand.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "Medium",
+        "observability": "Medium",
+        "reducibility": "Partially reducible",
+        "decision_change_types": [
+          "timing",
+          "staging"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "question": "What operating metrics most credibly show workflow improvement during the pilot?",
+        "why_it_matters": "Weak metrics create noise and false confidence.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "monitoring",
+          "action"
+        ]
+      }
+    ],
+    "task_specific": [
+      {
+        "question": "What should be known before approving even a limited pilot?",
+        "why_it_matters": "The decision needs a clear pre-action evidence threshold.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "Medium",
+        "observability": "Medium",
+        "reducibility": "Partially reducible",
+        "decision_change_types": [
+          "action",
+          "timing"
+        ]
+      }
+    ],
+    "domain_specific": [
+      {
+        "question": "How slow are procurement and operational change cycles in the target hospitals?",
+        "why_it_matters": "Slow cycles can make early negative signals misleading.",
+        "impact_on_final_judgment": "Medium",
+        "uncertainty_reduction": "Medium",
+        "observability": "Medium",
+        "reducibility": "Partially reducible",
+        "decision_change_types": [
+          "timing",
+          "monitoring"
+        ]
+      }
+    ],
+    "output_mode_specific": [
+      {
+        "question": "What decision framing best distinguishes pilot approval from full rollout approval?",
+        "why_it_matters": "The memo should separate immediate action from later expansion decisions.",
+        "impact_on_final_judgment": "Medium",
+        "uncertainty_reduction": "Medium",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "staging"
+        ]
+      }
+    ],
+    "evidence_mode_specific": [
+      {
+        "question": "Which pilot metrics are hard to game and update fast enough to govern expansion?",
+        "why_it_matters": "The wrong metrics can reward noise or vanity adoption.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "monitoring",
+          "action"
+        ]
+      }
+    ],
+    "uncertainty_mode_specific": [
+      {
+        "question": "What hidden variable is most likely to make pilot success non-transferable?",
+        "why_it_matters": "A hidden adoption driver could make the first pilot a poor guide for expansion.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "Medium",
+        "observability": "Low",
+        "reducibility": "Partially reducible",
+        "decision_change_types": [
+          "sizing",
+          "staging"
+        ]
+      }
+    ],
+    "decision_mode_specific": [
+      {
+        "question": "What milestone should gate moving from pilot to broader rollout?",
+        "why_it_matters": "Optionality only works if stage gates are explicit.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "staging",
+          "action"
+        ]
+      }
+    ],
+    "top_killer_questions": [
+      {
+        "question": "What milestone should gate moving from pilot to broader rollout?",
+        "why_it_matters": "This determines whether the staged commitment logic is real or performative.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "staging",
+          "action"
+        ]
+      },
+      {
+        "question": "Which bottleneck is more binding: compliance review or implementation bandwidth?",
+        "why_it_matters": "The main bottleneck determines whether speed comes from policy work or operational narrowing.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "Medium",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "timing",
+          "staging"
+        ]
+      },
+      {
+        "question": "What operating metrics most credibly show workflow improvement during the pilot?",
+        "why_it_matters": "These metrics determine what evidence should trigger expansion rather than optimism.",
+        "impact_on_final_judgment": "High",
+        "uncertainty_reduction": "High",
+        "observability": "High",
+        "reducibility": "Reducible",
+        "decision_change_types": [
+          "monitoring",
+          "action"
+        ]
+      }
+    ]
+  },
+  "evidence_plan": {
+    "evidence_hierarchy": [
+      "pilot operating metrics",
+      "workflow retention behavior",
+      "customer implementation evidence",
+      "compliance review outcomes",
+      "executive narrative"
+    ],
+    "preferred_source_types": [
+      "pilot usage logs",
+      "workflow outcome metrics",
+      "implementation reports"
+    ],
+    "backup_source_types": [
+      "customer interviews",
+      "compliance memos",
+      "sales notes"
+    ],
+    "conflict_resolution_rules": [
+      "Prefer observed workflow behavior over executive interpretation",
+      "Treat single-customer anecdotes as weak unless supported by metrics"
+    ],
+    "question_to_evidence_mapping": [
+      {
+        "question": "What milestone should gate moving from pilot to broader rollout?",
+        "preferred_sources": [
+          "pilot usage logs",
+          "workflow outcome metrics"
+        ],
+        "backup_sources": [
+          "customer interviews"
+        ]
+      }
+    ]
+  },
+  "uncertainty_map": {
+    "reducible_unknowns": [
+      "pilot usage quality",
+      "implementation cycle time"
+    ],
+    "partially_reducible_unknowns": [
+      "transferability of one pilot to a broader segment"
+    ],
+    "irreducible_uncertainties": [
+      "future policy shifts at customer institutions"
+    ],
+    "task_material_uncertainties": [
+      "whether pilot success will be strong and repeatable enough to justify expansion"
+    ]
+  },
+  "decision_logic": {
+    "must_know_before_action": [
+      "the pilot can be legally scoped",
+      "one credible workflow metric set is available"
+    ],
+    "can_learn_after_action": [
+      "whether broader buyer demand emerges after the first pilot"
+    ],
+    "appropriate_evidence_threshold": "Approve only a narrow pilot until workflow gains are demonstrated with real usage.",
+    "reversibility_logic": "Keep the initial commitment small and reversible until compliance and usage thresholds are met.",
+    "sizing_logic": "Size the pilot to generate evidence without overcommitting implementation bandwidth.",
+    "staging_logic": "Pilot first, expand only after explicit milestone review.",
+    "hedge_exit_kill_criteria": [
+      "pause if compliance review widens scope unexpectedly",
+      "stop if workflow gains fail to clear the minimum threshold"
+    ],
+    "triggers": [
+      "expand if pilot retention and workflow gains clear the gate",
+      "delay if compliance review extends beyond planned timing"
+    ]
+  },
+  "synthesis": {
+    "recommendation_or_action_frame": "Approve a narrow pilot with explicit expansion gates.",
+    "why_now_or_why_not_now": "Now is appropriate for a reversible pilot, not for broad rollout.",
+    "what_must_be_true": [
+      "the pilot demonstrates meaningful workflow value",
+      "compliance concerns stay bounded"
+    ],
+    "key_risks_and_failure_modes": [
+      "false confidence from vanity usage",
+      "implementation bottlenecks masking demand quality"
+    ]
+  },
+  "signals": [
+    {
+      "signal": "weekly pilot retention after onboarding",
+      "linked_question": "What milestone should gate moving from pilot to broader rollout?",
+      "preferred_evidence_source": "pilot usage logs",
+      "backup_evidence_source": "customer interviews",
+      "cadence": "weekly",
+      "thresholds": [
+        "retention above target for four consecutive weeks"
+      ],
+      "update_rules": [
+        "raise confidence in expansion viability if retention stays above target",
+        "lower confidence sharply if retention decays after onboarding"
+      ],
+      "belief_update_implications": [
+        "increase weight on measured pilot success scenario",
+        "decrease weight on weak workflow fit scenario"
+      ],
+      "confidence_under_current_uncertainty_mode": "medium",
+      "changes_action_vs_belief": "changes both belief and action"
+    }
+  ],
+  "monitoring": {
+    "what_to_watch": [
+      {
+        "item": "weekly pilot retention after onboarding",
+        "why_it_matters": "It is the cleanest early test of actual workflow fit.",
+        "evidence_source_preference": [
+          "pilot usage logs",
+          "customer success reports"
+        ],
+        "escalation_triggers": [
+          "retention drops below target for two consecutive weeks"
+        ],
+        "action_triggers": [
+          "expand only if retention stays above the defined threshold"
+        ],
+        "noise_to_ignore": [
+          "one-off executive enthusiasm",
+          "single-week usage spikes caused by onboarding"
+        ],
+        "update_cadence": "weekly"
+      }
+    ],
+    "signal_most_reducing_dominant_uncertainty": "weekly pilot retention after onboarding",
+    "signal_most_likely_to_change_action": "weekly pilot retention after onboarding",
+    "what_to_monitor_next": [
+      "time-to-compliance approval",
+      "implementation queue length"
+    ]
+  }
+}

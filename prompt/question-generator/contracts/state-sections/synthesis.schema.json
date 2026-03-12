@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/synthesis.schema.json",
+  "title": "Synthesis",
+  "type": "object",
+  "required": [
+    "recommendation_or_action_frame",
+    "why_now_or_why_not_now",
+    "what_must_be_true",
+    "key_risks_and_failure_modes"
+  ],
+  "properties": {
+    "recommendation_or_action_frame": {"type": "string"},
+    "why_now_or_why_not_now": {"type": "string"},
+    "what_must_be_true": {"type": "array", "items": {"type": "string"}},
+    "key_risks_and_failure_modes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

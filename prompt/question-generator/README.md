@@ -28,6 +28,7 @@ Layout:
 - `output-modes/`
 - `contracts/`
   - `shared_state_schema.json`
+  - `state-sections/`
   - `implementation-notes.md`
 - python runtime:
   - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
@@ -71,10 +72,35 @@ Assembler runtime:
 
 Assembly model:
 - stage template supplies the core prompt body
+- stage template may explicitly place assembler-provided placeholders
 - contract supplies required and optional stage dependencies, adapter
   dependencies, and output schema
 - shared state supplies the routed context and prior stage outputs
 - routed adapters supply stage-specific steering
+
+Supported template placeholders:
+- `{{topic}}` -> a markdown-safe rendered topic block from shared state
+- `{{current_state}}` -> the rendered `Relevant Context` block
+- `{{active_steering}}` -> the rendered `Stage Guidance` block
+- `{{required_output}}` -> the rendered output-schema block
+- `{{feedback}}` -> the rendered feedback-schema block when supported
+
+Placeholder fallback rule:
+- if a template includes one of these placeholders, the assembler injects the
+  matching content at that location
+- if a template does not include a given block placeholder, the assembler
+  appends that block after the template using the legacy order
+
+Current prompt-facing assembly:
+- `Relevant Context` renders the resolved shared-state sections for the stage
+- `Stage Guidance` renders the routed adapter and output-mode guidance
+- state rendering uses a section-renderer registry under
+  `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/`
+  with a JSON fallback for sections that do not yet have a specialized renderer
+- `shared_state_schema.json` is a composed JSON Schema that references one
+  schema file per top-level section under `contracts/state-sections/`
+- stage contracts reuse those section schemas inside `output_schema.properties`
+  via `$ref` where practical
 
 CLI usage:
 ```bash

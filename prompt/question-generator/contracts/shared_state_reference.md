@@ -96,7 +96,7 @@ Meaning:
 - Secondary task classification when a second task meaningfully shapes the run.
 
 Notes:
-- Leave empty if not needed.
+- Optional. Omit when one task is sufficient.
 
 ### `routing.domain`
 
@@ -112,6 +112,9 @@ Examples:
 
 Meaning:
 - Secondary domain classification when the problem spans two ontologies.
+
+Notes:
+- Optional. Omit when one domain is sufficient.
 
 ### `routing.output_mode`
 
@@ -129,6 +132,9 @@ Examples:
 Meaning:
 - Secondary output mode classification if the deliverable needs a second shape.
 
+Notes:
+- Optional. Omit when one output mode is sufficient.
+
 ### `routing.evidence_mode`
 
 Meaning:
@@ -143,6 +149,9 @@ Examples:
 
 Meaning:
 - Secondary evidence mode if a second proof style materially matters.
+
+Notes:
+- Optional. Omit when one evidence mode is sufficient.
 
 ### `routing.uncertainty_mode`
 
@@ -161,6 +170,9 @@ Meaning:
 - Secondary uncertainty mode if a second uncertainty pattern matters enough to
   shape the workflow.
 
+Notes:
+- Optional. Omit when one uncertainty pattern is sufficient.
+
 ### `routing.decision_mode`
 
 Meaning:
@@ -176,6 +188,9 @@ Examples:
 
 Meaning:
 - Secondary decision mode when a second action pattern matters.
+
+Notes:
+- Optional. Omit when one decision mode is sufficient.
 
 ### `routing.classification_rationales`
 
@@ -199,6 +214,9 @@ Fields:
 Notes:
 - These are useful for auditability and for downstream stages that need to know
   why a route was chosen, not just what was chosen.
+- Primary rationale fields are expected.
+- Secondary rationale fields are optional and only need to be present when the
+  corresponding `secondary_*` route is present.
 
 ### `routing.time_horizon`
 

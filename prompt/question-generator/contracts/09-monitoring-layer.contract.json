@@ -31,46 +31,7 @@
     "type": "object",
     "required": ["monitoring"],
     "properties": {
-      "monitoring": {
-        "type": "object",
-        "required": [
-          "what_to_watch",
-          "signal_most_reducing_dominant_uncertainty",
-          "signal_most_likely_to_change_action",
-          "what_to_monitor_next"
-        ],
-        "properties": {
-          "what_to_watch": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "item",
-                "why_it_matters",
-                "evidence_source_preference",
-                "escalation_triggers",
-                "action_triggers",
-                "noise_to_ignore",
-                "update_cadence"
-              ],
-              "properties": {
-                "item": {"type": "string"},
-                "why_it_matters": {"type": "string"},
-                "evidence_source_preference": {"type": "array", "items": {"type": "string"}},
-                "escalation_triggers": {"type": "array", "items": {"type": "string"}},
-                "action_triggers": {"type": "array", "items": {"type": "string"}},
-                "noise_to_ignore": {"type": "array", "items": {"type": "string"}},
-                "update_cadence": {"type": "string"}
-              },
-              "additionalProperties": false
-            }
-          },
-          "signal_most_reducing_dominant_uncertainty": {"type": "string"},
-          "signal_most_likely_to_change_action": {"type": "string"},
-          "what_to_monitor_next": {"type": "array", "items": {"type": "string"}}
-        },
-        "additionalProperties": false
-      }
+      "monitoring": {"$ref": "./state-sections/monitoring.schema.json"}
     },
     "additionalProperties": false
   },

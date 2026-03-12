@@ -15,10 +15,18 @@ Render rule:
 - the render stage should not rethink the problem
 - it should only format the accumulated state for the selected output mode
 - it should use the shared state file as its sole analysis input
+- if the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only
+- the selected output-mode module defines the final deliverable structure and section order
+- include a concise routing summary unless the selected output-mode module clearly requires a different opening
 
-Always begin with:
+Input topic:
+{{topic}}
 
-1. Routing
+{{current_state}}
+
+{{active_steering}}
+
+Include a concise routing summary with:
 - Primary task
 - Secondary task
 - Primary domain
@@ -35,7 +43,7 @@ Always begin with:
 - Unit of analysis
 - Key assumptions
 
-Then generate the core sections required by the selected output-mode module.
+Then generate the rest of the deliverable using the section order and structure required by the selected output-mode module.
 
 Also always include:
 - Top 3 Killer Questions
@@ -44,6 +52,8 @@ Also always include:
 - Decision-Mode Implications
 - What to Monitor Next
 - What Would Change the Conclusion
+
+{{required_output}}
 
 Uncertainty Map must include:
 - reducible unknowns

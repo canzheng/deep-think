@@ -23,13 +23,15 @@ class AdapterRenderingTest(unittest.TestCase):
 
         rendered = render_adapter_sections("decision_logic", resolved)
 
-        self.assertIn("## Active Steering", rendered)
+        self.assertIn("## Stage Guidance", rendered)
+        self.assertNotIn("## Active Steering", rendered)
         self.assertIn("Because this is a `Decide` task", rendered)
         self.assertIn("Because this problem sits in `Investing / Markets`", rendered)
         self.assertIn("Because the deliverable is `Decision Memo`", rendered)
         self.assertIn("Relevance: Primary", rendered)
         self.assertIn("action thresholds explicit", rendered)
-        self.assertIn("Required sections:", rendered)
+        self.assertIn("influence emphasis and prioritization", rendered)
+        self.assertNotIn("Required sections:", rendered)
 
 
 if __name__ == "__main__":
