@@ -136,6 +136,18 @@ class NonRenderPromptQualityTest(unittest.TestCase):
         self.assertIn('"must_know_before_action"', decision_logic_prompt)
         self.assertIn('"recommendation_or_action_frame"', decision_logic_prompt)
 
+    def test_review_prompt_set_keeps_relevant_context_human_readable(self) -> None:
+        from tests.question_generator.assemble_non_render_prompts import build_review_prompt_set
+
+        prompt_set = build_review_prompt_set(seed=20260313)
+        decision_logic_prompt = prompt_set["prompts"]["decision_logic"]
+        relevant_context, remainder = decision_logic_prompt.split("## Stage Guidance", maxsplit=1)
+
+        self.assertIn("## Relevant Context", relevant_context)
+        self.assertNotIn("```json", relevant_context)
+        self.assertIn("## Required Output", remainder)
+        self.assertIn("```json", remainder)
+
     def test_prompt_set_cli_writes_manifest_and_stage_files(self) -> None:
         from tests.question_generator.assemble_non_render_prompts import main
 

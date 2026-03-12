@@ -30,7 +30,7 @@ class StateRenderingTest(unittest.TestCase):
         self.assertNotIn("## Current State", rendered)
         self.assertIn("### The current routing for this run is:", rendered)
         self.assertIn("### The current structural view of the system is:", rendered)
-        self.assertIn("```json", rendered)
+        self.assertNotIn("```json", rendered)
 
     def test_render_stage_full_state_rendering_includes_monitoring(self) -> None:
         rendered = render_state_sections(

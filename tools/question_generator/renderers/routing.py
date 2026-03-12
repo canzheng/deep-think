@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .common import json_block, legacy_section_heading
+from .common import legacy_section_heading
 
 
 def render_routing(payload: dict[str, object]) -> list[str]:
@@ -44,7 +44,4 @@ def render_routing(payload: dict[str, object]) -> list[str]:
         for assumption in assumptions:
             lines.append(f"  - {assumption}")
 
-    return [
-        *lines,
-        *json_block(payload),
-    ]
+    return lines
