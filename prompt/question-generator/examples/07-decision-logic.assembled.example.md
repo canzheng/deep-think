@@ -37,137 +37,84 @@ Working rules:
 
 Input topic:
 ```text
-placeholder
+Should we add to NVDA ahead of earnings?
 ```
 
 Action frame:
-- Decision context: Whether to launch a staged pilot before full rollout
-- Risk tolerance: Moderate
-- Time horizon: next 2 quarters
+- Decision context: 
+- Risk tolerance: 
+- Time horizon: 
 
 Base-case scenario logic:
-- Probability logic: Most plausible if product fit is good but expansion remains capacity-constrained.
-- Reversibility: highly reversible
+- Probability logic: 
+- Reversibility: 
 Decision implications from the base case:
-- expand only after pilot thresholds are met
 
 Base-case branch triggers:
-- pilot usage sustains after onboarding
-- no major compliance blockers emerge
 
 Alternative scenarios:
-- Compliance drag stalls rollout
-  Probability logic: Plausible if buyers like the product but the operating environment is slow-moving.
-  Reversibility: partially reversible
-  Decision implications:
-  - delay expansion and narrow scope
-  Branch triggers:
-  - extended review requests
-  - data handling objections
-- Weak workflow fit
-  Probability logic: Plausible if the product solves a visible but not decisive workflow pain point.
-  Reversibility: highly reversible
-  Decision implications:
-  - stop rollout and rework product
-  Branch triggers:
-  - low repeat usage
-  - limited operational impact
 
 Evidence plan:
 Evidence hierarchy:
-- pilot operating metrics
-- workflow retention behavior
-- customer implementation evidence
-- compliance review outcomes
-- executive narrative
+- guidance
+- revisions
 
 Preferred source types:
-- pilot usage logs
-- workflow outcome metrics
-- implementation reports
 
 Conflict-resolution rules:
-- Prefer observed workflow behavior over executive interpretation
-- Treat single-customer anecdotes as weak unless supported by metrics
 
 Question-to-evidence mapping:
-- What milestone should gate moving from pilot to broader rollout?
-  Preferred sources:
-  - pilot usage logs
-  - workflow outcome metrics
-  Backup sources:
-  - customer interviews
 
 Uncertainty map:
 Reducible unknowns:
-- pilot usage quality
-- implementation cycle time
 
 Partially reducible unknowns:
-- transferability of one pilot to a broader segment
 
 Irreducible uncertainties:
-- future policy shifts at customer institutions
+- management tone
 
 Task-material uncertainties:
-- whether pilot success will be strong and repeatable enough to justify expansion
 
 [CONDITIONAL condition="Use this only if unresolved killer questions should explicitly gate action."]
 Top killer questions:
-- What milestone should gate moving from pilot to broader rollout?
-  Why it matters: This determines whether the staged commitment logic is real or performative.
-- Which bottleneck is more binding: compliance review or implementation bandwidth?
-  Why it matters: The main bottleneck determines whether speed comes from policy work or operational narrowing.
-- What operating metrics most credibly show workflow improvement during the pilot?
-  Why it matters: These metrics determine what evidence should trigger expansion rather than optimism.
+- Is demand pull-forward?
+  Why it matters: 
 [/CONDITIONAL]
 
 [CONDITIONAL condition="Use this only if the exact action scope or inherited scope discipline is still ambiguous."]
 Boundary anchors:
-- Exact object of analysis: staged launch of Atlas forecasting into regulated healthcare operations teams
+- Exact object of analysis: 
 Scope assumptions:
-- The first release is pilot-only and feature-limited.
-- The launch decision is evaluated separately from full enterprise expansion.
 [/CONDITIONAL]
 
 [CONDITIONAL condition="Use this only if the action rule depends on mechanism details, bottlenecks, or decisive variables rather than scenario summaries alone."]
 Mechanism details:
 Killer variables:
-- measured workflow improvement
-- time-to-compliance approval
-- pilot retention
 
 Bottlenecks:
-- compliance review capacity
-- implementation bandwidth
+- datacenter demand durability
 
 Causal mechanism:
-- Pilot adoption quality determines whether credible case studies emerge
-- Credible case studies shape commercial confidence and expansion budget
-- Compliance friction can delay or narrow the rollout path
 [/CONDITIONAL]
 
 ## Stage Guidance
-### Because this is a `Decide` task, follow this guidance with stated importance:
-Relevance: Primary
-- This is a core stage for the adapter and should make action thresholds explicit.
-### Because this problem sits in `Company / Product Strategy`, follow this guidance with stated importance:
-Relevance: Modulating
-- Shapes what action means: resource allocation, sequencing, investment, pricing, or GTM change.
-### Because the deliverable is `Decision Memo`, follow this guidance with stated importance:
-Relevance: Modulating
-- Keep this stage consistent with the eventual `Decision Memo` deliverable.
-- Let the deliverable shape influence emphasis and prioritization, not final section formatting.
-- Do not drift into writing the final artifact in this stage.
-### Because the preferred evidence mode is `Operating-Metric-First`, follow this guidance with stated importance:
-Relevance: Modulating
-- Can support action when operating evidence is stronger than narrative but still incomplete.
-### Because the dominant uncertainty is `Hidden-Variable Dominated`, follow this guidance with stated importance:
-Relevance: Primary
-- Pushes action logic toward staging, reversibility, and wider uncertainty bands.
-### Because the action problem is `Optionality / Staged Commitment`, follow this guidance with stated importance:
-Relevance: Primary
-- Core stage: must define probe, scale, kill, and learning-before-commitment logic.
+Each guidance item includes an importance label that indicates how strongly it should shape the result of this stage.
+### Because the dominant uncertainty is `Hidden-Variable Dominated`, follow this guidance:
+Important: Pushes action logic toward staging, reversibility, and wider uncertainty bands.
+### Because the action problem is `Portfolio Construction`, follow this guidance:
+Important: Core stage: must define sizing, diversification, hedging, and substitution logic.
+### Because this is a `Decide` task, follow this guidance:
+[CONDITIONAL condition="Use this only if the task framing materially changes the action bar."]
+Important: This is a core stage for the adapter and should make action thresholds explicit.
+[/CONDITIONAL]
+### Because this problem sits in `Investing / Markets`, follow this guidance:
+[CONDITIONAL condition="Use this only if domain-specific action logic should shape timing, sizing, or hedging."]
+Moderate: Shapes what action means: sizing, timing, hedge, add, trim, or avoid.
+[/CONDITIONAL]
+### Because the preferred evidence mode is `Market-Tape / Price-Action-First`, follow this guidance:
+[CONDITIONAL condition="Use this only if the preferred proof style should change commitment thresholds."]
+Moderate: Can justify action on tape confirmation even when direct evidence is incomplete.
+[/CONDITIONAL]
 
 Decision implications must include:
 - what must be known before acting

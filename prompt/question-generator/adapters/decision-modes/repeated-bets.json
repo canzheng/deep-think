@@ -1,0 +1,73 @@
+{
+  "value": "Repeated Bets",
+  "use_when": [
+    "many similar decisions will occur",
+    "edge and calibration matter more than perfection on one case",
+    "losses are survivable if sized correctly"
+  ],
+  "research_behavior": [
+    "lower the evidence bar per bet, but raise the bar for process discipline",
+    "focus on base rates, hit rate, payoff ratio, and edge decay",
+    "separate process quality from short-term outcome"
+  ],
+  "key_questions": [
+    "What is the repeatable edge?",
+    "What is the base rate?",
+    "What is the payoff distribution?",
+    "How quickly does the edge decay?",
+    "What sizing rule is appropriate?"
+  ],
+  "action_logic": [
+    "process > one outcome",
+    "calibrate continuously",
+    "size so survival is preserved"
+  ],
+  "monitoring_style": [
+    "frequent, process-based, outcome-aware"
+  ],
+  "failure_mode": [
+    "overconfidence from small samples"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the action problem as repeatable and calibration-driven rather than one-off."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Pulls in base rates, repeatability, and sizing discipline."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Adds edge durability, payoff ratio, and process quality to the structural view."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors branches tied to payoff distribution and edge decay, not only single-case outcomes."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about repeatable edge, base rate, and sizing rules."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Lowers per-bet evidence demands while strengthening process-discipline evidence."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Core stage: should define sizing, calibration, and process rules."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should indicate edge persistence, decay, and process drift."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be frequent and process-based, not merely outcome-chasing."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Outputs should make repeatability and process discipline explicit."
+    }
+  }
+}

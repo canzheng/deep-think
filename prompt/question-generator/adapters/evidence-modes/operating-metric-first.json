@@ -1,0 +1,63 @@
+{
+  "value": "Operating-Metric-First",
+  "prioritize": [
+    "churn",
+    "activation",
+    "conversion",
+    "usage depth",
+    "throughput",
+    "margins",
+    "capacity",
+    "cohort behavior",
+    "time-to-value"
+  ],
+  "strengths": [
+    "close to mechanism"
+  ],
+  "weaknesses": [
+    "incomplete data",
+    "KPI selection bias"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Selects an operating-metric-first proof style close to mechanism."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Slightly centers scope on the parts of the system that emit usable operating data."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Encourages mechanism claims that map directly to behavior, throughput, retention, and unit economics."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Prefers scenarios that can be distinguished by operational metrics moving first."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about which metric moves first if the thesis is right or wrong."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Sets KPI hierarchy, proxy tolerance, and conflict handling around operating metrics."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Can support action when operating evidence is stronger than narrative but still incomplete."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Favors churn, cohorts, activation, throughput, capacity, and margin signals."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track high-frequency operating metrics and deterioration or acceleration patterns."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Mainly affects whether the output explicitly shows KPI logic."
+    }
+  }
+}

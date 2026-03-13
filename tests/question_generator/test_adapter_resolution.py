@@ -32,7 +32,7 @@ class AdapterResolutionTest(unittest.TestCase):
         self.assertEqual(sorted(resolved.keys()), sorted(contract.depends_on))
         self.assertEqual(
             resolved["task"].path,
-            adapters_dir() / "tasks" / "decide.md",
+            adapters_dir() / "tasks" / "decide.json",
         )
         self.assertEqual(
             resolved["output_mode"].path,

@@ -60,7 +60,7 @@ The assembled prompts should already use the repo’s prompt-facing labels such 
 Run:
 
 ```bash
-python tests/question_generator/assemble_non_render_prompts.py --output-dir tests/question_generator/artifacts/non_render_prompt_review_prompts --manifest tests/question_generator/artifacts/non_render_prompt_review_manifest.json --seed 20260313
+conda run -n truth-seek python tests/question_generator/assemble_non_render_prompts.py --output-dir tests/question_generator/artifacts/non_render_prompt_review_prompts --manifest tests/question_generator/artifacts/non_render_prompt_review_manifest.json --seed 20260313
 ```
 
 This creates:
@@ -96,7 +96,7 @@ This avoids false negatives caused by reviewing one very large multi-prompt bund
 Run:
 
 ```bash
-python tests/question_generator/check_non_render_prompt_review.py --input tests/question_generator/artifacts/non_render_prompt_review.json
+conda run -n truth-seek python tests/question_generator/check_non_render_prompt_review.py --input tests/question_generator/artifacts/non_render_prompt_review.json
 ```
 
 The checker will:
@@ -146,7 +146,7 @@ The review JSON should be an array like:
 Before using the workflow, run the focused test file:
 
 ```bash
-python -m unittest tests.question_generator.test_non_render_prompt_quality -v
+conda run -n truth-seek python -m unittest tests.question_generator.test_non_render_prompt_quality -v
 ```
 
 This verifies:

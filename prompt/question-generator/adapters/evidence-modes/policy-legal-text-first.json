@@ -1,0 +1,59 @@
+{
+  "value": "Policy / Legal-Text-First",
+  "prioritize": [
+    "bill text",
+    "rule text",
+    "court opinions",
+    "implementation guidance",
+    "delegated authority",
+    "procedural timelines"
+  ],
+  "strengths": [
+    "precise on authority and enforceability"
+  ],
+  "weaknesses": [
+    "weak on politics or enforcement intensity by itself"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Selects a legal-text-first proof style."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Slightly narrows scope toward what authority and procedure can actually support."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Encourages mechanism claims anchored in authority, delegation, procedure, and implementation."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Prefers branches driven by actual implementation paths, legal authority, and judicial outcomes."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what authority exists, what is discretionary, and what implementation path is real."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Sets source hierarchy around law, regulation, guidance, procedure, and court decisions."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Raises the evidence bar when legal authority is necessary before action."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Favors bill text, rule text, opinions, guidance, and delegated-authority signals."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track procedural milestones, litigation, implementation guidance, and enforcement signals."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Usually affects how explicitly authority and enforceability are shown."
+    }
+  }
+}

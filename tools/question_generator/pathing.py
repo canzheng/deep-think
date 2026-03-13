@@ -86,7 +86,7 @@ def adapter_family_dir(adapter_dimension: str) -> Path:
 
 
 def adapter_path(adapter_dimension: str, routed_value: str) -> Path:
-    return adapter_family_dir(adapter_dimension) / f"{_slugify(routed_value)}.md"
+    return adapter_family_dir(adapter_dimension) / f"{_slugify(routed_value)}.json"
 
 
 def output_mode_path(routed_value: str) -> Path:

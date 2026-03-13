@@ -105,10 +105,16 @@ class AssemblerTest(unittest.TestCase):
                         "",
                         "Time horizon: {{routing.time_horizon}}",
                         "",
-                        "{{#active_steering}}",
                         "## Stage Guidance",
-                        "{{{active_steering}}}",
-                        "{{/active_steering}}",
+                        "Each guidance item includes an importance label that indicates how strongly it should shape the result of this stage.",
+                        "{{#stage_guidance.required}}",
+                        "- {{importance}}: {{guidance}}",
+                        "{{/stage_guidance.required}}",
+                        "{{#stage_guidance.conditional}}",
+                        "[CONDITIONAL condition=\"{{condition}}\"]",
+                        "- {{importance}}: {{guidance}}",
+                        "[/CONDITIONAL]",
+                        "{{/stage_guidance.conditional}}",
                         "",
                         "## Required Output",
                         "{{{required_output_schema}}}",
@@ -137,13 +143,18 @@ class AssemblerTest(unittest.TestCase):
         self.assertIn("Time horizon:", prompt)
         self.assertNotIn("## Relevant Context", prompt)
         self.assertIn("## Stage Guidance", prompt)
+        self.assertIn(
+            "Each guidance item includes an importance label that indicates how strongly it should shape the result of this stage.",
+            prompt,
+        )
+        self.assertIn("- Important:", prompt)
         self.assertIn("## Required Output", prompt)
         self.assertIn("## Feedback", prompt)
         self.assertEqual(prompt.count("## Stage Guidance"), 1)
         self.assertEqual(prompt.count("## Required Output"), 1)
         self.assertEqual(prompt.count("## Feedback"), 1)
         self.assertNotIn("{{topic}}", prompt)
-        self.assertNotIn("{{active_steering}}", prompt)
+        self.assertNotIn("{{stage_guidance}}", prompt)
         self.assertNotIn("{{required_output_schema}}", prompt)
         self.assertNotIn("{{feedback_schema}}", prompt)
 
@@ -177,7 +188,6 @@ class AssemblerTest(unittest.TestCase):
         self.assertIn("## Stage Guidance", prompt)
         self.assertIn("## Required Output", prompt)
         self.assertIn("## Feedback", prompt)
-        self.assertIn("Because this is a `Decide` task", prompt)
         self.assertIn('"required": [', prompt)
 
     def test_decision_logic_prompt_expands_required_output_schema_refs(self) -> None:

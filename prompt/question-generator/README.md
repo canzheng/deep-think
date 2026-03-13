@@ -45,8 +45,8 @@ Consistency rules:
   `Routing`, `Boundary`, `Structure`, `Scenarios`, `Question Generation`,
   `Evidence Planning`, `Decision Logic`, `Signal Translation`, `Monitoring`,
   `Render`.
-- Adapter influence levels must use only: `Primary`, `Modulating`, `Light`,
-  or `None`.
+- Adapter stage-guidance importance levels must use only: `Important`,
+  `Moderate`, `Light`, or `None`.
 - If a change lands in the modular source prompt, update the affected task
   templates and contracts in the same change.
 
@@ -80,13 +80,14 @@ Assembly model:
 - contract supplies required and optional stage dependencies, adapter
   dependencies, and output schema
 - shared state supplies the routed context and prior stage outputs
-- routed adapters supply stage-specific steering
+- routed adapters supply stage-specific guidance
 - render currently remains a compatibility exception and still uses the broader section-rendering path
 
 Supported non-render Mustache context values:
 - `{{{topic}}}` -> a markdown-safe rendered topic block
 - `{{routing.*}}`, `{{boundary.*}}`, `{{structure.*}}`, `{{scenarios.*}}`, etc. -> direct shared-state values
-- `{{{active_steering}}}` -> the rendered stage-guidance block body
+- `{{#stage_guidance.required}} ... {{/stage_guidance.required}}` -> required stage-guidance entries
+- `{{#stage_guidance.conditional}} ... {{/stage_guidance.conditional}}` -> conditionally relevant stage-guidance entries
 - `{{{required_output_schema}}}` -> the rendered output-schema block with `$ref` entries expanded
 - `{{{feedback_schema}}}` -> the rendered feedback-schema block when supported, with `$ref` entries expanded
 
@@ -97,7 +98,9 @@ Non-render rendering rule:
 
 Current prompt-facing assembly:
 - non-render prompts inline only the state fields their templates reference
-- `Stage Guidance` remains available through `{{{active_steering}}}` and is currently the one temporary pre-rendered exception
+- `Stage Guidance` is the only prompt-visible adapter section in the first structured-adapter migration
+- stage-guidance entries use the prompt-facing importance labels `Important`, `Moderate`, `Light`, and `None`
+- conditional adapter guidance uses the same `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` wrapper convention as other conditional prompt blocks
 - render still uses section rendering under
   `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/`
   with a JSON fallback for sections that do not yet have a specialized renderer
@@ -123,7 +126,7 @@ Current orchestration behavior:
 
 CLI usage:
 ```bash
-python -m tools.question_generator.cli \
+conda run -n truth-seek python -m tools.question_generator.cli \
   --stage decision_logic \
   --state tests/question_generator/fixtures/minimal_state.json \
   --include-optional structure \
@@ -132,19 +135,19 @@ python -m tools.question_generator.cli \
 
 Automatic stage workflow:
 ```bash
-python -m tools.question_generator.cli init-run \
+conda run -n truth-seek python -m tools.question_generator.cli init-run \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
   --run-id demo-run
 
-python -m tools.question_generator.cli run-stage \
+conda run -n truth-seek python -m tools.question_generator.cli run-stage \
   --run-dir tmp/question-runs/demo-run \
   --stage decision_logic
 ```
 
 Recipe workflow:
 ```bash
-python -m tools.question_generator.cli run-recipe \
+conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
@@ -153,11 +156,11 @@ python -m tools.question_generator.cli run-recipe \
 
 Manual debug workflow:
 ```bash
-python -m tools.question_generator.cli prepare-stage \
+conda run -n truth-seek python -m tools.question_generator.cli prepare-stage \
   --run-dir tmp/question-runs/demo-run \
   --stage decision_logic
 
-python -m tools.question_generator.cli apply-response \
+conda run -n truth-seek python -m tools.question_generator.cli apply-response \
   --run-dir tmp/question-runs/demo-run \
   --stage decision_logic \
   --response tmp/question-runs/demo-run/decision_logic.response.md

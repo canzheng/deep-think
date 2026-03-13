@@ -1,0 +1,53 @@
+{
+  "value": "Predict",
+  "prioritize": [
+    "decisive stakeholders",
+    "incentives under constraints",
+    "endurance",
+    "branch logic",
+    "probabilities",
+    "what can still change the path"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Sets the overall job to forecasting what happens next."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls scope toward actors, constraints, and variables that can still change the future path."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Prioritizes actor, incentive, and constraint structure over retrospective causal narration."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Requires explicit future paths, branch points, and rough probability logic."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors probability-shifting questions and branch-distinguishing questions."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Prefers evidence that raises or lowers scenario odds rather than merely explaining the past."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Strong when prediction is being used to support action, otherwise secondary."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals are mainly for updating path probabilities and branch confidence."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track branch triggers, confirmation patterns, and belief updates."
+    },
+    "render": {
+      "importance": "Important",
+      "guidance": "Pushes the deliverable toward paths, odds, and update conditions."
+    }
+  }
+}

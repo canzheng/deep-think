@@ -1,0 +1,52 @@
+{
+  "value": "Explain",
+  "prioritize": [
+    "sequence reconstruction",
+    "trigger vs cause",
+    "dominant mechanism",
+    "alternative explanations",
+    "what mattered most"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Sets the overall job to explanation and makes causal understanding the success criterion."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls scope toward causes of what already happened and the time frame needed to explain them."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Prioritizes causal structure, mechanism, trigger, and alternative explanation analysis."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Uses scenarios mainly as rival explanations or counterfactual paths, not as forward forecasts."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors causal attribution questions and questions that distinguish trigger from deep cause."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Prefers chronology, sequence, and mechanism-validating evidence."
+    },
+    "decision_logic": {
+      "importance": "Light",
+      "guidance": "Only matters if explanation is meant to inform a later action."
+    },
+    "signal_translation": {
+      "importance": "Light",
+      "guidance": "Signals mainly indicate whether the explanation is supported or falsified."
+    },
+    "monitoring": {
+      "importance": "Light",
+      "guidance": "Monitoring is limited to what would confirm that the explanation remains valid."
+    },
+    "render": {
+      "importance": "Important",
+      "guidance": "Pushes the final artifact toward explanatory clarity rather than action or prediction."
+    }
+  }
+}

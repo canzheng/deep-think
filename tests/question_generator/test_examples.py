@@ -36,8 +36,14 @@ class ExampleAssemblyTest(unittest.TestCase):
         )
 
         self.assertIn("You are converting the current analysis into decision logic.", prompt)
-        self.assertIn("Because this problem sits in `Investing / Markets`", prompt)
-        self.assertIn("Because the action problem is `Portfolio Construction`", prompt)
+        self.assertIn(
+            "- Moderate: Shapes what action means: sizing, timing, hedge, add, trim, or avoid.",
+            prompt,
+        )
+        self.assertIn(
+            "- Important: Core stage: must define sizing, diversification, hedging, and substitution logic.",
+            prompt,
+        )
         self.assertIn('"decision_logic"', prompt)
         self.assertIn('"synthesis"', prompt)
 

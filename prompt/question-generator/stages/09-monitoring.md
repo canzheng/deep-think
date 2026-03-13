@@ -111,10 +111,16 @@ Backup source types:
 {{/evidence_plan.backup_source_types}}
 [/CONDITIONAL]
 
-{{#active_steering}}
 ## Stage Guidance
-{{{active_steering}}}
-{{/active_steering}}
+Each guidance item includes an importance label that indicates how strongly it should shape the result of this stage.
+{{#stage_guidance.required}}
+- {{importance}}: {{guidance}}
+{{/stage_guidance.required}}
+{{#stage_guidance.conditional}}
+[CONDITIONAL condition="{{condition}}"]
+- {{importance}}: {{guidance}}
+[/CONDITIONAL]
+{{/stage_guidance.conditional}}
 
 For the monitoring layer, determine:
 - what to watch

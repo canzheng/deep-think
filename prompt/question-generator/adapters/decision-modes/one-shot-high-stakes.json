@@ -1,0 +1,76 @@
+{
+  "value": "One-Shot High-Stakes",
+  "use_when": [
+    "downside is large",
+    "repetition is limited",
+    "mistakes are costly",
+    "reversal is difficult or expensive"
+  ],
+  "research_behavior": [
+    "raise the evidence threshold",
+    "widen scenario coverage",
+    "emphasize robustness, pre-mortems, and downside containment",
+    "ask what must be true before acting",
+    "privilege irreversible-risk analysis over elegance"
+  ],
+  "key_questions": [
+    "What error would be hardest to reverse?",
+    "What must be true for the decision to be acceptable?",
+    "What uncertainty can be reduced before action?",
+    "What uncertainty must simply be accepted?",
+    "What is the minimum robust action rather than the maximum aggressive action?"
+  ],
+  "action_logic": [
+    "robustness > optimization",
+    "avoid ruin",
+    "use kill criteria and explicit no-go thresholds"
+  ],
+  "monitoring_style": [
+    "milestone-based, not twitchy"
+  ],
+  "failure_mode": [
+    "analysis paralysis"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the action problem as high-cost, low-repeat, and difficult to reverse."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Pulls in downside, robustness, and irreversible-risk considerations."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Adds action-relevant structure around error cost and fragility."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors downside-heavy and robustness-focused branches over elegance."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what must be true before acting and what error is hardest to reverse."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Raises the evidence bar and emphasizes pre-mortems and disconfirming evidence."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Core stage: must define no-go thresholds, robustness, and kill criteria."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should indicate whether the preconditions for acting have been met or broken."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be milestone-based, not twitchy."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Decision outputs should explicitly show robustness, no-go conditions, and downside containment."
+    }
+  }
+}

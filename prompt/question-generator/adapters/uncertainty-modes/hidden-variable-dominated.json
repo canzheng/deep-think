@@ -1,0 +1,53 @@
+{
+  "value": "Hidden-Variable Dominated",
+  "research_behavior": [
+    "search for proxies",
+    "triangulate aggressively",
+    "widen the hypothesis set"
+  ],
+  "risk": [
+    "overfitting to indirect clues"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one where key drivers are only partially observable."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can widen scope modestly to include latent states and proxy-bearing systems."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Forces the stage to search for missing drivers, proxies, and latent states."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors wider scenario sets and more humility about hidden branch drivers."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors proxy questions and questions about what would reveal the hidden state."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Requires triangulation, confidence penalties, and careful proxy handling."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Pushes action logic toward staging, reversibility, and wider uncertainty bands."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should focus on aligned proxies rather than single direct claims."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should update only when multiple proxies align."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should show uncertainty explicitly and distinguish evidence from inference."
+    }
+  }
+}

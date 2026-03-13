@@ -1,0 +1,53 @@
+{
+  "value": "Known-Unknown Dominated",
+  "research_behavior": [
+    "quantify ranges",
+    "identify thresholds",
+    "keep scenario set relatively tight"
+  ],
+  "risk": [
+    "false precision"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one where key variables are visible but future values remain uncertain."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Usually keeps scope relatively tight because the main variables are already visible."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Supports higher confidence in the structural map and pushes attention to sensitivities and thresholds."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Prefers tighter branches and narrower probability bands."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors range, threshold, and sensitivity questions."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Encourages direct measurement of visible variables and disciplined range updates."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Supports action logic tied to explicit thresholds while warning against false precision."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should narrow ranges and confirm threshold movement."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be threshold-based and relatively regular."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should show confidence ranges without pretending certainty."
+    }
+  }
+}

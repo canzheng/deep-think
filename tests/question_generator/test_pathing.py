@@ -42,29 +42,29 @@ class PathingTest(unittest.TestCase):
         )
         self.assertEqual(
             pathing.adapter_path("task", "Decide"),
-            pathing.adapters_dir() / "tasks" / "decide.md",
+            pathing.adapters_dir() / "tasks" / "decide.json",
         )
         self.assertEqual(
             pathing.adapter_path("domain", "Investing / Markets"),
-            pathing.adapters_dir() / "domains" / "investing-markets.md",
+            pathing.adapters_dir() / "domains" / "investing-markets.json",
         )
         self.assertEqual(
             pathing.adapter_path("evidence_mode", "Market-Tape / Price-Action-First"),
             pathing.adapters_dir()
             / "evidence-modes"
-            / "market-tape-price-action-first.md",
+            / "market-tape-price-action-first.json",
         )
         self.assertEqual(
             pathing.adapter_path("uncertainty_mode", "Hidden-Variable Dominated"),
             pathing.adapters_dir()
             / "uncertainty-modes"
-            / "hidden-variable-dominated.md",
+            / "hidden-variable-dominated.json",
         )
         self.assertEqual(
             pathing.adapter_path("decision_mode", "Portfolio Construction"),
             pathing.adapters_dir()
             / "decision-modes"
-            / "portfolio-construction.md",
+            / "portfolio-construction.json",
         )
 
     def test_output_mode_path_normalizes_values(self) -> None:

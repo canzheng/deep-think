@@ -1,0 +1,72 @@
+{
+  "value": "Portfolio Construction",
+  "use_when": [
+    "the choice is allocation across multiple opportunities",
+    "diversification, concentration, and correlation matter",
+    "the right question is marginal contribution, not standalone attractiveness"
+  ],
+  "research_behavior": [
+    "change unit of analysis from single idea to portfolio role",
+    "identify common drivers and shared failure modes",
+    "ask what this adds, replaces, hedges, or duplicates"
+  ],
+  "key_questions": [
+    "What role does this position play?",
+    "What exposures does it share with the rest of the portfolio?",
+    "Where is correlation hidden?",
+    "What failure modes are duplicated?",
+    "What is the marginal contribution to expected return and drawdown?"
+  ],
+  "action_logic": [
+    "standalone quality is insufficient",
+    "evaluate fit, covariance, liquidity, and concentration"
+  ],
+  "monitoring_style": [
+    "portfolio-level and position-level"
+  ],
+  "failure_mode": [
+    "false diversification"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the action problem as allocation within a portfolio rather than standalone choice."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Pulls in correlation, overlap, concentration, and marginal portfolio role."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Adds common drivers, hidden correlations, and shared failure modes to the structure."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors branches evaluated by marginal portfolio effect, not standalone attractiveness."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about role, overlap, duplication, and marginal contribution."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Prefers evidence that distinguishes standalone quality from portfolio fit."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Core stage: must define sizing, diversification, hedging, and substitution logic."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should indicate when to add, trim, hedge, or reduce overlap."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should include both position-level and portfolio-level stress signals."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Decision and worksheet outputs should show portfolio role and sizing logic explicitly."
+    }
+  }
+}

@@ -327,7 +327,7 @@ Reason:
 - the rest of the adapter metadata should be preserved, but would mostly add
   noise if dumped directly into the current stage prompts
 
-This is acceptable in the short term and remains cleaner than the earlier
+This is acceptable in the short term and cleaner than the earlier
 `active_steering` framing because it matches the prompt-facing concept directly.
 
 Inside `## Stage Guidance`:
@@ -850,12 +850,9 @@ Prompt-facing importance labels should be:
 The stage prompt should explain the meaning of those labels directly under
 `## Stage Guidance`.
 
-Important implementation note:
-- the repository currently still uses `Primary`, `Modulating`, `Light`, `None`
-  in some internal docs and code
-- if the prompt-facing labels are changed, the repo rules and implementation
-  should be updated together so the system does not carry two conflicting
-  vocabularies
+Implementation note:
+- prompt-facing guidance labels should be kept consistent across repo rules,
+  templates, runtime behavior, and docs
 
 How the non-stage-guidance adapter fields should be used:
 - keep them in the JSON asset now

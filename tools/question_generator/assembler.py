@@ -9,7 +9,7 @@ from urllib.parse import unquote
 
 import chevron
 
-from tools.question_generator.adapter_rendering import render_adapter_sections
+from tools.question_generator.adapter_rendering import build_stage_guidance, render_adapter_sections
 from tools.question_generator.adapter_resolution import resolve_stage_modules
 from tools.question_generator.contracts import load_contract
 from tools.question_generator.pathing import contract_path, normalize_stage_name, stage_template_path
@@ -37,7 +37,7 @@ def _assemble_non_render_stage_prompt(stage: str, state: dict) -> str:
     context = _build_non_render_context(
         stage=stage,
         state=state,
-        active_steering=render_adapter_sections(stage, modules) if modules else "",
+        stage_guidance=build_stage_guidance(stage, modules) if modules else {"required": [], "conditional": []},
         required_output_schema=_render_schema_block(contract.output_schema.raw, base_path=contract_file),
         feedback_schema=(
             _render_schema_block(contract.feedback.schema, base_path=contract_file)
@@ -102,13 +102,13 @@ def _build_non_render_context(
     *,
     stage: str,
     state: dict,
-    active_steering: str,
+    stage_guidance: dict[str, list[dict[str, str]]],
     required_output_schema: str,
     feedback_schema: str,
 ) -> dict[str, object]:
     context = copy.deepcopy(state)
     context["topic"] = _render_topic_block(state.get("topic", ""))
-    context["active_steering"] = _strip_stage_guidance_heading(active_steering)
+    context["stage_guidance"] = copy.deepcopy(stage_guidance)
     context["required_output_schema"] = required_output_schema
     context["feedback_schema"] = feedback_schema
     context["stage"] = normalize_stage_name(stage)
@@ -137,19 +137,6 @@ def _render_topic_block(topic: str) -> str:
     backtick_runs = [len(match.group(0)) for match in re.finditer(r"`+", topic)]
     fence = "`" * max(3, max(backtick_runs, default=0) + 1)
     return "\n".join([f"{fence}text", topic, fence])
-
-
-def _strip_stage_guidance_heading(active_steering: str) -> str:
-    if not active_steering:
-        return ""
-
-    lines = active_steering.splitlines()
-    if lines and lines[0].strip() == "## Stage Guidance":
-        lines = lines[1:]
-    if lines and lines[0].startswith("(Note: each guidance will be marked"):
-        lines = lines[1:]
-    return "\n".join(lines).lstrip()
-
 
 def _render_required_output(output_schema: dict, base_path: Path) -> str:
     return "\n".join(
