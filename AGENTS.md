@@ -28,5 +28,5 @@ Rules:
   `Routing`, `Boundary`, `Structure`, `Scenarios`, `Question Generation`,
   `Evidence Planning`, `Decision Logic`, `Signal Translation`, `Monitoring`,
   `Render`.
-- Adapter influence levels must use only: `Primary`, `Modulating`, `Light`,
-  or `None`.
+- Adapter stage-guidance importance levels must use only: `Important`,
+  `Moderate`, `Light`, or `None`.

@@ -4,7 +4,7 @@
 
 **Goal:** Replace whole-section non-render prompt assembly with Mustache-based field-level templates so non-render prompts include only the state fields they actually need, while still supporting repeated object structures like scenarios, questions, signals, and monitoring items.
 
-**Architecture:** Build one render context per stage from the shared state, expanded stage contract metadata, and routed guidance. Render non-render stage templates with Mustache over that context, using the field-level dependency map in `IMPLEMENTATION.md` to decide what each template should consume. Keep `active_steering` as a temporary pre-rendered exception during the first migration, and keep render-stage broad context handling separate until its own input model is finalized. Include conditionally useful upstream fields directly in templates under explicit `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` blocks rather than making the assembler reason about fuzzy applicability.
+**Architecture:** Build one render context per stage from the shared state, expanded stage contract metadata, and routed guidance. Render non-render stage templates with Mustache over that context, using the field-level dependency map in `IMPLEMENTATION.md` to decide what each template should consume. Keep `stage_guidance` as the only prompt-visible adapter section during the first structured-adapter migration, and keep render-stage broad context handling separate until its own input model is finalized. Include conditionally useful upstream fields directly in templates under explicit `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` blocks rather than making the assembler reason about fuzzy applicability. Apply the same `[CONDITIONAL]` wrapper convention to conditionally relevant stage-guidance items.
 
 Important authoring rule:
 - for stages after `Routing`, do not inject adapter-selection routing fields
@@ -12,7 +12,7 @@ Important authoring rule:
 - do not use `routing.task`, `routing.domain`, `routing.output_mode`,
   `routing.evidence_mode`, `routing.uncertainty_mode`, or
   `routing.decision_mode` as ordinary prompt context
-- the effect of those classifications should come through `active_steering`
+- the effect of those classifications should come through `stage_guidance`
 
 **Tech Stack:** Python 3, a lightweight Mustache implementation for Python, existing question-generator assembler/runtime, markdown templates, `unittest`, Conda-managed Python execution.
 
@@ -26,7 +26,7 @@ Important authoring rule:
 - `prompt/question-generator/IMPLEMENTATION.md`
   - Update the runtime description so it reflects Mustache-based non-render prompt assembly and the compact dependency map as the target runtime behavior.
 - `prompt/question-generator/README.md`
-  - Update prompt authoring guidance to describe Mustache templates, stage render context, and the remaining `active_steering` exception.
+  - Update prompt authoring guidance to describe Mustache templates, stage render context, and `stage_guidance` as the only prompt-visible adapter section in the first structured-adapter migration.
 - `prompt/question-generator/stages/01-routing.md`
   - Rewrite as a Mustache template that uses only the topic and contract-derived metadata it needs.
 - `prompt/question-generator/stages/02-boundary.md`
@@ -36,7 +36,7 @@ Important authoring rule:
 - `prompt/question-generator/stages/04-scenarios.md`
   - Rewrite to consume required routing, boundary, and structure fields, including conditional groups and Mustache sections where list rendering helps readability.
 - `prompt/question-generator/stages/05-question-generation.md`
-  - Rewrite to consume required routing, structure, and scenarios inputs, plus conditional boundary/structure groups, `active_steering`, `required_output_schema`, and `feedback_schema` if applicable.
+  - Rewrite to consume required routing, structure, and scenarios inputs, plus conditional boundary/structure groups, `stage_guidance`, `required_output_schema`, and `feedback_schema` if applicable.
 - `prompt/question-generator/stages/06-evidence-planning.md`
   - Rewrite to consume required routing, questions, and scenarios inputs, plus conditional question/routing/structure groups, using Mustache sections for repeated question/evidence structures.
 - `prompt/question-generator/stages/07-decision-logic.md`
@@ -70,7 +70,7 @@ Important authoring rule:
 - `prompt/question-generator/stages/10-render.md`
   - Render remains a separate case for now.
 - `tools/question_generator/adapter_rendering.py`
-  - Keep `active_steering` as the one temporary pre-rendered natural-language block.
+  - Keep stage-guidance preparation isolated while structured adapters are introduced.
 
 ## Chunk 1: Lock The Mustache Rendering Model In Tests
 
@@ -120,7 +120,7 @@ Assert:
 Add a test that renders a temporary template containing:
 
 ```mustache
-{{active_steering}}
+{{stage_guidance}}
 
 {{required_output_schema}}
 
@@ -128,7 +128,7 @@ Add a test that renders a temporary template containing:
 ```
 
 Assert:
-- `active_steering` renders natural-language guidance
+- `stage_guidance` renders prompt-visible guidance content
 - `required_output_schema` renders expanded JSON without `$ref`
 - `feedback_schema` renders only for stages whose contracts support feedback
 
@@ -144,7 +144,7 @@ Update `tests/question_generator/test_assembler.py` to render every real non-ren
   - `{{required_output}}`
   - `{{feedback}}`
 - `required_output_schema` is present and expanded
-- `active_steering` appears only for stages that include it
+- `stage_guidance` appears only for stages that include it
 
 - [ ] **Step 5: Update review-artifact tests for the new Mustache prompt shape**
 
@@ -209,7 +209,7 @@ Prepare a context object shaped like:
     **shared_state,
     "required_output_schema": <expanded JSON schema>,
     "feedback_schema": <expanded JSON schema or empty>,
-    "active_steering": <rendered prose block>,
+    "stage_guidance": <structured guidance entries>,
 }
 ```
 
@@ -217,19 +217,20 @@ Guidance:
 - shared state stays top-level so templates can use paths like
   `routing.time_horizon`
 - contract-derived schemas are context values, not shared-state fields
-- `active_steering` remains the one temporary pre-rendered prose field
+- `stage_guidance` remains the one prompt-visible adapter section in the first
+  structured-adapter migration
 
 - [ ] **Step 3: Define Mustache-safe rendering rules for structured values**
 
 Make a clear decision for how Mustache receives:
 - expanded schemas
-- `active_steering`
+- `stage_guidance`
 - raw shared-state lists and objects
 
 Recommended approach:
 - pass ordinary shared-state dicts/lists as structured values so Mustache sections can iterate them
 - pass expanded schemas as JSON strings ready for direct insertion
-- pass `active_steering` as a markdown string ready for direct insertion
+- pass `stage_guidance` as structured entries ready for Mustache sections
 
 Do not introduce:
 - custom Mustache helpers
@@ -260,6 +261,8 @@ Requirements:
 - the assembler does not evaluate these conditions
 - templates must keep the condition text plain-language and stage-usable
 - related optional fields should be grouped into one readable block
+- conditionally relevant stage-guidance items should use the same wrapper
+  convention
 
 - [ ] **Step 4: Replace the old non-render placeholder path**
 
@@ -328,7 +331,7 @@ Use:
 - `{{topic}}`
 - `{{required_output_schema}}`
 
-Do not include `active_steering`.
+Do not include `stage_guidance`.
 
 - [ ] **Step 2: Rewrite `02-boundary.md`**
 
@@ -379,7 +382,7 @@ Inline only:
 - scenarios: `base_case.summary`, `base_case.branch_points`, `base_case.branch_triggers`
 
 Retain:
-- `active_steering`
+- `stage_guidance`
 - `required_output_schema`
 - `feedback_schema` if the stage still uses feedback
 
@@ -420,7 +423,7 @@ Inline only:
 - uncertainty map: all needed fields
 
 Retain:
-- `active_steering`
+- `stage_guidance`
 - `required_output_schema`
 
 Use `[CONDITIONAL]` blocks for:
@@ -529,8 +532,10 @@ In `prompt/question-generator/README.md`, document:
 - the prepared stage render context
 - `required_output_schema`
 - `feedback_schema`
-- `active_steering` as the one temporary exception
+- `stage_guidance` as the only prompt-visible adapter section in the first
+  structured-adapter migration
 - the `[CONDITIONAL condition=\"...\"] ... [/CONDITIONAL]` prompt convention
+- the fact that conditional adapter guidance uses the same wrapper convention
 - the removal of whole-section non-render context rendering
 
 - [ ] **Step 4: Update implementation documentation**

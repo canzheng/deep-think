@@ -724,7 +724,7 @@ File:
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/adapter_rendering.py`
 
 Responsibilities:
-- render active module steering for the current stage
+- render stage guidance for the current stage
 
 Current format:
 - one `## Stage Guidance` section
@@ -754,6 +754,65 @@ Tradeoff:
 - upstream stages avoid prompt confusion from seeing final-deliverable section
   lists in the middle of analytical work
 
+Planned direction:
+- migrate adapter assets to structured JSON
+- keep `## Stage Guidance` as the only adapter-derived prompt section in the
+  first migration
+- store the rest of the adapter metadata in JSON without rendering it into
+  stage prompts by default
+- use clearer prompt-facing importance labels:
+  - `Important`
+  - `Moderate`
+  - `Light`
+  - `None`
+- include one short line under `## Stage Guidance` explaining that each item’s
+  label indicates how strongly it should shape the stage result
+
+Recommended structured adapter shape:
+- use one JSON type per adapter family rather than one generic adapter object
+- recommended families:
+  - `task_adapter`
+    - `value`
+    - `prioritize`
+    - `stage_guidance`
+  - `domain_adapter`
+    - `value`
+    - `typical_ontology`
+    - `typical_bottlenecks`
+    - `typical_signals`
+    - `stage_guidance`
+  - `evidence_mode_adapter`
+    - `value`
+    - `prioritize`
+    - `strengths`
+    - `weaknesses`
+    - `stage_guidance`
+  - `uncertainty_mode_adapter`
+    - `value`
+    - `research_behavior`
+    - `risk`
+    - `stage_guidance`
+  - `decision_mode_adapter`
+    - `value`
+    - `use_when`
+    - `research_behavior`
+    - `key_questions`
+    - `action_logic`
+    - `monitoring_style`
+    - `failure_mode`
+    - `stage_guidance`
+- reusable shared structure:
+  - `stage_guidance`
+    - keyed by canonical stage name
+    - each entry contains:
+      - `importance`
+      - `guidance`
+
+Important prompt-use rule:
+- in the first JSON migration, only `stage_guidance` should appear in prompts
+- the other adapter metadata should remain available for future prompt design,
+  debugging, and routing support, but should not be dumped into prompts yet
+
 ### `assembler.py`
 
 File:
@@ -782,7 +841,7 @@ Key implementation choices:
   custom placeholder engine.
 - The render context is prepared in Python, but prompt wording and layout stay
   in the stage template.
-- `active_steering` remains the one temporary pre-rendered prose exception for
+- `stage_guidance` remains the one adapter-derived prompt section for
   non-render stages.
 
 Those behaviors are left to a future orchestrator.
@@ -801,7 +860,8 @@ Supported non-render Mustache context values:
   - `{{scenarios.base_case.summary}}`
   - `{{questions.top_killer_questions}}`
 - `{{{topic}}}` -> markdown-safe rendered topic block
-- `{{{active_steering}}}` -> rendered stage-guidance block body
+- `{{stage_guidance}}` -> structured stage-guidance entries prepared for the
+  template
 - `{{{required_output_schema}}}` -> rendered output-schema block with `$ref`
   entries expanded
 - `{{{feedback_schema}}}` -> rendered feedback-schema block with `$ref`
@@ -815,7 +875,7 @@ Conditional blocks in non-render templates:
 
 Render-stage compatibility placeholders:
 - `{{current_state}}` -> rendered `Relevant Context` block
-- `{{active_steering}}` -> rendered `Stage Guidance` block
+- `{{active_steering}}` -> legacy rendered `Stage Guidance` block
 - `{{required_output}}` -> rendered output-schema block with `$ref` entries expanded
 - `{{feedback}}` -> rendered feedback-schema block with `$ref` entries expanded when supported
 
@@ -999,7 +1059,7 @@ For a stage like `decision_logic`, the runtime currently does this:
 6. prepare a Mustache render context containing:
    - top-level shared-state entities
    - `topic`
-   - `active_steering`
+   - `stage_guidance`
    - `required_output_schema`
    - `feedback_schema`, when supported
 7. render the template with Mustache

@@ -243,7 +243,7 @@ That render context should contain:
 - `required_output_schema` from the stage contract, with `$ref` expanded
 - `feedback_schema` from the stage contract when supported, with `$ref`
   expanded
-- `active_steering` as the currently rendered routed guidance block
+- `stage_guidance` as the routed guidance entries for the current stage
 
 This means templates can directly reference values like:
 - `{{topic}}`
@@ -277,6 +277,8 @@ For those cases, the preferred prompt convention is:
 - always include required inputs plainly
 - include optional context as explicit conditional blocks in the template
 - let the model decide whether the conditional block materially applies
+- use the same explicit conditional-block convention for conditionally relevant
+  stage-guidance items
 
 Non-render templates should begin with a general rule like:
 
@@ -301,6 +303,9 @@ Design rules:
 - the condition must say when to use the block, not just what the block contains
 - related optional fields should be grouped into one readable conditional block
 - conditionals should be visible in the prompt, not silently decided by orchestration
+- conditionally relevant adapter guidance should use the same
+  `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` wrapper style as
+  conditional state/context blocks
 
 Reason:
 - many conditional reads are judgment calls rather than deterministic routing rules
@@ -308,19 +313,29 @@ Reason:
 - keeping the decision visible in the prompt is easier to audit than burying it
   in orchestration code
 
-### 6.5. One Temporary Exception: `active_steering`
+### 6.5. One Temporary Exception: `stage_guidance`
 
-The first Mustache migration may still keep:
-- `active_steering`
+The first structured-adapter migration may still keep:
+- `stage_guidance`
 
-as one pre-rendered natural-language block.
+as the one adapter-derived prompt section, even before the rest of the adapter
+metadata is surfaced anywhere else in prompts.
 
 Reason:
-- the current adapter assets are authored as markdown prose, not structured
-  data
+- stage guidance is the only adapter content that currently has clear,
+  stage-local prompt value across all stages
+- the rest of the adapter metadata should be preserved, but would mostly add
+  noise if dumped directly into the current stage prompts
 
-This exception is acceptable in the short term, but it is not the cleanest end
-state.
+This is acceptable in the short term and remains cleaner than the earlier
+`active_steering` framing because it matches the prompt-facing concept directly.
+
+Inside `## Stage Guidance`:
+- required guidance items should appear plainly
+- conditional guidance items should be wrapped in explicit
+  `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` blocks
+- templates should explain that each guidance item’s importance label indicates
+  how strongly it should shape the stage result
 
 ## 7. Shared State Design
 
@@ -729,8 +744,8 @@ The following architectural steps are now the preferred next direction:
 1. move non-render stage templates to Mustache
 2. replace whole-section non-render context injection with compact field-level
    template inputs
-3. keep `active_steering` as a temporary special-case rendered block during the
-   first Mustache migration
+3. keep `stage_guidance` as the one adapter-derived prompt section during the
+   first structured-adapter migration
 4. keep `required_output_schema` and `feedback_schema` as contract-derived
    render-context values
 5. keep render as a temporary exception that may still consume broader context
@@ -770,20 +785,89 @@ Current recommendation:
 ### 15.4. Should adapters migrate to structured data?
 
 Current recommendation:
-- not in the first Mustache migration
-- reconsider after field-level Mustache templates are working
+- yes
+- migrate the full adapter body to structured JSON
+- in the first prompt-facing migration, render only `stage_guidance`
 
 Reason:
-- adapters are currently authored as prompt prose and are still ergonomic in
-  markdown
-- the strongest structural pressure is around `active_steering`, not around the
-  whole adapter body
-- migrating adapters now would broaden the change surface too much
+- Mustache should be the single prompt templating mechanism rather than sharing
+  responsibility with one special pre-rendered prose blob
+- the adapter files are already highly structured in practice
+- stage guidance is the only adapter-derived content that clearly belongs in
+  the current prompts by default
+- the rest of the adapter metadata is valuable, but should remain stored and
+  queryable without being dumped into prompt bodies yet
 
-Likely future direction:
-- if we want Mustache to be the only template mechanism with no special
-  `active_steering` exception, migrate adapter stage-relevance data, and
-  potentially the whole adapter asset, to structured YAML/JSON later
+Recommended adapter JSON structure:
+- use one JSON type per adapter family rather than one generic adapter shape
+- each family should have its own schema and loader model
+
+Recommended families:
+- `task_adapter`
+  - `value`
+  - `prioritize`
+  - `stage_guidance`
+- `domain_adapter`
+  - `value`
+  - `typical_ontology`
+  - `typical_bottlenecks`
+  - `typical_signals`
+  - `stage_guidance`
+- `evidence_mode_adapter`
+  - `value`
+  - `prioritize`
+  - `strengths`
+  - `weaknesses`
+  - `stage_guidance`
+- `uncertainty_mode_adapter`
+  - `value`
+  - `research_behavior`
+  - `risk`
+  - `stage_guidance`
+- `decision_mode_adapter`
+  - `value`
+  - `use_when`
+  - `research_behavior`
+  - `key_questions`
+  - `action_logic`
+  - `monitoring_style`
+  - `failure_mode`
+  - `stage_guidance`
+
+Shared reusable structure:
+- `stage_guidance`
+  - keyed by canonical stage name
+  - each entry contains:
+    - `importance`
+    - `guidance`
+
+Prompt-facing importance labels should be:
+- `Important`
+- `Moderate`
+- `Light`
+- `None`
+
+The stage prompt should explain the meaning of those labels directly under
+`## Stage Guidance`.
+
+Important implementation note:
+- the repository currently still uses `Primary`, `Modulating`, `Light`, `None`
+  in some internal docs and code
+- if the prompt-facing labels are changed, the repo rules and implementation
+  should be updated together so the system does not carry two conflicting
+  vocabularies
+
+How the non-stage-guidance adapter fields should be used:
+- keep them in the JSON asset now
+- do not render them into stage prompts by default in the first migration
+- reconsider selective prompt use later only where they clearly add value
+  without duplicating the main stage instructions
+
+The strongest future candidates are:
+- decision-mode `action_logic`
+- decision-mode `monitoring_style`
+- uncertainty-mode `risk`
+- domain `typical_signals`
 ### 15.5. Should the orchestrator call Codex directly or support external
 stage sessions first?
 
@@ -809,8 +893,8 @@ The right long-term shape is:
 - one composed top-level shared-state schema
 - Mustache-based non-render stage templates over structured shared state and
   contract-derived metadata
-- one temporary `active_steering` exception while adapters remain markdown
-  assets
+- structured adapter JSON with `stage_guidance` as the only prompt-visible
+  adapter section in the first migration
 - full output-mode structure only at `Render`
 - rich `routing` state retained, but consumed through explicit field-level
   template references
