@@ -24,19 +24,102 @@ This step should not:
 - confuse evidence hierarchy with rhetorical confidence
 
 Working rules:
-- Use the provided topic and current state, especially the current questions, as the basis for planning.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
-- Rank evidence within the selected evidence mode, but adapt to the actual topic.
+- Use the topic plus the key questions and scenario branch logic as the basis for evidence planning.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
+- Rank evidence within the selected evidence guidance, but adapt to the actual topic.
 - Prefer diagnostic evidence over vivid or noisy evidence.
 - Distinguish what can be learned through research from what can only be managed through decision design, staging, or monitoring.
 - State conflicts explicitly and explain what additional evidence would resolve them.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Priority questions:
+{{#questions.top_killer_questions}}
+- {{question}}
+  Why it matters: {{why_it_matters}}
+{{/questions.top_killer_questions}}
 
-{{active_steering}}
+Evidence questions:
+{{#questions.evidence}}
+- {{question}}
+{{/questions.evidence}}
+
+Evidence-guidance-specific questions:
+{{#questions.evidence_mode_specific}}
+- {{question}}
+{{/questions.evidence_mode_specific}}
+
+Uncertainty-guidance-specific questions:
+{{#questions.uncertainty_mode_specific}}
+- {{question}}
+{{/questions.uncertainty_mode_specific}}
+
+Scenario branch logic:
+Base-case branch points:
+{{#scenarios.base_case.branch_points}}
+- {{.}}
+{{/scenarios.base_case.branch_points}}
+
+Base-case branch triggers:
+{{#scenarios.base_case.branch_triggers}}
+- {{.}}
+{{/scenarios.base_case.branch_triggers}}
+
+Alternative-scenario branch points and triggers:
+{{#scenarios.alternative_scenarios}}
+- {{name}}
+  Branch points:
+  {{#branch_points}}
+  - {{.}}
+  {{/branch_points}}
+  Branch triggers:
+  {{#branch_triggers}}
+  - {{.}}
+  {{/branch_triggers}}
+{{/scenarios.alternative_scenarios}}
+
+[CONDITIONAL condition="Use this only if action gating, stage-gates, or downstream deliverable requirements should change the evidence bar."]
+Decision-gating questions:
+{{#questions.decision_mode_specific}}
+- {{question}}
+{{/questions.decision_mode_specific}}
+
+Deliverable-shaping questions:
+{{#questions.output_mode_specific}}
+- {{question}}
+{{/questions.output_mode_specific}}
+
+Decision context:
+- {{routing.decision_context}}
+- Risk tolerance: {{routing.risk_tolerance}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if source choice should be mechanism-aware rather than just question-aware."]
+Mechanism details:
+Causal mechanism:
+{{#structure.causal_mechanism}}
+- {{.}}
+{{/structure.causal_mechanism}}
+
+Killer variables:
+{{#structure.killer_variables}}
+- {{.}}
+{{/structure.killer_variables}}
+
+Bottlenecks:
+{{#structure.bottlenecks}}
+- {{.}}
+{{/structure.bottlenecks}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
 
 Base hierarchy:
 1. Direct primary evidence
@@ -76,9 +159,13 @@ Output requirements:
   - irreducible uncertainties
   - task-material uncertainties
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
-{{feedback}}
+{{#feedback_schema}}
+## Feedback
+{{{feedback_schema}}}
+{{/feedback_schema}}
 
 Quality bar:
 - Make the evidence plan operational, not generic.

@@ -21,19 +21,37 @@ This step should not:
 - solve the full problem downstream
 
 Working rules:
-- Use the provided topic and current state as the basis for scope definition.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
+- Use the topic, the time horizon, the unit of analysis, and the working assumptions as the basis for scope definition.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
 - Draw the boundary around the object that is most decision-useful or analytically useful to study.
 - Keep adjacent systems visible only if they materially affect the core system.
 - Exclude factors that are interesting but not necessary for this run.
 - State scope assumptions explicitly when they are needed to keep the boundary workable.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Scope anchors:
+- Time horizon: {{routing.time_horizon}}
+- Unit of analysis: {{routing.unit_of_analysis}}
 
-{{active_steering}}
+Working assumptions:
+{{#routing.assumptions}}
+- {{.}}
+{{/routing.assumptions}}
+
+[CONDITIONAL condition="Use this only if the user has already fixed a deliverable shape tightly enough that the boundary should match it."]
+Requested deliverable shape:
+- {{routing.desired_output}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
 
 Questions to resolve:
 - What system are we actually analyzing?
@@ -52,7 +70,8 @@ Output requirements:
   - out-of-scope factors
   - scope assumptions
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
 Quality bar:
 - Make the boundary specific enough that downstream stages know what world they are reasoning about.

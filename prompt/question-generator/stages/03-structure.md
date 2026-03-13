@@ -25,20 +25,56 @@ This step should not:
 - convert structure directly into prose deliverables
 
 Working rules:
-- Use the provided topic and current state, especially the existing boundary, as the basis for analysis.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
+- Use the topic, the stabilized boundary, the time horizon, and the unit of analysis as the basis for structural analysis.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
 - Focus on the actors, forces, and mechanisms that materially shape the outcome.
 - Distinguish decisive actors from actors that are merely visible, loud, or narratively prominent.
 - Distinguish incentives from constraints, and constraints from mechanisms.
 - Build a model of how the system actually moves, not just who is present.
-- If downstream or feedback-loop context is present in the current state, treat it as reference-only and do not let it override this stage's own structural reasoning.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Scope anchors:
+- Time horizon: {{routing.time_horizon}}
+- Unit of analysis: {{routing.unit_of_analysis}}
 
-{{active_steering}}
+Boundary already established:
+- Exact object of analysis: {{boundary.exact_object_of_analysis}}
+- Core system: {{boundary.core_system}}
+
+[CONDITIONAL condition="Use this only if fragile assumptions, hidden drivers, or scope ambiguity could change which structure matters."]
+Inherited scope discipline:
+Assumptions:
+{{#routing.assumptions}}
+- {{.}}
+{{/routing.assumptions}}
+
+Scope assumptions:
+{{#boundary.scope_assumptions}}
+- {{.}}
+{{/boundary.scope_assumptions}}
+
+Out-of-scope factors:
+{{#boundary.out_of_scope_factors}}
+- {{.}}
+{{/boundary.out_of_scope_factors}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if cross-system spillovers matter to the mechanism, bottlenecks, or decisive actors."]
+Adjacent systems:
+{{#boundary.adjacent_systems}}
+- {{.}}
+{{/boundary.adjacent_systems}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
 
 ## Step 1 - Stakeholder Mapping
 
@@ -115,7 +151,8 @@ Output requirements:
   - threshold variables
   - scarce resources
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
 Quality bar:
 - Prefer causal relevance over descriptive completeness.

@@ -20,19 +20,105 @@ This step should not:
 - prioritize background questions unless they materially matter
 
 Working rules:
-- Use the provided topic and current state as the basis for question generation.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
+- Use the topic plus the current scope anchors, structure, and scenario picture as the basis for question generation.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
 - Generate questions that emerge from structure, incentives, constraints, scenarios, and decision needs.
 - Prefer questions that can change the explanation, forecast, decision, monitoring framework, investment view, or downstream research instructions.
 - Deprioritize questions that are merely interesting, historical, or descriptive.
 - If a question cannot change the answer, reduce uncertainty, identify a branch point, create a signal, or change action, timing, sizing, staging, or monitoring, deprioritize it.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Scope anchors:
+- Time horizon: {{routing.time_horizon}}
+- Unit of analysis: {{routing.unit_of_analysis}}
 
-{{active_steering}}
+Structural model:
+Decisive stakeholders:
+{{#structure.decisive_stakeholders}}
+- {{.}}
+{{/structure.decisive_stakeholders}}
+
+Constraints:
+{{#structure.constraints}}
+- {{.}}
+{{/structure.constraints}}
+
+Causal mechanism:
+{{#structure.causal_mechanism}}
+- {{.}}
+{{/structure.causal_mechanism}}
+
+Killer variables:
+{{#structure.killer_variables}}
+- {{.}}
+{{/structure.killer_variables}}
+
+Bottlenecks:
+{{#structure.bottlenecks}}
+- {{.}}
+{{/structure.bottlenecks}}
+
+Scenario framing:
+- Base case summary: {{scenarios.base_case.summary}}
+Base-case branch points:
+{{#scenarios.base_case.branch_points}}
+- {{.}}
+{{/scenarios.base_case.branch_points}}
+
+Base-case branch triggers:
+{{#scenarios.base_case.branch_triggers}}
+- {{.}}
+{{/scenarios.base_case.branch_triggers}}
+
+Alternative scenarios:
+{{#scenarios.alternative_scenarios}}
+- {{name}}: {{summary}}
+  Branch points:
+  {{#branch_points}}
+  - {{.}}
+  {{/branch_points}}
+  Branch triggers:
+  {{#branch_triggers}}
+  - {{.}}
+  {{/branch_triggers}}
+{{/scenarios.alternative_scenarios}}
+
+[CONDITIONAL condition="Use this only if scope drift or ambiguous framing would change which questions matter most."]
+Boundary anchors:
+- Exact object of analysis: {{boundary.exact_object_of_analysis}}
+- Core system: {{boundary.core_system}}
+Scope assumptions:
+{{#boundary.scope_assumptions}}
+- {{.}}
+{{/boundary.scope_assumptions}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if threshold effects, endurance limits, or broader stakeholder coverage would materially change the question set."]
+Threshold variables:
+{{#structure.threshold_variables}}
+- {{.}}
+{{/structure.threshold_variables}}
+
+Scarce resources:
+{{#structure.scarce_resources}}
+- {{.}}
+{{/structure.scarce_resources}}
+
+Broader stakeholder set:
+{{#structure.stakeholders}}
+- {{.}}
+{{/structure.stakeholders}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
 
 Generate questions in these buckets:
 - clarifying
@@ -71,9 +157,13 @@ Output requirements:
 - Include all required question buckets.
 - Include a prioritized `top_killer_questions` subset.
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
-{{feedback}}
+{{#feedback_schema}}
+## Feedback
+{{{feedback_schema}}}
+{{/feedback_schema}}
 
 Quality bar:
 - Do not generate generic filler questions.

@@ -6,7 +6,7 @@
 question-generator system as a whole. It covers the authored prompt assets, the
 shared-state contract, the stage contracts, the prompt assembler runtime, the
 intended orchestrator boundary, and the next design direction for schema
-composition and richer section renderers.
+composition and model-facing prompt assembly.
 
 ## 1. Purpose
 
@@ -87,7 +87,7 @@ The runtime lives under:
 Its current job is to:
 - load the correct stage template
 - load the correct stage contract
-- resolve the relevant shared-state sections
+- build the render context for the stage
 - resolve the routed guidance modules
 - render all of those into a single stage prompt
 
@@ -168,24 +168,33 @@ Today, prompt assembly works like this:
 1. choose a stage
 2. load its stage template
 3. load its stage contract
-4. resolve required and selected optional state reads
-5. resolve the routed guidance modules from the `routing` state
-6. render prompt blocks
-7. interpolate placeholders in the stage template when present
-8. append any unplaced blocks using the legacy order
-9. return one final markdown prompt string
+4. build one stage render context from:
+   - shared state
+   - stage contract metadata
+   - routed guidance
+5. render the template through Mustache
+6. return one final markdown prompt string
 
-The supported prompt blocks are:
-- `{{topic}}`
-- `{{current_state}}`
-- `{{active_steering}}`
-- `{{required_output}}`
-- `{{feedback}}`
+The target model-facing template system is Mustache.
+
+Why Mustache:
+- it supports variable substitution and list sections
+- it is logic-light and much safer than a full template language
+- it handles repeated object structures like scenarios, questions, signals, and
+  monitoring items cleanly
+- it avoids a growing pile of custom placeholder behavior
+
+Important constraints:
+- prompt templates should not depend on custom filters or helper functions
+- formatting should live primarily in the templates, not in Python-generated
+  markdown fragments
+- Python should prepare data and metadata, not control indentation-sensitive
+  prompt layout
 
 This behavior is implemented in:
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
 
-## 6. Prompt-Facing Concepts
+## 6. Prompt-Facing Concepts And Render Context
 
 The runtime contains implementation concepts that should not leak into prompt
 language more than necessary.
@@ -224,27 +233,94 @@ This is acceptable, but prompt-facing renderers should present the meaning of
 the routing block rather than implementation language such as “adapter
 selection.”
 
-### 6.3. Relevant Context
+### 6.3. Mustache Render Context
 
-The current runtime label `Current State` is implementation-oriented.
+Non-render templates should be authored as Mustache templates over one prepared
+render context.
 
-The preferred prompt-facing term is:
-- `Relevant Context`
+That render context should contain:
+- the shared state object at the top level
+- `required_output_schema` from the stage contract, with `$ref` expanded
+- `feedback_schema` from the stage contract when supported, with `$ref`
+  expanded
+- `active_steering` as the currently rendered routed guidance block
+
+This means templates can directly reference values like:
+- `{{topic}}`
+- `{{routing.time_horizon}}`
+- `{{routing.decision_context}}`
+- `{{boundary.core_system}}`
+- `{{scenarios.base_case.summary}}`
+- `{{required_output_schema}}`
+
+Important rule for stages after `Routing`:
+- do not inject adapter-selection routing fields such as `routing.task`,
+  `routing.domain`, `routing.output_mode`, `routing.evidence_mode`,
+  `routing.uncertainty_mode`, or `routing.decision_mode` directly into the
+  prompt
+- the effect of those routed classifications should come from the stage's
+  adapter guidance instead
+
+And they can repeat list-like structures with Mustache sections, for example:
+- `alternative_scenarios`
+- `top_killer_questions`
+- `question_to_evidence_mapping`
+- `signals`
+- `what_to_watch`
+
+### 6.4. Conditional Input Convention
+
+Some upstream inputs are not always required, but are still useful enough that
+we want them available to the model when judgment is needed.
+
+For those cases, the preferred prompt convention is:
+- always include required inputs plainly
+- include optional context as explicit conditional blocks in the template
+- let the model decide whether the conditional block materially applies
+
+Non-render templates should begin with a general rule like:
+
+```md
+For any input marked `[CONDITIONAL]`, use it only if you strongly believe the
+stated condition is met for the current task.
+If the condition is not clearly met, ignore that input entirely.
+Do not force conditional inputs into the analysis just because they are
+provided.
+```
+
+Each conditional block should then be wrapped explicitly:
+
+```md
+[CONDITIONAL condition="Use this only if action depends on mechanism details rather than scenario summaries."]
+...
+[/CONDITIONAL]
+```
+
+Design rules:
+- the condition must be written in plain language
+- the condition must say when to use the block, not just what the block contains
+- related optional fields should be grouped into one readable conditional block
+- conditionals should be visible in the prompt, not silently decided by orchestration
 
 Reason:
-- it tells the model what prior analysis matters for this stage
-- it avoids implying a database or state machine abstraction inside the prompt
+- many conditional reads are judgment calls rather than deterministic routing rules
+- the workflow already relies on the model for reasoning
+- keeping the decision visible in the prompt is easier to audit than burying it
+  in orchestration code
 
-### 6.4. Stage Guidance
+### 6.5. One Temporary Exception: `active_steering`
 
-The current runtime label `Active Steering` is also implementation-oriented.
+The first Mustache migration may still keep:
+- `active_steering`
 
-The preferred prompt-facing term is:
-- `Stage Guidance`
+as one pre-rendered natural-language block.
 
 Reason:
-- it explains the purpose more directly
-- it sounds like model-facing instructions rather than internal runtime jargon
+- the current adapter assets are authored as markdown prose, not structured
+  data
+
+This exception is acceptable in the short term, but it is not the cleanest end
+state.
 
 ## 7. Shared State Design
 
@@ -362,85 +438,48 @@ The goal is:
 not:
 - bureaucratic over-modeling
 
-## 9. Section Renderers
+## 9. State Schemas And Template Inputs
 
 ### 9.1. Current State
 
-State rendering is now registry-driven.
+The shared-state contract remains important, but non-render prompt assembly
+should no longer depend on whole-section markdown renderers.
 
-Current structure:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/`
-  - `topic.py`
-  - `routing.py`
-  - `boundary.py`
-  - `structure.py`
-  - `scenarios.py`
-  - `questions.py`
-  - `evidence_plan.py`
-  - `uncertainty_map.py`
-  - `decision_logic.py`
-  - `synthesis.py`
-  - `signals.py`
-  - `monitoring.py`
-  - `registry.py`
+The primary role of the shared-state schemas is now:
+- durable workflow state validation
+- stage-output schema reuse
+- stable field paths for Mustache templates
 
-The renderer registry maps:
-- state section name -> renderer function
+Render remains the one stage that may still use a broader render-time context
+view until its own field-level template design is settled.
 
-Fallback behavior:
-- if no specialized renderer exists, fall back to the current JSON rendering
+### 9.2. Compact Field-Level Dependency Map
 
-Prompt-facing labels are now:
-- `Relevant Context`
-- `Stage Guidance`
+The compact dependency map in
+`/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/IMPLEMENTATION.md`
+should be treated as the target source of truth for non-render prompt inputs.
 
-The routing renderer intentionally presents normalized problem meaning rather
-than adapter-selection mechanics, while the remaining section renderers surface
-the most useful state fields first without drifting into final deliverable prose.
+Meaning:
+- non-render templates should reference only the fields they materially need
+- the assembler should stop injecting whole required sections for non-render
+  stages
+- prompt noise should be reduced by moving from section-level inclusion to
+  field-level inclusion
+- conditionally useful fields should be surfaced through explicit
+  `[CONDITIONAL] ... [/CONDITIONAL]` blocks rather than hidden orchestration
+  heuristics
 
-### 9.3. Rendering Principle
+### 9.3. Why Field-Level Templates
 
-Each section renderer should:
-- preserve fidelity to the underlying state
-- present the most decision-useful or stage-useful information first
-- avoid implementation jargon
-- avoid final deliverable formatting unless the stage is `Render`
+Field-level templating is preferred because:
+- it makes prompt dependencies visible in the template itself
+- it keeps non-render prompts smaller and less noisy
+- it makes prompt reviews easier because the visible context is intentional
+- it removes the need for section self-renderers to decide what a model should
+  see
 
-Examples:
-
-`routing` renderer should emphasize:
-- normalized question
-- constraints
-- decision context
-- task/domain/output/evidence/uncertainty/decision modes
-- rationales
-- time horizon
-- unit of analysis
-- assumptions
-
-It should not emphasize:
-- “adapter resolution”
-- “selected modules”
-- other runtime-specific language
-
-`structure` renderer should emphasize:
-- decisive stakeholders
-- incentives
-- constraints
-- causal mechanism
-- bottlenecks
-- killer variables
-
-`questions` renderer should emphasize:
-- top killer questions first
-- then compact summaries of the buckets
-
-`decision_logic` renderer should emphasize:
-- must know before action
-- can learn after action
-- evidence threshold
-- staging
-- triggers
+This is the preferred non-render direction even though the shared-state file
+itself remains one durable JSON object.
 
 ## 10. Output Mode Guidance Design
 
@@ -481,7 +520,19 @@ Each should contain:
 - working rules
 - input precedence rules when both raw topic and normalized state are present
 - output requirements
-- the relevant assembler placeholders
+- the relevant Mustache variables and sections
+
+Non-render templates should:
+- inline only the compact state fields they need
+- use readable grouped subsections rather than raw section dumps
+- use Mustache sections for repeated structures when needed
+- remain easy to read as prompts, not just as templates
+
+Non-render templates should not:
+- depend on giant appended context blocks
+- require Python to emit preformatted markdown blobs with indentation-sensitive
+  layout
+- rely on growing custom placeholder semantics
 
 Stage templates should not rely on the reader understanding internal repository
 concepts such as:
@@ -514,7 +565,7 @@ The current runtime tests should continue verifying:
 - prompt assembly
 - CLI assembly
 - example assembly
-- state rendering
+- stage-template rendering against prepared shared state
 
 ### 13.2. Stage-Sweep Assembly Tests
 
@@ -524,9 +575,19 @@ The system should assemble every stage using:
 
 This catches:
 - unresolved placeholders
-- duplicated sections
+- broken Mustache sections
 - bad ordering
 - markdown safety regressions
+
+For the Mustache migration, one render test per real template should be the
+primary deterministic safety net.
+
+These tests should confirm at least:
+- the template renders successfully with a prepared shared state
+- no unresolved Mustache tags remain
+- repeated list/object structures render as intended
+- required output schema appears
+- whole-section legacy context blocks do not reappear in non-render prompts
 
 ### 13.3. Prompt Quality Review
 
@@ -581,20 +642,20 @@ Reason:
 The structured review gate should use two kinds of criteria.
 
 Hard gates:
-- No Confusion
-- Stage Discipline
+- Instruction Coherence
 - Input Precedence Clarity
-- Output Contract Clarity
+- Output Requirement Clarity
+- Sufficient Starting Context
 
 Scored dimensions:
 - Task Clarity
-- Context Quality
+- Context Usefulness
+- Guidance And Constraint Clarity
 - Readability
-- Completeness
-- Priority Clarity
-- Decision-Usefulness
+- Output Readiness
+- Confidence To Execute
 - Context Efficiency
-- Guidance Quality
+- Risk Of Misinterpretation
 
 Pass rule:
 - every hard gate must be `PASS` for every reviewed non-render stage
@@ -663,6 +724,18 @@ The following architectural steps are now implemented:
 7. the non-render prompt quality review assets remain available as an
    additional prompt-quality gate
 
+The following architectural steps are now the preferred next direction:
+
+1. move non-render stage templates to Mustache
+2. replace whole-section non-render context injection with compact field-level
+   template inputs
+3. keep `active_steering` as a temporary special-case rendered block during the
+   first Mustache migration
+4. keep `required_output_schema` and `feedback_schema` as contract-derived
+   render-context values
+5. keep render as a temporary exception that may still consume broader context
+   until its own template input model is finalized
+
 ## 15. Open Questions
 
 These questions do not block the current direction, but they should be kept
@@ -690,10 +763,28 @@ Current recommendation:
 intermediate summaries first?
 
 Current recommendation:
-- markdown only for now
+- do not center future non-render prompt assembly on section renderers
+- use Mustache over structured state and contract data instead
 - do not add a prompt IR unless there is a concrete need
 
-### 15.4. Should the orchestrator call Codex directly or support external
+### 15.4. Should adapters migrate to structured data?
+
+Current recommendation:
+- not in the first Mustache migration
+- reconsider after field-level Mustache templates are working
+
+Reason:
+- adapters are currently authored as prompt prose and are still ergonomic in
+  markdown
+- the strongest structural pressure is around `active_steering`, not around the
+  whole adapter body
+- migrating adapters now would broaden the change surface too much
+
+Likely future direction:
+- if we want Mustache to be the only template mechanism with no special
+  `active_steering` exception, migrate adapter stage-relevance data, and
+  potentially the whole adapter asset, to structured YAML/JSON later
+### 15.5. Should the orchestrator call Codex directly or support external
 stage sessions first?
 
 Current recommendation:
@@ -716,10 +807,13 @@ The right long-term shape is:
 - one separate run-artifact layer for prompts and model replies
 - one schema file per top-level state section
 - one composed top-level shared-state schema
-- one self-renderer per top-level state section
-- prompt-facing labels that describe meaning, not runtime jargon
+- Mustache-based non-render stage templates over structured shared state and
+  contract-derived metadata
+- one temporary `active_steering` exception while adapters remain markdown
+  assets
 - full output-mode structure only at `Render`
-- rich `routing` state retained, but rendered in human-meaningful form
+- rich `routing` state retained, but consumed through explicit field-level
+  template references
 - a clean orchestrator-to-model boundary powered by one ephemeral Codex session
   per stage
 - a fixed answering-session execution policy of `GPT-5.4` with `high`

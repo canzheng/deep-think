@@ -237,7 +237,8 @@ Responsibilities:
 - render resolved state sections into readable markdown blocks
 
 Current format:
-- one `## Relevant Context` section
+- render-stage compatibility path only
+- one `## Relevant Context` section for `Render`
 - one section renderer per top-level shared-state section when available
 - JSON fallback for sections without a specialized renderer
 
@@ -248,11 +249,453 @@ Key implementation choices:
   keeping headings stable and prompt-friendly.
 - Unknown sections still fall back to the legacy JSON block rendering so new
   sections can be added incrementally.
+- Non-render stages no longer depend on `state_rendering.py` for prompt
+  assembly. They now inline only the fields their Mustache templates reference.
 
 Tradeoff:
-- Specialized summaries are easier for the model to scan and reason over.
-- JSON fallback preserves transparency and keeps rollout incremental where a
-  custom summary is not worth the complexity yet.
+- Render still benefits from a broad readable state summary.
+- Non-render prompts are now less noisy because they no longer receive whole
+  state sections by default.
+
+## Proposed Compact Field-Level Dependency Map
+
+This section records the current field-level dependency target for non-render
+prompt assembly.
+
+Goal:
+- reduce prompt noise by selecting only the stage fields that materially help
+  the current stage
+- move from whole-section inclusion toward field-level selection
+- keep adapter-conditional expansion explicit rather than passing everything by
+  default
+
+This is the current authoring target for non-render stage templates.
+The runtime still resolves dependencies from contracts at the section level,
+but templates should inline only the specific fields they need through
+Mustache.
+
+Conditional input policy:
+- required fields should appear normally in the prompt
+- conditionally useful fields may still be included, but should be grouped into
+  explicit prompt blocks marked with `[CONDITIONAL ...]` and `[/CONDITIONAL]`
+- the model, not the assembler, should decide whether those conditional inputs
+  materially apply
+- after `Routing`, templates should not directly inject adapter-selection
+  routing fields such as `task`, `domain`, `output_mode`, `evidence_mode`,
+  `uncertainty_mode`, or `decision_mode`; the impact of those classifications
+  should come through the stage's adapter guidance instead
+
+Recommended template-level instruction:
+
+```md
+For any input marked `[CONDITIONAL]`, use it only if you strongly believe the
+stated condition is met for the current task.
+If the condition is not clearly met, ignore that input entirely.
+Do not force conditional inputs into the analysis just because they are
+provided.
+```
+
+Recommended block shape:
+
+```md
+[CONDITIONAL condition="Use this only if action depends on mechanism details rather than scenario summaries."]
+...
+[/CONDITIONAL]
+```
+
+### 1. Routing
+
+Adapters that affect this stage:
+- none
+
+Prior-stage fields required:
+- none
+
+Output fields produced here that later stages commonly consume:
+- `task`
+- `domain`
+- `output_mode`
+- `evidence_mode`
+- `uncertainty_mode`
+- `decision_mode`
+- `time_horizon`
+- `unit_of_analysis`
+- `assumptions`
+
+Common downstream extras:
+- `decision_context`
+- `risk_tolerance`
+- `desired_output`
+- `classification_rationales` when auditability matters
+
+### 2. Boundary
+
+Adapters that should affect this stage:
+
+Required:
+- `task`
+- `domain`
+
+Conditional:
+- `output_mode`
+  Use when output form narrows scope, especially `Monitoring Dashboard`,
+  `Scenario Tree`, or `Deep-Research Prompt`.
+- `uncertainty_mode`
+  Use when the selected mode is `Hidden-Variable Dominated` or
+  `Regime-Shift Dominated` and scope may need to widen.
+- `decision_mode`
+  Use when the selected mode is `Portfolio Construction`, `Adversarial Game`,
+  or `Optionality / Staged Commitment` and the object of action may differ.
+
+Prior-stage fields required:
+
+From `routing`:
+- `time_horizon`
+- `unit_of_analysis`
+- `assumptions`
+
+Prior-stage fields conditionally required:
+
+From `routing`:
+- `desired_output` when the user has already fixed a deliverable shape
+
+### 3. Structure
+
+Adapters that should affect this stage:
+
+Required:
+- `task`
+- `domain`
+
+Conditional:
+- `uncertainty_mode`
+  Use when hidden drivers, deception, regime shift, sparse data, or high noise
+  should alter structural confidence.
+- `decision_mode`
+  Use when action-relevant structure matters, especially
+  `Portfolio Construction`, `Adversarial Game`, or
+  `Optionality / Staged Commitment`.
+- `evidence_mode`
+  Use when structural claims should stay close to the selected proof style.
+
+Prior-stage fields required:
+
+From `routing`:
+- `time_horizon`
+- `unit_of_analysis`
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `core_system`
+
+Prior-stage fields conditionally required:
+
+From `routing`:
+- `assumptions` when scope and ontology are fragile
+
+From `boundary`:
+- `adjacent_systems` when cross-system mechanisms matter
+- `out_of_scope_factors` when contamination risk is high
+- `scope_assumptions` when structure needs explicit inherited scope discipline
+
+### 4. Scenarios
+
+Adapters that should affect this stage:
+
+Required:
+- `task`
+- `domain`
+- `uncertainty_mode`
+
+Conditional:
+- `decision_mode`
+  Especially relevant because each scenario requires
+  `decision_mode_implications`.
+- `evidence_mode`
+  Use when the scenario set should be narrowed to evidencable branches.
+- `output_mode`
+  Use when the selected output is explicitly `Scenario Tree` or
+  `Monitoring Dashboard`.
+
+Prior-stage fields required:
+
+From `routing`:
+- `time_horizon`
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `core_system`
+
+From `structure`:
+- `decisive_stakeholders`
+- `incentives`
+- `constraints`
+- `causal_mechanism`
+- `killer_variables`
+- `bottlenecks`
+
+Prior-stage fields conditionally required:
+
+From `boundary`:
+- `adjacent_systems` when scenario branches cross into neighboring systems
+
+From `structure`:
+- `threshold_variables` when branch points are threshold-driven
+- `scarce_resources` when endurance or depletion matters
+- `stakeholders` when non-decisive actors still affect path branching
+
+### 5. Question Generation
+
+Adapters that should affect this stage:
+- all six adapters
+
+Reason:
+- the schema requires `task_specific`, `domain_specific`,
+  `output_mode_specific`, `evidence_mode_specific`,
+  `uncertainty_mode_specific`, and `decision_mode_specific`
+
+Required:
+- `task`
+- `domain`
+- `output_mode`
+- `evidence_mode`
+- `uncertainty_mode`
+- `decision_mode`
+
+Prior-stage fields required:
+
+From `routing`:
+- `time_horizon`
+- `unit_of_analysis`
+
+From `structure`:
+- `decisive_stakeholders`
+- `constraints`
+- `causal_mechanism`
+- `killer_variables`
+- `bottlenecks`
+
+From `scenarios`:
+- `base_case.summary`
+- `base_case.branch_points`
+- `base_case.branch_triggers`
+- `alternative_scenarios[].summary`
+- `alternative_scenarios[].branch_points`
+- `alternative_scenarios[].branch_triggers`
+
+Prior-stage fields conditionally required:
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `core_system`
+- `scope_assumptions`
+  Use when scope is still ambiguous or multiple workflow passes may have caused
+  drift.
+
+From `structure`:
+- `threshold_variables` when questions need to target branch thresholds
+- `scarce_resources` when endurance or capacity questions matter
+- `stakeholders` when broader stakeholder questioning is needed beyond decisive actors
+
+### 6. Evidence Planning
+
+Adapters that should affect this stage:
+
+Required:
+- `evidence_mode`
+- `uncertainty_mode`
+
+Conditional:
+- `task`
+- `domain`
+- `decision_mode`
+
+Prior-stage fields required:
+
+From `questions`:
+- `top_killer_questions`
+- `evidence`
+- `evidence_mode_specific`
+- `uncertainty_mode_specific`
+
+From `scenarios`:
+- `base_case.branch_points`
+- `base_case.branch_triggers`
+- `alternative_scenarios[].branch_points`
+- `alternative_scenarios[].branch_triggers`
+
+Prior-stage fields conditionally required:
+
+From `questions`:
+- `decision_mode_specific` when evidence sufficiency is tied to stage gates or action gating
+- `output_mode_specific` when downstream output requires a more explicit evidence rationale
+
+From `routing`:
+- `decision_context`
+- `risk_tolerance`
+
+From `structure`:
+- `causal_mechanism`
+- `killer_variables`
+- `bottlenecks`
+  Use when source choice should be mechanism-aware rather than just question-aware
+
+### 7. Decision Logic
+
+Adapters that should affect this stage:
+
+Required:
+- `decision_mode`
+- `uncertainty_mode`
+
+Conditional:
+- `task`
+- `evidence_mode`
+- `domain`
+
+Prior-stage fields required:
+
+From `routing`:
+- `decision_context`
+- `risk_tolerance`
+- `time_horizon`
+
+From `scenarios`:
+- `base_case.probability_logic`
+- `base_case.reversibility`
+- `base_case.decision_mode_implications`
+- `base_case.branch_triggers`
+- `alternative_scenarios[].probability_logic`
+- `alternative_scenarios[].reversibility`
+- `alternative_scenarios[].decision_mode_implications`
+- `alternative_scenarios[].branch_triggers`
+
+From `evidence_plan`:
+- `evidence_hierarchy`
+- `preferred_source_types`
+- `conflict_resolution_rules`
+- `question_to_evidence_mapping`
+
+From `uncertainty_map`:
+- `reducible_unknowns`
+- `partially_reducible_unknowns`
+- `irreducible_uncertainties`
+- `task_material_uncertainties`
+
+Prior-stage fields conditionally required:
+
+From `questions`:
+- `top_killer_questions`
+  Use when action is explicitly gated by unresolved questions.
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `scope_assumptions`
+  Use when action scope is still ambiguous.
+
+From `structure`:
+- `killer_variables`
+- `bottlenecks`
+- `causal_mechanism`
+  Use when the action rule depends on mechanism or bottleneck details rather
+  than scenario summaries alone.
+
+### 8. Signal Translation
+
+Adapters that should affect this stage:
+
+Required:
+- `evidence_mode`
+- `uncertainty_mode`
+
+Conditional:
+- `decision_mode`
+- `task`
+- `domain`
+- `output_mode`
+
+Prior-stage fields required:
+
+From `questions`:
+- `top_killer_questions`
+
+From `evidence_plan`:
+- `preferred_source_types`
+- `backup_source_types`
+- `conflict_resolution_rules`
+- `question_to_evidence_mapping`
+
+From `scenarios`:
+- `base_case.branch_points`
+- `base_case.branch_triggers`
+- `alternative_scenarios[].branch_points`
+- `alternative_scenarios[].branch_triggers`
+
+Prior-stage fields conditionally required:
+
+From `decision_logic`:
+- `triggers`
+- `hedge_exit_kill_criteria`
+- `appropriate_evidence_threshold`
+  Use when signals should change action, not just belief.
+
+From `structure`:
+- `killer_variables`
+- `threshold_variables`
+- `bottlenecks`
+  Use when signals should map directly to bottlenecks or threshold variables.
+
+From `uncertainty_map`:
+- `task_material_uncertainties`
+  Use when signals should explicitly reduce dominant uncertainty.
+
+### 9. Monitoring
+
+Adapters that should affect this stage:
+
+Required:
+- `task`
+- `uncertainty_mode`
+
+Conditional:
+- `decision_mode`
+- `evidence_mode`
+- `output_mode`
+- `domain`
+
+Prior-stage fields required:
+
+From `signals`:
+- `signal`
+- `preferred_evidence_source`
+- `backup_evidence_source`
+- `cadence`
+- `thresholds`
+- `update_rules`
+- `belief_update_implications`
+- `confidence_under_current_uncertainty_mode`
+- `changes_action_vs_belief`
+
+From `uncertainty_map`:
+- `task_material_uncertainties`
+
+Prior-stage fields conditionally required:
+
+From `decision_logic`:
+- `triggers`
+- `hedge_exit_kill_criteria`
+  Use when monitoring should trigger adds, trims, stops, or hedges.
+
+From `scenarios`:
+- `base_case.branch_triggers`
+- `alternative_scenarios[].branch_triggers`
+  Use when monitoring should explicitly track competing paths.
+
+From `evidence_plan`:
+- `preferred_source_types`
+- `backup_source_types`
+  Use when monitoring cadence or source preference should reflect source
+  hierarchy, not just signal-level defaults.
 
 ### `adapter_resolution.py`
 
@@ -321,16 +764,13 @@ Responsibilities:
 
 Current assembly flow:
 1. load the stage template
-2. resolve required and selected optional state sections
-3. resolve the routed modules
-4. render prompt blocks:
-   - topic
-   - relevant context
-   - stage guidance, if any
-   - required output schema
-   - feedback schema, if supported
-5. interpolate any matching placeholders in the stage template
-6. append any unplaced blocks in legacy order
+2. load the stage contract
+3. expand the contract output schema, and feedback schema when present
+4. resolve required and selected optional state sections from the shared state
+5. resolve the routed modules
+6. branch by stage type:
+   - non-render: prepare one Mustache render context and render the template
+   - render: use the compatibility section-rendering path
 7. return one markdown prompt string
 
 Key implementation choices:
@@ -338,8 +778,12 @@ Key implementation choices:
 - It does not call the model.
 - It does not validate model output.
 - It does not merge state updates.
-- Placeholder support is intentionally lightweight and uses a small fixed set of
-  supported tokens rather than a general templating engine.
+- Non-render prompt templating uses `chevron` Mustache rendering rather than a
+  custom placeholder engine.
+- The render context is prepared in Python, but prompt wording and layout stay
+  in the stage template.
+- `active_steering` remains the one temporary pre-rendered prose exception for
+  non-render stages.
 
 Those behaviors are left to a future orchestrator.
 
@@ -349,18 +793,31 @@ Why this split was chosen:
 - it keeps the current implementation testable without introducing model or API
   dependencies
 
-Supported placeholders:
-- `{{topic}}` -> markdown-safe rendered topic block
+Supported non-render Mustache context values:
+- shared-state values are exposed at the top level:
+  - `{{routing.time_horizon}}`
+  - `{{routing.decision_context}}`
+  - `{{boundary.core_system}}`
+  - `{{scenarios.base_case.summary}}`
+  - `{{questions.top_killer_questions}}`
+- `{{{topic}}}` -> markdown-safe rendered topic block
+- `{{{active_steering}}}` -> rendered stage-guidance block body
+- `{{{required_output_schema}}}` -> rendered output-schema block with `$ref`
+  entries expanded
+- `{{{feedback_schema}}}` -> rendered feedback-schema block with `$ref`
+  entries expanded when supported
+
+Conditional blocks in non-render templates:
+- are plain authored markdown, not Mustache helpers
+- should wrap readable field groups that the model may or may not use
+- rely on the template’s own instruction text plus the top-level
+  `[CONDITIONAL]` rule rather than orchestration-time reasoning
+
+Render-stage compatibility placeholders:
 - `{{current_state}}` -> rendered `Relevant Context` block
 - `{{active_steering}}` -> rendered `Stage Guidance` block
 - `{{required_output}}` -> rendered output-schema block with `$ref` entries expanded
 - `{{feedback}}` -> rendered feedback-schema block with `$ref` entries expanded when supported
-
-Backward-compatibility rule:
-- when a template explicitly places a block placeholder, that block is rendered
-  there and not appended again
-- when a template omits a block placeholder, the assembler appends that block
-  after the template using the legacy order
 
 ### `cli.py`
 
@@ -535,40 +992,45 @@ For a stage like `decision_logic`, the runtime currently does this:
 
 1. load `07-decision-logic.contract.json`
 2. load `07-decision-logic.md`
-3. resolve required and selected optional state sections
-4. resolve routed modules from `routing`
-5. render prompt blocks for:
-   - topic
-   - current state
-   - active steering
-   - required output
-   - feedback, if supported
-6. interpolate any matching placeholders in the template
-7. append any remaining unplaced blocks in legacy order
+3. expand `output_schema` and `feedback.schema` so the prompt sees concrete
+   JSON shapes rather than local `$ref` pointers
+4. resolve required and selected optional state sections
+5. resolve routed modules from `routing`
+6. prepare a Mustache render context containing:
+   - top-level shared-state entities
+   - `topic`
+   - `active_steering`
+   - `required_output_schema`
+   - `feedback_schema`, when supported
+7. render the template with Mustache
 8. return one markdown prompt string
 
 This gives a prompt shaped like:
-- stage instructions with optional explicit placeholders
-- current state, either interpolated or appended
-- active steering, either interpolated or appended
-- required output, either interpolated or appended
-- feedback, if needed and either interpolated or appended
+- stage instructions and working rules
+- only the specific upstream fields the template references
+- stage guidance, when the stage depends on routed modules
+- expanded required output schema
+- expanded feedback schema, when supported
 
 ## Why We Chose Markdown Templates Plus Code
 
-We considered a heavier templating or IR approach. The current implementation
-uses document templates plus Python rendering logic instead.
+We considered a heavier prompt IR and a custom substitution system. The current
+implementation uses markdown templates plus a minimal Mustache renderer for
+non-render stages and keeps render on the broader compatibility path for now.
 
 Reasons:
 - the authored prompt assets already exist as markdown documents
 - contracts already provide structured machine-readable metadata
 - state is already structured JSON
+- Mustache gives us variable substitution and list sections without turning
+  templates into little programs
 - a separate prompt IR would add abstraction without solving a concrete current
   problem
 
 So the implementation treats prompt assembly as:
-- render structured inputs into a markdown prompt
-- optionally interpolate them into authored placeholder locations
+- prepare a stage-specific render context in Python
+- let the template decide what context to show and in what order
+- render the prompt through Mustache
 
 not:
 - compile a new intermediate language first

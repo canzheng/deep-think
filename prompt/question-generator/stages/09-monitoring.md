@@ -26,19 +26,95 @@ This step should not:
 - confuse narrative noise with diagnostic change
 
 Working rules:
-- Use the provided topic and current state, especially the current signals and decision logic, as the basis for monitoring design.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
+- Use the topic plus the current signals and task-material uncertainties as the basis for monitoring design.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
 - Even if the requested output mode is not a dashboard, always produce a compact monitoring layer.
 - Distinguish narrative from diagnostic signals.
 - Focus on what would force an update in belief, branch weighting, or action.
 - Prefer a small number of high-value watch items over a long unfocused list.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Signals already identified:
+{{#signals}}
+- Signal: {{signal}}
+  {{#linked_question}}Linked question: {{linked_question}}{{/linked_question}}
+  Preferred evidence source: {{preferred_evidence_source}}
+  Backup evidence source: {{backup_evidence_source}}
+  Cadence: {{cadence}}
+  Thresholds:
+  {{#thresholds}}
+  - {{.}}
+  {{/thresholds}}
 
-{{active_steering}}
+  Update rules:
+  {{#update_rules}}
+  - {{.}}
+  {{/update_rules}}
+
+  Belief update implications:
+  {{#belief_update_implications}}
+  - {{.}}
+  {{/belief_update_implications}}
+  Confidence under current uncertainty mode: {{confidence_under_current_uncertainty_mode}}
+  Changes action vs belief: {{changes_action_vs_belief}}
+{{/signals}}
+
+Task-material uncertainties:
+{{#uncertainty_map.task_material_uncertainties}}
+- {{.}}
+{{/uncertainty_map.task_material_uncertainties}}
+
+[CONDITIONAL condition="Use this only if monitoring should trigger adds, trims, stops, or hedges rather than only update beliefs."]
+Action-linked decision logic:
+Triggers:
+{{#decision_logic.triggers}}
+- {{.}}
+{{/decision_logic.triggers}}
+
+Hedge, exit, and kill criteria:
+{{#decision_logic.hedge_exit_kill_criteria}}
+- {{.}}
+{{/decision_logic.hedge_exit_kill_criteria}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if monitoring should explicitly track competing scenario paths."]
+Scenario branch triggers:
+Base case:
+{{#scenarios.base_case.branch_triggers}}
+- {{.}}
+{{/scenarios.base_case.branch_triggers}}
+
+Alternative scenarios:
+{{#scenarios.alternative_scenarios}}
+- {{name}}
+  {{#branch_triggers}}
+  - {{.}}
+  {{/branch_triggers}}
+{{/scenarios.alternative_scenarios}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if source hierarchy should influence monitoring cadence or escalation beyond the default signal-level source fields."]
+Evidence source hierarchy:
+Preferred source types:
+{{#evidence_plan.preferred_source_types}}
+- {{.}}
+{{/evidence_plan.preferred_source_types}}
+
+Backup source types:
+{{#evidence_plan.backup_source_types}}
+- {{.}}
+{{/evidence_plan.backup_source_types}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
 
 For the monitoring layer, determine:
 - what to watch
@@ -58,7 +134,8 @@ Output requirements:
   - the signal most likely to change action
   - what to monitor next
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
 Quality bar:
 - Make the monitoring layer practical and selective.

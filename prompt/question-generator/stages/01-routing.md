@@ -1,12 +1,12 @@
 You are performing the routing step of a question-generation workflow.
 
-Your job is to classify and normalize the problem before deeper analysis begins.
+Your job is to classify and normalize the topic before deeper analysis begins.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
 Purpose:
-- classify the problem before analysis starts
+- classify the topic before analysis starts
 - normalize the topic into a structured problem frame
 - choose the right analysis configuration for downstream work
 
@@ -149,7 +149,8 @@ Output requirements:
 - Include key assumptions.
 - Include a rationale for each classification.
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
 Quality bar:
 - Prefer precise, usable classifications over generic ones.

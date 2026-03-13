@@ -57,6 +57,40 @@ def random_topic() -> str:
 
 
 class AssemblerTest(unittest.TestCase):
+    def test_decision_logic_prompt_supports_mustache_sections_for_repeated_objects(self) -> None:
+        state = load_populated_state()
+        with TemporaryDirectory() as tmpdir:
+            template_path = Path(tmpdir) / "decision-logic.md"
+            template_path.write_text(
+                "\n".join(
+                    [
+                        "Alternatives:",
+                        "{{#scenarios.alternative_scenarios}}",
+                        "### {{name}}",
+                        "Summary: {{summary}}",
+                        "{{#branch_points}}",
+                        "- {{.}}",
+                        "{{/branch_points}}",
+                        "{{/scenarios.alternative_scenarios}}",
+                        "",
+                        "{{required_output_schema}}",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            with patch(
+                "tools.question_generator.assembler.stage_template_path",
+                return_value=template_path,
+            ):
+                prompt = assemble_stage_prompt("decision_logic", state)
+
+        self.assertIn("Compliance drag stalls rollout", prompt)
+        self.assertIn("Weak workflow fit", prompt)
+        self.assertNotIn("{{#scenarios.alternative_scenarios}}", prompt)
+        self.assertNotIn("{{name}}", prompt)
+        self.assertNotIn("{{.}}", prompt)
+
     def test_question_generation_prompt_interpolates_placeholders(self) -> None:
         state = dict(STATE)
         state["topic"] = random_topic()
@@ -67,15 +101,22 @@ class AssemblerTest(unittest.TestCase):
                     [
                         "Intro",
                         "",
-                        "{{topic}}",
+                        "{{{topic}}}",
                         "",
-                        "{{current_state}}",
+                        "Time horizon: {{routing.time_horizon}}",
                         "",
-                        "{{active_steering}}",
+                        "{{#active_steering}}",
+                        "## Stage Guidance",
+                        "{{{active_steering}}}",
+                        "{{/active_steering}}",
                         "",
-                        "{{required_output}}",
+                        "## Required Output",
+                        "{{{required_output_schema}}}",
                         "",
-                        "{{feedback}}",
+                        "{{#feedback_schema}}",
+                        "## Feedback",
+                        "{{{feedback_schema}}}",
+                        "{{/feedback_schema}}",
                     ]
                 ),
                 encoding="utf-8",
@@ -93,21 +134,18 @@ class AssemblerTest(unittest.TestCase):
 
         self.assertIn("Intro", prompt)
         self.assertIn(state["topic"], prompt)
-        self.assertIn("## Relevant Context", prompt)
-        self.assertNotIn("## Current State", prompt)
+        self.assertIn("Time horizon:", prompt)
+        self.assertNotIn("## Relevant Context", prompt)
         self.assertIn("## Stage Guidance", prompt)
-        self.assertNotIn("## Active Steering", prompt)
         self.assertIn("## Required Output", prompt)
         self.assertIn("## Feedback", prompt)
-        self.assertEqual(prompt.count("## Relevant Context"), 1)
         self.assertEqual(prompt.count("## Stage Guidance"), 1)
         self.assertEqual(prompt.count("## Required Output"), 1)
         self.assertEqual(prompt.count("## Feedback"), 1)
         self.assertNotIn("{{topic}}", prompt)
-        self.assertNotIn("{{current_state}}", prompt)
         self.assertNotIn("{{active_steering}}", prompt)
-        self.assertNotIn("{{required_output}}", prompt)
-        self.assertNotIn("{{feedback}}", prompt)
+        self.assertNotIn("{{required_output_schema}}", prompt)
+        self.assertNotIn("{{feedback_schema}}", prompt)
 
     def test_question_generation_prompt_appends_blocks_without_placeholders(self) -> None:
         with TemporaryDirectory() as tmpdir:
@@ -124,13 +162,7 @@ class AssemblerTest(unittest.TestCase):
                     optional_reads=["boundary"],
                 )
 
-        self.assertTrue(prompt.startswith("Intro\n\n## Relevant Context"))
-        self.assertIn("\n\n## Stage Guidance\n", prompt)
-        self.assertIn("\n\n## Required Output\n", prompt)
-        self.assertTrue(prompt.rstrip().endswith("```"))
-        self.assertLess(prompt.index("## Relevant Context"), prompt.index("## Stage Guidance"))
-        self.assertLess(prompt.index("## Stage Guidance"), prompt.index("## Required Output"))
-        self.assertLess(prompt.index("## Required Output"), prompt.index("## Feedback"))
+        self.assertEqual(prompt, "Intro")
 
     def test_question_generation_prompt_contains_all_core_sections(self) -> None:
         prompt = assemble_stage_prompt(
@@ -140,10 +172,9 @@ class AssemblerTest(unittest.TestCase):
         )
 
         self.assertIn("You are generating the question set for the current topic.", prompt)
-        self.assertIn("## Relevant Context", prompt)
-        self.assertNotIn("## Current State", prompt)
+        self.assertIn("Scope anchors:", prompt)
+        self.assertNotIn("## Relevant Context", prompt)
         self.assertIn("## Stage Guidance", prompt)
-        self.assertNotIn("## Active Steering", prompt)
         self.assertIn("## Required Output", prompt)
         self.assertIn("## Feedback", prompt)
         self.assertIn("Because this is a `Decide` task", prompt)
@@ -187,27 +218,43 @@ class AssemblerTest(unittest.TestCase):
                 self.assertNotIn("{{active_steering}}", prompt)
                 self.assertNotIn("{{required_output}}", prompt)
                 self.assertNotIn("{{feedback}}", prompt)
+                self.assertNotIn("{{{required_output_schema}}}", prompt)
                 self.assertTrue(prompt.splitlines()[0].strip())
                 self.assertIn(state["topic"], prompt)
                 self.assertEqual(prompt.count("## Required Output"), 1)
+                self.assertEqual(
+                    prompt.count("[CONDITIONAL condition="),
+                    prompt.count("[/CONDITIONAL]"),
+                )
 
-                expected_context_count = 0 if stage == "routing" else 1
-                self.assertEqual(prompt.count("## Relevant Context"), expected_context_count)
-                self.assertEqual(prompt.count("## Current State"), 0)
+                if stage != "render":
+                    self.assertNotIn("## Relevant Context", prompt)
+                    self.assertNotIn("## Current State", prompt)
+                    expected_guidance_count = 0 if stage == "routing" else 1
+                    self.assertEqual(prompt.count("## Stage Guidance"), expected_guidance_count)
 
-                expected_guidance_count = 0 if stage == "routing" else 1
-                self.assertEqual(prompt.count("## Stage Guidance"), expected_guidance_count)
-                self.assertEqual(prompt.count("## Active Steering"), 0)
+                if stage in {
+                    "boundary",
+                    "structure",
+                    "scenarios",
+                    "question_generation",
+                    "evidence_planning",
+                    "decision_logic",
+                    "signal_translation",
+                    "monitoring",
+                }:
+                    self.assertNotIn("Task: Decide", prompt)
+                    self.assertNotIn("Domain: Investing / Markets", prompt)
+                    self.assertNotIn("Output mode: Decision Memo", prompt)
+                    self.assertNotIn("Evidence mode: Market-Tape / Price-Action-First", prompt)
+                    self.assertNotIn("Uncertainty mode: Hidden-Variable Dominated", prompt)
+                    self.assertNotIn("Decision mode: Portfolio Construction", prompt)
 
                 expected_feedback_count = 1 if stage in {"question_generation", "evidence_planning"} else 0
                 self.assertEqual(prompt.count("## Feedback"), expected_feedback_count)
 
-                if "## Relevant Context" in prompt and "## Stage Guidance" in prompt:
-                    self.assertLess(prompt.index("## Relevant Context"), prompt.index("## Stage Guidance"))
                 if "## Stage Guidance" in prompt:
                     self.assertLess(prompt.index("## Stage Guidance"), prompt.index("## Required Output"))
-                elif "## Relevant Context" in prompt:
-                    self.assertLess(prompt.index("## Relevant Context"), prompt.index("## Required Output"))
                 if stage == "routing":
                     self.assertLess(prompt.index("## Step 1 - Determine Primary Task"), prompt.index("## Required Output"))
 
@@ -217,12 +264,10 @@ class AssemblerTest(unittest.TestCase):
     def test_render_prompt_uses_full_state_and_no_feedback(self) -> None:
         prompt = assemble_stage_prompt("render", STATE)
 
-        self.assertIn("## Stage 10 - Render", prompt)
-        self.assertIn("### The current monitoring layer is:", prompt)
+        self.assertIn("You are generating the final deliverable for the current topic.", prompt)
         self.assertIn("## Relevant Context", prompt)
         self.assertIn("## Stage Guidance", prompt)
-        self.assertIn("the selected output-mode module defines the final deliverable structure and section order", prompt)
-        self.assertNotIn("Always begin with:", prompt)
+        self.assertIn("### The current routing for this run is:", prompt)
         self.assertNotIn("## Feedback", prompt)
 
 

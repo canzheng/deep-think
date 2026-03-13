@@ -56,7 +56,7 @@ conda env create -f environment.yml
 conda activate truth-seek
 ```
 The current assembler target is dependency-light and relies on the Python
-standard library plus `unittest`.
+standard library plus `chevron` and `unittest`.
 
 Assembler runtime:
 - stage pathing and contract loading:
@@ -76,29 +76,29 @@ Assembler runtime:
 
 Assembly model:
 - stage template supplies the core prompt body
-- stage template may explicitly place assembler-provided placeholders
+- non-render stage templates are Mustache templates over a prepared stage render context
 - contract supplies required and optional stage dependencies, adapter
   dependencies, and output schema
 - shared state supplies the routed context and prior stage outputs
 - routed adapters supply stage-specific steering
+- render currently remains a compatibility exception and still uses the broader section-rendering path
 
-Supported template placeholders:
-- `{{topic}}` -> a markdown-safe rendered topic block from shared state
-- `{{current_state}}` -> the rendered `Relevant Context` block
-- `{{active_steering}}` -> the rendered `Stage Guidance` block
-- `{{required_output}}` -> the rendered output-schema block
-- `{{feedback}}` -> the rendered feedback-schema block when supported
+Supported non-render Mustache context values:
+- `{{{topic}}}` -> a markdown-safe rendered topic block
+- `{{routing.*}}`, `{{boundary.*}}`, `{{structure.*}}`, `{{scenarios.*}}`, etc. -> direct shared-state values
+- `{{{active_steering}}}` -> the rendered stage-guidance block body
+- `{{{required_output_schema}}}` -> the rendered output-schema block with `$ref` entries expanded
+- `{{{feedback_schema}}}` -> the rendered feedback-schema block when supported, with `$ref` entries expanded
 
-Placeholder fallback rule:
-- if a template includes one of these placeholders, the assembler injects the
-  matching content at that location
-- if a template does not include a given block placeholder, the assembler
-  appends that block after the template using the legacy order
+Non-render rendering rule:
+- the assembler prepares one render context per stage
+- the template decides what context appears in the final prompt
+- the assembler does not append a large whole-section `Relevant Context` block for non-render stages
 
 Current prompt-facing assembly:
-- `Relevant Context` renders the resolved shared-state sections for the stage
-- `Stage Guidance` renders the routed adapter and output-mode guidance
-- state rendering uses a section-renderer registry under
+- non-render prompts inline only the state fields their templates reference
+- `Stage Guidance` remains available through `{{{active_steering}}}` and is currently the one temporary pre-rendered exception
+- render still uses section rendering under
   `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/`
   with a JSON fallback for sections that do not yet have a specialized renderer
 - assembled `Required Output` and `Feedback` blocks expand schema `$ref`

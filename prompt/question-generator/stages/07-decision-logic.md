@@ -20,26 +20,148 @@ This step should:
 
 This step should not:
 - reopen the full ontology unless a key assumption fails
-- ignore decision mode when setting evidence thresholds
+- ignore the stage guidance when setting evidence thresholds
 - hide behind generic balance on decision tasks
 - drift into final deliverable formatting
 
 Working rules:
-- Use the provided topic and current state as the basis for decision logic.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
+- Use the topic plus the current decision context, scenario logic, evidence plan, and uncertainty map as the basis for decision logic.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
 - Distinguish reducible uncertainty from uncertainty that must simply be borne.
 - Be explicit about what would change the conclusion.
-- Be explicit when the decision mode should raise the evidence bar, lower the evidence bar, favor reversibility, favor diversification, or favor staged commitment.
-- When task = Decide, do not hide behind generic balance.
+- Be explicit about when reversibility, staging, or diversification should lower commitment and when evidence strength should raise it.
+- If the task is action-oriented, do not hide behind generic balance.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Action frame:
+- Decision context: {{routing.decision_context}}
+- Risk tolerance: {{routing.risk_tolerance}}
+- Time horizon: {{routing.time_horizon}}
 
-{{active_steering}}
+Base-case scenario logic:
+- Probability logic: {{scenarios.base_case.probability_logic}}
+- Reversibility: {{scenarios.base_case.reversibility}}
+Decision implications from the base case:
+{{#scenarios.base_case.decision_mode_implications}}
+- {{.}}
+{{/scenarios.base_case.decision_mode_implications}}
 
-Decision-mode implications must include:
+Base-case branch triggers:
+{{#scenarios.base_case.branch_triggers}}
+- {{.}}
+{{/scenarios.base_case.branch_triggers}}
+
+Alternative scenarios:
+{{#scenarios.alternative_scenarios}}
+- {{name}}
+  Probability logic: {{probability_logic}}
+  Reversibility: {{reversibility}}
+  Decision implications:
+  {{#decision_mode_implications}}
+  - {{.}}
+  {{/decision_mode_implications}}
+  Branch triggers:
+  {{#branch_triggers}}
+  - {{.}}
+  {{/branch_triggers}}
+{{/scenarios.alternative_scenarios}}
+
+Evidence plan:
+Evidence hierarchy:
+{{#evidence_plan.evidence_hierarchy}}
+- {{.}}
+{{/evidence_plan.evidence_hierarchy}}
+
+Preferred source types:
+{{#evidence_plan.preferred_source_types}}
+- {{.}}
+{{/evidence_plan.preferred_source_types}}
+
+Conflict-resolution rules:
+{{#evidence_plan.conflict_resolution_rules}}
+- {{.}}
+{{/evidence_plan.conflict_resolution_rules}}
+
+Question-to-evidence mapping:
+{{#evidence_plan.question_to_evidence_mapping}}
+- {{question}}
+  Preferred sources:
+  {{#preferred_sources}}
+  - {{.}}
+  {{/preferred_sources}}
+  Backup sources:
+  {{#backup_sources}}
+  - {{.}}
+  {{/backup_sources}}
+{{/evidence_plan.question_to_evidence_mapping}}
+
+Uncertainty map:
+Reducible unknowns:
+{{#uncertainty_map.reducible_unknowns}}
+- {{.}}
+{{/uncertainty_map.reducible_unknowns}}
+
+Partially reducible unknowns:
+{{#uncertainty_map.partially_reducible_unknowns}}
+- {{.}}
+{{/uncertainty_map.partially_reducible_unknowns}}
+
+Irreducible uncertainties:
+{{#uncertainty_map.irreducible_uncertainties}}
+- {{.}}
+{{/uncertainty_map.irreducible_uncertainties}}
+
+Task-material uncertainties:
+{{#uncertainty_map.task_material_uncertainties}}
+- {{.}}
+{{/uncertainty_map.task_material_uncertainties}}
+
+[CONDITIONAL condition="Use this only if unresolved killer questions should explicitly gate action."]
+Top killer questions:
+{{#questions.top_killer_questions}}
+- {{question}}
+  Why it matters: {{why_it_matters}}
+{{/questions.top_killer_questions}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if the exact action scope or inherited scope discipline is still ambiguous."]
+Boundary anchors:
+- Exact object of analysis: {{boundary.exact_object_of_analysis}}
+Scope assumptions:
+{{#boundary.scope_assumptions}}
+- {{.}}
+{{/boundary.scope_assumptions}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if the action rule depends on mechanism details, bottlenecks, or decisive variables rather than scenario summaries alone."]
+Mechanism details:
+Killer variables:
+{{#structure.killer_variables}}
+- {{.}}
+{{/structure.killer_variables}}
+
+Bottlenecks:
+{{#structure.bottlenecks}}
+- {{.}}
+{{/structure.bottlenecks}}
+
+Causal mechanism:
+{{#structure.causal_mechanism}}
+- {{.}}
+{{/structure.causal_mechanism}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
+
+Decision implications must include:
 - what must be known before acting
 - what can be learned after acting
 - appropriate evidence threshold
@@ -69,9 +191,10 @@ Output requirements:
   - what must be true
   - key risks and failure modes
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
 Quality bar:
 - Make the decision logic operational rather than philosophical.
-- Tie action guidance to the current uncertainty and decision mode.
+- Tie action guidance to the current uncertainty and the stage guidance.
 - Be direct about what should happen, what should wait, and why.

@@ -124,6 +124,17 @@ class NonRenderPromptQualityTest(unittest.TestCase):
             self.assertNotIn("{{required_output}}", prompt)
             self.assertNotIn("{{feedback}}", prompt)
             self.assertNotIn('"$ref"', prompt)
+            self.assertNotIn("## Relevant Context", prompt)
+            self.assertNotIn("## Current State", prompt)
+            self.assertNotIn("## Active Steering", prompt)
+            self.assertEqual(
+                prompt.count("[CONDITIONAL condition="),
+                prompt.count("[/CONDITIONAL]"),
+            )
+            if stage == "routing":
+                self.assertNotIn("## Stage Guidance", prompt)
+            else:
+                self.assertIn("## Stage Guidance", prompt)
 
     def test_review_prompt_set_expands_required_output_schema_for_llm_use(self) -> None:
         from tests.question_generator.assemble_non_render_prompts import build_review_prompt_set
@@ -136,15 +147,28 @@ class NonRenderPromptQualityTest(unittest.TestCase):
         self.assertIn('"must_know_before_action"', decision_logic_prompt)
         self.assertIn('"recommendation_or_action_frame"', decision_logic_prompt)
 
-    def test_review_prompt_set_keeps_relevant_context_human_readable(self) -> None:
+    def test_review_prompt_set_renders_repeated_scenarios_without_unresolved_mustache_tags(self) -> None:
+        from tests.question_generator.assemble_non_render_prompts import build_review_prompt_set
+
+        prompt_set = build_review_prompt_set(seed=20260313)
+        scenarios_prompt = prompt_set["prompts"]["scenarios"]
+
+        self.assertNotIn("{{#", scenarios_prompt)
+        self.assertNotIn("{{/", scenarios_prompt)
+        self.assertNotIn("{{.", scenarios_prompt)
+        self.assertIn("Structural model:", scenarios_prompt)
+
+    def test_review_prompt_set_keeps_inline_context_human_readable(self) -> None:
         from tests.question_generator.assemble_non_render_prompts import build_review_prompt_set
 
         prompt_set = build_review_prompt_set(seed=20260313)
         decision_logic_prompt = prompt_set["prompts"]["decision_logic"]
-        relevant_context, remainder = decision_logic_prompt.split("## Stage Guidance", maxsplit=1)
+        before_guidance, remainder = decision_logic_prompt.split("## Stage Guidance", maxsplit=1)
 
-        self.assertIn("## Relevant Context", relevant_context)
-        self.assertNotIn("```json", relevant_context)
+        self.assertIn("Action frame:", before_guidance)
+        self.assertIn("Evidence plan:", before_guidance)
+        self.assertIn("[CONDITIONAL condition=", before_guidance)
+        self.assertNotIn("## Relevant Context", before_guidance)
         self.assertIn("## Required Output", remainder)
         self.assertIn("```json", remainder)
 

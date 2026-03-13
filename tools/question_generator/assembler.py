@@ -1,20 +1,54 @@
 from __future__ import annotations
 
+import copy
 import json
 import re
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import unquote
 
+import chevron
+
 from tools.question_generator.adapter_rendering import render_adapter_sections
 from tools.question_generator.adapter_resolution import resolve_stage_modules
 from tools.question_generator.contracts import load_contract
-from tools.question_generator.pathing import contract_path, stage_template_path
+from tools.question_generator.pathing import contract_path, normalize_stage_name, stage_template_path
 from tools.question_generator.state_rendering import render_state_sections
 from tools.question_generator.state_resolution import resolve_state_sections
 
 
 def assemble_stage_prompt(
+    stage: str,
+    state: dict,
+    optional_reads: list[str] | None = None,
+) -> str:
+    normalized_stage = normalize_stage_name(stage)
+    if normalized_stage != "render":
+        return _assemble_non_render_stage_prompt(stage, state)
+
+    return _assemble_render_stage_prompt(stage, state, optional_reads=optional_reads)
+
+
+def _assemble_non_render_stage_prompt(stage: str, state: dict) -> str:
+    contract_file = contract_path(stage)
+    contract = load_contract(stage)
+    template = stage_template_path(stage).read_text().strip()
+    modules = resolve_stage_modules(contract, state.get("routing", {}))
+    context = _build_non_render_context(
+        stage=stage,
+        state=state,
+        active_steering=render_adapter_sections(stage, modules) if modules else "",
+        required_output_schema=_render_schema_block(contract.output_schema.raw, base_path=contract_file),
+        feedback_schema=(
+            _render_schema_block(contract.feedback.schema, base_path=contract_file)
+            if contract.feedback.supported
+            else ""
+        ),
+    )
+    return chevron.render(template, context).strip()
+
+
+def _assemble_render_stage_prompt(
     stage: str,
     state: dict,
     optional_reads: list[str] | None = None,
@@ -64,6 +98,23 @@ def assemble_stage_prompt(
     return "\n\n".join(block for block in blocks if block)
 
 
+def _build_non_render_context(
+    *,
+    stage: str,
+    state: dict,
+    active_steering: str,
+    required_output_schema: str,
+    feedback_schema: str,
+) -> dict[str, object]:
+    context = copy.deepcopy(state)
+    context["topic"] = _render_topic_block(state.get("topic", ""))
+    context["active_steering"] = _strip_stage_guidance_heading(active_steering)
+    context["required_output_schema"] = required_output_schema
+    context["feedback_schema"] = feedback_schema
+    context["stage"] = normalize_stage_name(stage)
+    return context
+
+
 def _render_template_placeholders(template: str, values: dict[str, str]) -> tuple[str, set[str]]:
     used_placeholders: set[str] = set()
 
@@ -88,13 +139,23 @@ def _render_topic_block(topic: str) -> str:
     return "\n".join([f"{fence}text", topic, fence])
 
 
+def _strip_stage_guidance_heading(active_steering: str) -> str:
+    if not active_steering:
+        return ""
+
+    lines = active_steering.splitlines()
+    if lines and lines[0].strip() == "## Stage Guidance":
+        lines = lines[1:]
+    if lines and lines[0].startswith("(Note: each guidance will be marked"):
+        lines = lines[1:]
+    return "\n".join(lines).lstrip()
+
+
 def _render_required_output(output_schema: dict, base_path: Path) -> str:
     return "\n".join(
         [
             "## Required Output",
-            "```json",
-            json.dumps(_expand_schema_refs(output_schema, base_path=base_path), indent=2, ensure_ascii=True),
-            "```",
+            _render_schema_block(output_schema, base_path=base_path),
         ]
     )
 
@@ -103,8 +164,16 @@ def _render_feedback(feedback_schema: dict, base_path: Path) -> str:
     return "\n".join(
         [
             "## Feedback",
+            _render_schema_block(feedback_schema, base_path=base_path),
+        ]
+    )
+
+
+def _render_schema_block(schema: dict, *, base_path: Path) -> str:
+    return "\n".join(
+        [
             "```json",
-            json.dumps(_expand_schema_refs(feedback_schema, base_path=base_path), indent=2, ensure_ascii=True),
+            json.dumps(_expand_schema_refs(schema, base_path=base_path), indent=2, ensure_ascii=True),
             "```",
         ]
     )

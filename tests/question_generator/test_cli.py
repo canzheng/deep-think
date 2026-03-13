@@ -70,8 +70,10 @@ class CliTest(unittest.TestCase):
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn("You are converting the current analysis into decision logic.", output)
-        self.assertIn("## Relevant Context", output)
+        self.assertNotIn("## Relevant Context", output)
+        self.assertNotIn("## Current State", output)
         self.assertIn("## Stage Guidance", output)
+        self.assertNotIn("## Active Steering", output)
         self.assertIn("## Required Output", output)
 
     def test_init_run_prepare_stage_and_apply_response_commands(self) -> None:

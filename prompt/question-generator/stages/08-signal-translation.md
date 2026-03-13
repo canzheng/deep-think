@@ -23,19 +23,123 @@ This step should not:
 - mistake narrative commentary for a diagnostic signal
 
 Working rules:
-- Use the provided topic and current state, especially the current questions, scenarios, and evidence plan, as the basis for signal design.
-- If the raw topic and the normalized current state differ in wording or precision, prefer the normalized routing and current-state framing and use the raw topic as background context only.
+- Use the topic plus the current question set, scenario triggers, and evidence plan as the basis for signal design.
+- If the raw topic and the normalized framing differ in wording or precision, prefer the normalized framing and use the raw topic as background context only.
 - Separate evidence from signals, and signals from decisions.
 - Distinguish narrative from diagnostic signals.
 - Prefer signals that can meaningfully change branch weights, confidence, monitoring, or action.
 - Make update logic explicit enough that someone could actually use the signals.
+- For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
+- If the condition is not clearly met, ignore that input entirely.
+- Do not force conditional inputs into the analysis just because they are provided.
 
 Input topic:
-{{topic}}
+{{{topic}}}
 
-{{current_state}}
+Top killer questions:
+{{#questions.top_killer_questions}}
+- {{question}}
+  Why it matters: {{why_it_matters}}
+{{/questions.top_killer_questions}}
 
-{{active_steering}}
+Evidence plan inputs:
+Preferred source types:
+{{#evidence_plan.preferred_source_types}}
+- {{.}}
+{{/evidence_plan.preferred_source_types}}
+
+Backup source types:
+{{#evidence_plan.backup_source_types}}
+- {{.}}
+{{/evidence_plan.backup_source_types}}
+
+Conflict-resolution rules:
+{{#evidence_plan.conflict_resolution_rules}}
+- {{.}}
+{{/evidence_plan.conflict_resolution_rules}}
+
+Question-to-evidence mapping:
+{{#evidence_plan.question_to_evidence_mapping}}
+- {{question}}
+  Preferred sources:
+  {{#preferred_sources}}
+  - {{.}}
+  {{/preferred_sources}}
+  Backup sources:
+  {{#backup_sources}}
+  - {{.}}
+  {{/backup_sources}}
+{{/evidence_plan.question_to_evidence_mapping}}
+
+Scenario triggers:
+Base-case branch points:
+{{#scenarios.base_case.branch_points}}
+- {{.}}
+{{/scenarios.base_case.branch_points}}
+
+Base-case branch triggers:
+{{#scenarios.base_case.branch_triggers}}
+- {{.}}
+{{/scenarios.base_case.branch_triggers}}
+
+Alternative-scenario branch points and triggers:
+{{#scenarios.alternative_scenarios}}
+- {{name}}
+  Branch points:
+  {{#branch_points}}
+  - {{.}}
+  {{/branch_points}}
+  Branch triggers:
+  {{#branch_triggers}}
+  - {{.}}
+  {{/branch_triggers}}
+{{/scenarios.alternative_scenarios}}
+
+[CONDITIONAL condition="Use this only if the signals should change action, timing, sizing, staging, or stop conditions rather than only changing belief."]
+Action-linked decision logic:
+Triggers:
+{{#decision_logic.triggers}}
+- {{.}}
+{{/decision_logic.triggers}}
+
+Hedge, exit, and kill criteria:
+{{#decision_logic.hedge_exit_kill_criteria}}
+- {{.}}
+{{/decision_logic.hedge_exit_kill_criteria}}
+
+Appropriate evidence threshold:
+- {{decision_logic.appropriate_evidence_threshold}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if signals should map directly to bottlenecks, threshold variables, or other structural choke points."]
+Structural anchors:
+Killer variables:
+{{#structure.killer_variables}}
+- {{.}}
+{{/structure.killer_variables}}
+
+Threshold variables:
+{{#structure.threshold_variables}}
+- {{.}}
+{{/structure.threshold_variables}}
+
+Bottlenecks:
+{{#structure.bottlenecks}}
+- {{.}}
+{{/structure.bottlenecks}}
+[/CONDITIONAL]
+
+[CONDITIONAL condition="Use this only if signals should explicitly target the dominant uncertainties rather than serve as general monitoring."]
+Task-material uncertainties:
+{{#uncertainty_map.task_material_uncertainties}}
+- {{.}}
+{{/uncertainty_map.task_material_uncertainties}}
+[/CONDITIONAL]
+
+{{#active_steering}}
+## Stage Guidance
+{{{active_steering}}}
+{{/active_steering}}
 
 For each high-value question, determine:
 - the linked question
@@ -60,7 +164,8 @@ Output requirements:
 - Produce a result fully consistent with the provided output schema.
 - Include a set of signals that directly connect important questions to observable updates.
 
-{{required_output}}
+## Required Output
+{{{required_output_schema}}}
 
 Quality bar:
 - Prefer high-value, monitorable signals over noisy proxies.
