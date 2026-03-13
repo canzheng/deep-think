@@ -17,7 +17,11 @@ This is the implementation reference for the Python runtime under:
 The assembler exists to turn the modular question-generator assets into a
 runtime prompt for one workflow stage at a time.
 
-The system does not run the full workflow by itself yet. Its current job is:
+The system now supports two adjacent responsibilities:
+- assemble one prompt for one workflow stage
+- manage an external-session stage workflow with persisted run artifacts
+
+The assembler's job is:
 - take the current shared state
 - take a target stage
 - load the matching stage template
@@ -29,7 +33,23 @@ In short:
 
 `state + stage + contracts + routed modules -> assembled stage prompt`
 
-The model call, output validation, and state merge are still orchestrator work.
+The current orchestrator helper supports:
+- initializing a run directory with a copied `shared_state.json`
+- loading a JSON recipe that defines stage order
+- preparing a stage prompt into `stages/<stage-stub>/prompt.md`
+- preparing a per-stage `response.schema.json`
+- automatically invoking a fresh ephemeral Codex answering session for one stage
+- storing the raw model reply and parsed JSON payload
+- storing `codex.stdout.jsonl` and `codex.stderr.txt`
+- merging only contract-owned state sections back into `shared_state.json`
+
+The answering-session execution policy is fixed:
+- model: `gpt-5.4`
+- reasoning effort: `high`
+- session lifetime: ephemeral, one stage per session
+
+This keeps the orchestrator and the stage-answering model as two separate Codex
+sessions while removing manual handoff steps.
 
 ## High-Level Architecture
 
@@ -72,8 +92,9 @@ Contracts are the assembly authority. They define:
 The runtime lives under:
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
 
-It resolves files, parses contracts, renders state, resolves adapters, and
-assembles the final prompt.
+It resolves files, parses contracts, renders state, resolves adapters,
+assembles prompts, manages run artifacts, and launches the ephemeral
+stage-answering Codex subprocess.
 
 ### 4. Tests
 
@@ -83,6 +104,31 @@ Tests live under:
 The test suite verifies pathing, contract parsing, state resolution, state
 rendering, adapter resolution, adapter rendering, prompt assembly, CLI
 behavior, and the worked example.
+
+### `orchestrator.py`
+
+File:
+- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/orchestrator.py`
+
+Responsibilities:
+- initialize one run directory
+- load one workflow recipe
+- persist a copied `shared_state.json`
+- prepare one stage prompt into stage-local artifacts
+- prepare one stage response schema artifact
+- build the pinned `codex exec --ephemeral` command for the answering session
+- invoke one disposable answering session per stage
+- persist subprocess stdout and stderr artifacts
+- persist raw and parsed stage responses
+- merge only the stage-owned shared-state sections
+- execute a full multi-stage workflow by iterating the recipe entries
+
+Key implementation choices:
+- prompt and reply artifacts live outside the shared-state schema
+- response parsing accepts either plain JSON or fenced JSON blocks
+- the response schema passed to Codex is derived from the contract output schema
+- merge behavior is controlled by contract ownership, not by ad hoc field lists
+- the answering session is created and destroyed automatically per stage run
 
 ## Runtime Modules
 

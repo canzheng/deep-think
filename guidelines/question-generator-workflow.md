@@ -20,6 +20,9 @@ Assembler runtime:
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/cli.py`
 
+Checked-in recipe for the non-render workflow:
+- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/recipes/non-render.recipe.json`
+
 ## Workflow Overview
 
 1. Routing
@@ -48,6 +51,18 @@ Use these loops only when a killer question exposes:
 The state file should be carried throughout the workflow and treated as the
 single source of truth for intermediate reasoning.
 
+Run-artifact rule:
+- persist prompts and model replies for every stage as run artifacts
+- persist the response schema and Codex stdout/stderr artifacts for every
+  automatic stage run
+- do not store those artifacts inside shared state
+- `shared_state.json` remains the only analysis object passed between stages
+
+Answering-session rule:
+- the orchestrator should call the answering session automatically
+- each stage should use a fresh ephemeral Codex session
+- the answering session should always use `gpt-5.4` with `high` reasoning
+
 ## How To Use The State File
 
 1. Initialize a fresh copy of
@@ -56,11 +71,19 @@ single source of truth for intermediate reasoning.
 2. Run the workflow stages in order.
 3. After each stage, update only the state sections that stage owns.
 4. Persist the full state and pass it to the next stage.
-5. If a feedback loop is triggered, update the relevant upstream section and
+5. Run the stage in a fresh ephemeral Codex answering session.
+6. Persist the stage prompt, response schema, raw reply, parsed reply, and
+   Codex stdout/stderr as run artifacts.
+7. If a feedback loop is triggered, update the relevant upstream section and
    then continue forward again.
-6. At render time, pass the full accumulated state plus the selected
+8. At render time, pass the full accumulated state plus the selected
    output-mode module to the renderer.
-7. The renderer should treat the shared state as its sole analysis input.
+9. The renderer should treat the shared state as its sole analysis input.
+
+Recipe execution:
+- use `run-recipe` when you want the orchestrator to execute a checked-in stage sequence
+- the checked-in non-render recipe runs `Routing` through `Monitoring`
+- keep `Render` out of that recipe so the pre-render workflow can be run and inspected independently
 
 State rules:
 - Routing must be completed before any downstream task runs.

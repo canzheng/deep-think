@@ -1,0 +1,33 @@
+{
+  "name": "non_render_workflow",
+  "description": "Run the question-generator workflow from routing through monitoring, excluding render.",
+  "stages": [
+    {
+      "stage": "routing"
+    },
+    {
+      "stage": "boundary"
+    },
+    {
+      "stage": "structure"
+    },
+    {
+      "stage": "scenarios"
+    },
+    {
+      "stage": "question_generation"
+    },
+    {
+      "stage": "evidence_planning"
+    },
+    {
+      "stage": "decision_logic"
+    },
+    {
+      "stage": "signal_translation"
+    },
+    {
+      "stage": "monitoring"
+    }
+  ]
+}

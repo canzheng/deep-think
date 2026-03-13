@@ -13,6 +13,7 @@ Current scope:
 - stage contracts
 - shared state template
 - python assembler runtime
+- external-session orchestration helpers with run-artifact persistence
 - archived `v1`-`v7` prompts live under
   `/Users/canzheng/Work/sandbox/truth-seek/prompt/archived/`
 - `question-generator-modular.md` is the modular host prompt that references
@@ -26,6 +27,7 @@ Layout:
 - `adapters/uncertainty-modes/`
 - `adapters/decision-modes/`
 - `output-modes/`
+- `recipes/`
 - `contracts/`
   - `shared_state_schema.json`
   - `state-sections/`
@@ -67,6 +69,8 @@ Assembler runtime:
   - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/adapter_rendering.py`
 - prompt assembly:
   - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
+- orchestration helpers:
+  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/orchestrator.py`
 - CLI:
   - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/cli.py`
 
@@ -104,6 +108,19 @@ Current prompt-facing assembly:
 - stage contracts reuse those section schemas inside `output_schema.properties`
   via `$ref` where practical
 
+Current orchestration behavior:
+- a run can be initialized into its own artifact directory
+- the live `shared_state.json` remains the sole analysis input passed between stages
+- a JSON recipe can define an ordered multi-stage workflow
+- each prepared stage writes its assembled `prompt.md` into a stage-specific artifact directory
+- each prepared stage also writes `response.schema.json`
+- automatic stage execution launches a fresh ephemeral Codex answering session
+- that answering session always uses `gpt-5.4` with `high` reasoning effort
+- each executed stage persists `codex.stdout.jsonl` and `codex.stderr.txt`
+- each applied response writes both `response.raw.md` and `response.parsed.json`
+- only contract-owned state sections are merged back into `shared_state.json`
+- debug artifacts live beside shared state, not inside it
+
 CLI usage:
 ```bash
 python -m tools.question_generator.cli \
@@ -111,4 +128,37 @@ python -m tools.question_generator.cli \
   --state tests/question_generator/fixtures/minimal_state.json \
   --include-optional structure \
   --include-optional question_generation
+```
+
+Automatic stage workflow:
+```bash
+python -m tools.question_generator.cli init-run \
+  --state tests/question_generator/fixtures/minimal_state.json \
+  --output-dir tmp/question-runs \
+  --run-id demo-run
+
+python -m tools.question_generator.cli run-stage \
+  --run-dir tmp/question-runs/demo-run \
+  --stage decision_logic
+```
+
+Recipe workflow:
+```bash
+python -m tools.question_generator.cli run-recipe \
+  --recipe prompt/question-generator/recipes/non-render.recipe.json \
+  --state tests/question_generator/fixtures/minimal_state.json \
+  --output-dir tmp/question-runs \
+  --run-id demo-non-render
+```
+
+Manual debug workflow:
+```bash
+python -m tools.question_generator.cli prepare-stage \
+  --run-dir tmp/question-runs/demo-run \
+  --stage decision_logic
+
+python -m tools.question_generator.cli apply-response \
+  --run-dir tmp/question-runs/demo-run \
+  --stage decision_logic \
+  --response tmp/question-runs/demo-run/decision_logic.response.md
 ```

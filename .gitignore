@@ -4,3 +4,4 @@
 .DS_Store
 prompt/question-generator/examples/00-placeholder-review-bundle.md
 tests/question_generator/artifacts/*
+tmp/

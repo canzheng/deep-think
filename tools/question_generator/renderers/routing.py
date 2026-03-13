@@ -21,6 +21,28 @@ def render_routing(payload: dict[str, object]) -> list[str]:
     if decision_context := payload.get("decision_context"):
         lines.append(f"- Decision context: {decision_context}")
 
+    for label, field in [
+        ("Primary task", "task"),
+        ("Primary domain", "domain"),
+        ("Primary output mode", "output_mode"),
+        ("Primary evidence mode", "evidence_mode"),
+        ("Primary uncertainty mode", "uncertainty_mode"),
+        ("Primary decision mode", "decision_mode"),
+    ]:
+        if value := payload.get(field):
+            lines.append(f"- {label}: {value}")
+
+    for label, field in [
+        ("Secondary task", "secondary_task"),
+        ("Secondary domain", "secondary_domain"),
+        ("Secondary output mode", "secondary_output_mode"),
+        ("Secondary evidence mode", "secondary_evidence_mode"),
+        ("Secondary uncertainty mode", "secondary_uncertainty_mode"),
+        ("Secondary decision mode", "secondary_decision_mode"),
+    ]:
+        value = payload.get(field)
+        if isinstance(value, str) and value.strip():
+            lines.append(f"- {label}: {value}")
 
     if time_horizon := payload.get("time_horizon"):
         lines.append(f"- Time horizon: {time_horizon}")

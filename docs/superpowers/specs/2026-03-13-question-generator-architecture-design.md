@@ -112,6 +112,38 @@ Its job should be to:
 The orchestrator should not duplicate assembly logic that already lives in the
 contracts and runtime.
 
+### 3.5. Separate Model Session Boundary
+
+The orchestrator and the stage-answering model should be treated as separate
+actors even when both are powered by Codex.
+
+Recommended implementation:
+- one Codex-backed orchestration session owns workflow control
+- one fresh ephemeral Codex answering session is created for each stage run
+- the orchestrator launches that answering session automatically
+- the answering session is discarded after the stage reply is captured
+- the only interface between them is the assembled stage prompt, the returned
+  stage response, and the contract-governed shared-state merge
+
+Reason:
+- it preserves the stage boundary that the architecture is designed around
+- it prevents orchestration context from silently leaking into stage answers
+- it makes prompt and output debugging more honest
+- it avoids carrying hidden stage-to-stage model memory
+- it allows the model backend to change later without rewriting assembly logic
+
+Execution policy for the answering session:
+- always use `GPT-5.4`
+- always use `high` reasoning effort
+- always run the answering session as ephemeral/disposable
+
+This should be treated as orchestration policy, not left to per-run operator
+choice.
+
+This means the orchestrator should be model-provider-agnostic at the boundary.
+It may call Codex directly, but the architectural contract should not depend on
+one in-process model session holding both roles at once.
+
 ## 4. Workflow Model
 
 The canonical workflow is:
@@ -238,6 +270,44 @@ The current top-level state sections are:
 - `monitoring`
 
 This is the right top-level shape and should remain.
+
+### 7.1. Run Artifacts Must Be Separate From Shared State
+
+The system should also persist run artifacts for debugging and auditability, but
+those artifacts must not be folded into the live shared state.
+
+Required distinction:
+- shared state is the durable analysis object used by downstream stages
+- run artifacts are execution traces that explain how the state was produced
+
+The run artifacts should include at least:
+- the assembled prompt for each stage
+- the raw reply returned by the stage-answering agent
+- the parsed structured payload used for validation and merge
+- lightweight stage metadata such as stage name, run identifier, and file paths
+
+Reason:
+- the shared state should stay small, durable, and analysis-oriented
+- prompts and raw model replies are essential for debugging but are not part of
+  the analysis contract
+- render should still treat the shared state file as its sole analysis input
+
+Recommended storage shape:
+- one run directory per workflow execution
+- one live `shared_state.json` file inside that run directory
+- one manifest file describing the run
+- one subdirectory per stage containing prompt and response artifacts
+
+Recommended stage artifact set:
+- `prompt.md`
+- `response.raw.md`
+- `response.parsed.json`
+- `response.schema.json`
+- `codex.stdout.jsonl`
+- `codex.stderr.txt`
+- `stage.json`
+
+These files are execution artifacts, not additional shared-state sections.
 
 ## 8. Shared State Contract
 
@@ -623,16 +693,37 @@ Current recommendation:
 - markdown only for now
 - do not add a prompt IR unless there is a concrete need
 
+### 15.4. Should the orchestrator call Codex directly or support external
+stage sessions first?
+
+Current recommendation:
+- call Codex directly from the orchestrator
+- create one ephemeral answering session per stage invocation
+- make prompt, schema, stdout/stderr, and response artifact persistence
+  mandatory
+- keep the model-call boundary explicit even though the orchestrator launches
+  the answering session automatically
+
+Reason:
+- it preserves the separate-session architecture without manual operator steps
+- it is still debuggable because the full request and reply path is persisted
+- it keeps the answering session disposable after each stage
+
 ## 16. Final Recommendation
 
 The right long-term shape is:
 - one live shared-state file
+- one separate run-artifact layer for prompts and model replies
 - one schema file per top-level state section
 - one composed top-level shared-state schema
 - one self-renderer per top-level state section
 - prompt-facing labels that describe meaning, not runtime jargon
 - full output-mode structure only at `Render`
 - rich `routing` state retained, but rendered in human-meaningful form
+- a clean orchestrator-to-model boundary powered by one ephemeral Codex session
+  per stage
+- a fixed answering-session execution policy of `GPT-5.4` with `high`
+  reasoning
 
 This direction improves:
 - readability
