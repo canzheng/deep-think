@@ -3,7 +3,7 @@
 ## Shared State Template
 
 The shared state template now lives at:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+- `prompt/question-generator/contracts/shared_state_schema.json`
 
 This file is intended to hold durable pre-render research state. The goal is to
 capture enough structured output from each stage that:

@@ -18,7 +18,7 @@ CONTRACT_FILES = sorted(
     if path.name != "shared_state_schema.json"
 )
 
-RENDER_CONTRACT = "10-renderer.contract.json"
+RENDER_CONTRACT = "10-render.contract.json"
 REQUIRED_KEYS = {"stage", "depends_on", "writes", "output_format", "feedback"}
 NON_RENDER_REQUIRED_KEYS = {"reads_required", "reads_optional"}
 FEEDBACK_SCHEMA_REQUIRED = {
@@ -54,7 +54,7 @@ STAGE_SECTION_REFS = {
         "synthesis": "./state-sections/synthesis.schema.json",
     },
     "08-signal-translation.contract.json": {"signals": "./state-sections/signals.schema.json"},
-    "09-monitoring-layer.contract.json": {"monitoring": "./state-sections/monitoring.schema.json"},
+    "09-monitoring.contract.json": {"monitoring": "./state-sections/monitoring.schema.json"},
 }
 
 

@@ -16,8 +16,8 @@ class PathingTest(unittest.TestCase):
         for stage, contract_name, template_name in [
             ("Routing", "01-routing.contract.json", "01-routing.md"),
             ("Question Generation", "05-question-generation.contract.json", "05-question-generation.md"),
-            ("Monitoring", "09-monitoring-layer.contract.json", "09-monitoring.md"),
-            ("Render", "10-renderer.contract.json", "10-render.md"),
+            ("Monitoring", "09-monitoring.contract.json", "09-monitoring.md"),
+            ("Render", "10-render.contract.json", "10-render.md"),
         ]:
             with self.subTest(stage=stage):
                 self.assertEqual(
@@ -74,6 +74,15 @@ class PathingTest(unittest.TestCase):
             pathing.output_modes_dir() / "decision-memo.md",
         )
         self.assertTrue(output_mode_path.is_file())
+
+    def test_adapters_directory_contains_only_json_modules(self) -> None:
+        legacy_markdown_modules = sorted(
+            path.relative_to(pathing.adapters_dir()).as_posix()
+            for path in pathing.adapters_dir().rglob("*.md")
+            if path.parent.name != "schemas"
+        )
+
+        self.assertEqual(legacy_markdown_modules, [])
 
 
 if __name__ == "__main__":

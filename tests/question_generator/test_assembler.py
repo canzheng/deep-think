@@ -406,7 +406,7 @@ class AssemblerTest(unittest.TestCase):
     def test_scenario_tree_render_includes_evidence_shift_section(self) -> None:
         prompt = self._render_prompt_for_mode("Scenario Tree")
 
-        self.assertIn("Evidence that would raise / lower each scenario:", prompt)
+        self.assertIn("Evidence and signals that would shift scenario confidence:", prompt)
         self.assertIn("What would change the conclusion:", prompt)
 
     def test_deep_research_render_includes_mode_labels_and_rule_inputs(self) -> None:

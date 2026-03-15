@@ -48,10 +48,10 @@ Reporting rule:
 ## Inputs
 
 This workflow uses:
-- the populated shared-state fixture at [populated_state.json](/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/fixtures/populated_state.json)
-- a seeded stress-case topic chosen by [assemble_non_render_prompts.py](/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/assemble_non_render_prompts.py)
-- the reviewer rubric at [non_render_prompt_review_prompt.md](/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/non_render_prompt_review_prompt.md)
-- the structured output contract at [non_render_prompt_review_schema.json](/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/non_render_prompt_review_schema.json)
+- the populated shared-state fixture at [populated_state.json](tests/question_generator/fixtures/populated_state.json)
+- a seeded stress-case topic chosen by [assemble_non_render_prompts.py](tests/question_generator/assemble_non_render_prompts.py)
+- the reviewer rubric at [non_render_prompt_review_prompt.md](tests/question_generator/non_render_prompt_review_prompt.md)
+- the structured output contract at [non_render_prompt_review_schema.json](tests/question_generator/non_render_prompt_review_schema.json)
 
 The assembled prompts should already use the repo’s prompt-facing labels such as `Relevant Context` and `Stage Guidance` when those runtime changes are active.
 
@@ -71,7 +71,7 @@ This creates:
 ## Step 2: Ask Codex To Review Each Prompt Separately
 
 Give Codex:
-- the rubric in [non_render_prompt_review_prompt.md](/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/non_render_prompt_review_prompt.md)
+- the rubric in [non_render_prompt_review_prompt.md](tests/question_generator/non_render_prompt_review_prompt.md)
 - the manifest in `tests/question_generator/artifacts/non_render_prompt_review_manifest.json`
 - one prompt file at a time from `tests/question_generator/artifacts/non_render_prompt_review_prompts/`
 

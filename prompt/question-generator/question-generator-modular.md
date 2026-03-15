@@ -10,7 +10,7 @@ It preserves the shared logic inline and references external modules for:
 - output-mode definitions
 
 The current python assembler lives under:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
+- `tools/question_generator/`
 
 Assembly rule:
 - use the stage prompt template for the current stage
@@ -62,7 +62,7 @@ PART I - ROUTING LAYER
 ==================================================
 
 Routing stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/01-routing.md`
+- `prompt/question-generator/stages/01-routing.md`
 
 Rule:
 Task defines the objective.
@@ -77,13 +77,13 @@ PART II - UNIVERSAL CORE STRUCTURE
 ==================================================
 
 Boundary stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/02-boundary.md`
+- `prompt/question-generator/stages/02-boundary.md`
 
 Structure stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/03-structure.md`
+- `prompt/question-generator/stages/03-structure.md`
 
 Scenarios stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/04-scenarios.md`
+- `prompt/question-generator/stages/04-scenarios.md`
 
 ==================================================
 PART III - MODULE SELECTION
@@ -92,51 +92,51 @@ PART III - MODULE SELECTION
 After routing, load the selected modules from these directories:
 
 Task modules:
-- Explain -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/tasks/explain.md`
-- Predict -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/tasks/predict.md`
-- Decide -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/tasks/decide.md`
-- Monitor -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/tasks/monitor.md`
-- Design / Influence -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/tasks/design-influence.md`
+- Explain -> `prompt/question-generator/adapters/tasks/explain.json`
+- Predict -> `prompt/question-generator/adapters/tasks/predict.json`
+- Decide -> `prompt/question-generator/adapters/tasks/decide.json`
+- Monitor -> `prompt/question-generator/adapters/tasks/monitor.json`
+- Design / Influence -> `prompt/question-generator/adapters/tasks/design-influence.json`
 
 Domain modules:
-- Geopolitics / War -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/domains/geopolitics-war.md`
-- Investing / Markets -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/domains/investing-markets.md`
-- Company / Product Strategy -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/domains/company-product-strategy.md`
-- Policy / Regulation -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/domains/policy-regulation.md`
-- Technology / Adoption -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/domains/technology-adoption.md`
+- Geopolitics / War -> `prompt/question-generator/adapters/domains/geopolitics-war.json`
+- Investing / Markets -> `prompt/question-generator/adapters/domains/investing-markets.json`
+- Company / Product Strategy -> `prompt/question-generator/adapters/domains/company-product-strategy.json`
+- Policy / Regulation -> `prompt/question-generator/adapters/domains/policy-regulation.json`
+- Technology / Adoption -> `prompt/question-generator/adapters/domains/technology-adoption.json`
 
 Evidence-mode modules:
-- Primary-Source-Heavy -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/evidence-modes/primary-source-heavy.md`
-- Market-Tape / Price-Action-First -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/evidence-modes/market-tape-price-action-first.md`
-- Operating-Metric-First -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/evidence-modes/operating-metric-first.md`
-- Policy / Legal-Text-First -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/evidence-modes/policy-legal-text-first.md`
-- Expert-Network / Qualitative-First -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/evidence-modes/expert-network-qualitative-first.md`
+- Primary-Source-Heavy -> `prompt/question-generator/adapters/evidence-modes/primary-source-heavy.json`
+- Market-Tape / Price-Action-First -> `prompt/question-generator/adapters/evidence-modes/market-tape-price-action-first.json`
+- Operating-Metric-First -> `prompt/question-generator/adapters/evidence-modes/operating-metric-first.json`
+- Policy / Legal-Text-First -> `prompt/question-generator/adapters/evidence-modes/policy-legal-text-first.json`
+- Expert-Network / Qualitative-First -> `prompt/question-generator/adapters/evidence-modes/expert-network-qualitative-first.json`
 
 Uncertainty-mode modules:
-- Known-Unknown Dominated -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/known-unknown-dominated.md`
-- Hidden-Variable Dominated -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/hidden-variable-dominated.md`
-- Adversarial / Deception Dominated -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/adversarial-deception-dominated.md`
-- Regime-Shift Dominated -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/regime-shift-dominated.md`
-- Sparse-Data Dominated -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/sparse-data-dominated.md`
-- High-Noise / Fast-Feedback -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/high-noise-fast-feedback.md`
-- Slow-Feedback / Irreversible-Decision -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/uncertainty-modes/slow-feedback-irreversible-decision.md`
+- Known-Unknown Dominated -> `prompt/question-generator/adapters/uncertainty-modes/known-unknown-dominated.json`
+- Hidden-Variable Dominated -> `prompt/question-generator/adapters/uncertainty-modes/hidden-variable-dominated.json`
+- Adversarial / Deception Dominated -> `prompt/question-generator/adapters/uncertainty-modes/adversarial-deception-dominated.json`
+- Regime-Shift Dominated -> `prompt/question-generator/adapters/uncertainty-modes/regime-shift-dominated.json`
+- Sparse-Data Dominated -> `prompt/question-generator/adapters/uncertainty-modes/sparse-data-dominated.json`
+- High-Noise / Fast-Feedback -> `prompt/question-generator/adapters/uncertainty-modes/high-noise-fast-feedback.json`
+- Slow-Feedback / Irreversible-Decision -> `prompt/question-generator/adapters/uncertainty-modes/slow-feedback-irreversible-decision.json`
 
 Decision-mode modules:
-- Latent / No Immediate Commitment -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/latent-no-immediate-commitment.md`
-- One-Shot High-Stakes -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/one-shot-high-stakes.md`
-- Repeated Bets -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/repeated-bets.md`
-- Portfolio Construction -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/portfolio-construction.md`
-- Optionality / Staged Commitment -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/optionality-staged-commitment.md`
-- Adversarial Game -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/adversarial-game.md`
-- Exploration vs Exploitation -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/decision-modes/exploration-vs-exploitation.md`
+- Latent / No Immediate Commitment -> `prompt/question-generator/adapters/decision-modes/latent-no-immediate-commitment.json`
+- One-Shot High-Stakes -> `prompt/question-generator/adapters/decision-modes/one-shot-high-stakes.json`
+- Repeated Bets -> `prompt/question-generator/adapters/decision-modes/repeated-bets.json`
+- Portfolio Construction -> `prompt/question-generator/adapters/decision-modes/portfolio-construction.json`
+- Optionality / Staged Commitment -> `prompt/question-generator/adapters/decision-modes/optionality-staged-commitment.json`
+- Adversarial Game -> `prompt/question-generator/adapters/decision-modes/adversarial-game.json`
+- Exploration vs Exploitation -> `prompt/question-generator/adapters/decision-modes/exploration-vs-exploitation.json`
 
 Output-mode modules:
-- Research Memo -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/research-memo.md`
-- Decision Memo -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/decision-memo.md`
-- Monitoring Dashboard -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/monitoring-dashboard.md`
-- Scenario Tree -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/scenario-tree.md`
-- Investment Worksheet -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/investment-worksheet.md`
-- Deep-Research Prompt -> `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/deep-research-prompt.md`
+- Research Memo -> `prompt/question-generator/output-modes/research-memo.md`
+- Decision Memo -> `prompt/question-generator/output-modes/decision-memo.md`
+- Monitoring Dashboard -> `prompt/question-generator/output-modes/monitoring-dashboard.md`
+- Scenario Tree -> `prompt/question-generator/output-modes/scenario-tree.md`
+- Investment Worksheet -> `prompt/question-generator/output-modes/investment-worksheet.md`
+- Deep-Research Prompt -> `prompt/question-generator/output-modes/deep-research-prompt.md`
 
 Selection rules:
 - Always load the primary module for each of the six routing axes.
@@ -185,34 +185,34 @@ PART V - EVIDENCE HIERARCHY AND CONFLICT RULES
 ==================================================
 
 Evidence Planning stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/06-evidence-planning.md`
+- `prompt/question-generator/stages/06-evidence-planning.md`
 
 ==================================================
 PART VI - QUESTION GENERATION ENGINE
 ==================================================
 
 Question Generation stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/05-question-generation.md`
+- `prompt/question-generator/stages/05-question-generation.md`
 
 ==================================================
 PART VII - SIGNAL TRANSLATION
 ==================================================
 
 Signal Translation stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/08-signal-translation.md`
+- `prompt/question-generator/stages/08-signal-translation.md`
 
 Monitoring stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/09-monitoring.md`
+- `prompt/question-generator/stages/09-monitoring.md`
 
 ==================================================
 PART VIII - OUTPUT FORMAT
 ==================================================
 
 Decision Logic stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/07-decision-logic.md`
+- `prompt/question-generator/stages/07-decision-logic.md`
 
 Render stage content has been moved to:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/10-render.md`
+- `prompt/question-generator/stages/10-render.md`
 
 ==================================================
 QUALITY CONTROL RULES

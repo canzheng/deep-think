@@ -1,10 +1,10 @@
 This directory contains the modular question-generator source of truth.
 
 Implementation reference:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/IMPLEMENTATION.md`
+- `prompt/question-generator/IMPLEMENTATION.md`
 
 Shared state reference:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_reference.md`
+- `prompt/question-generator/contracts/shared_state_reference.md`
 
 Current scope:
 - modular source prompt
@@ -15,7 +15,7 @@ Current scope:
 - python assembler runtime
 - external-session orchestration helpers with run-artifact persistence
 - archived `v1`-`v7` prompts live under
-  `/Users/canzheng/Work/sandbox/truth-seek/prompt/archived/`
+  `prompt/archived/`
 - `question-generator-modular.md` is the modular host prompt that references
   these files and is the source of truth
 
@@ -33,7 +33,7 @@ Layout:
   - `state-sections/`
   - `implementation-notes.md`
 - python runtime:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
+  - `tools/question_generator/`
 
 Consistency rules:
 - Stage templates under `stages/` are the canonical stage prompt sources and
@@ -60,19 +60,19 @@ standard library plus `chevron` and `unittest`.
 
 Assembler runtime:
 - stage pathing and contract loading:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/pathing.py`
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/contracts.py`
+  - `tools/question_generator/pathing.py`
+  - `tools/question_generator/contracts.py`
 - state and adapter resolution:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/state_resolution.py`
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/state_rendering.py`
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/adapter_resolution.py`
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/adapter_rendering.py`
+  - `tools/question_generator/state_resolution.py`
+  - `tools/question_generator/state_rendering.py`
+  - `tools/question_generator/adapter_resolution.py`
+  - `tools/question_generator/adapter_rendering.py`
 - prompt assembly:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
+  - `tools/question_generator/assembler.py`
 - orchestration helpers:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/orchestrator.py`
+  - `tools/question_generator/orchestrator.py`
 - CLI:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/cli.py`
+  - `tools/question_generator/cli.py`
 
 Assembly model:
 - stage template supplies the core prompt body
@@ -105,7 +105,7 @@ Current prompt-facing assembly:
 - stage-guidance entries use the prompt-facing importance labels `Important`, `Moderate`, `Light`, and `None`
 - conditional adapter guidance uses the same `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` wrapper convention as other conditional prompt blocks
 - render uses output-mode-selected subtemplates under
-  `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/`
+  `prompt/question-generator/stages/render/`
 - assembled `Required Output` and `Feedback` blocks expand schema `$ref`
   entries before rendering so stage prompts see concrete JSON shapes
 - `shared_state_schema.json` is a composed JSON Schema that references one

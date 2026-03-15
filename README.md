@@ -3,18 +3,18 @@
 This repository contains prompt, contract, and runtime tooling for the `question-generator` workflow.
 
 The main working area today is:
-- [prompt/question-generator/README.md](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/README.md)
+- [prompt/question-generator/README.md](prompt/question-generator/README.md)
 
 ## What This Repo Contains
 
-- [prompt/question-generator/question-generator-modular.md](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md): modular source of truth for the question generator
-- [prompt/question-generator/stages](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages): stage prompt templates
-- [prompt/question-generator/adapters](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters): structured adapter content and stage guidance
-- [prompt/question-generator/output-modes](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes): output-mode guidance
-- [prompt/question-generator/contracts](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts): stage contracts and shared-state schemas
-- [tools/question_generator](/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator): Python assembler and orchestration runtime
-- [tests/question_generator](/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator): unit tests, review prompts, and prompt artifacts
-- [tmp/question-runs](/Users/canzheng/Work/sandbox/truth-seek/tmp/question-runs): local run artifacts from end-to-end workflows
+- [prompt/question-generator/question-generator-modular.md](prompt/question-generator/question-generator-modular.md): modular source of truth for the question generator
+- [prompt/question-generator/stages](prompt/question-generator/stages): stage prompt templates
+- [prompt/question-generator/adapters](prompt/question-generator/adapters): structured adapter content and stage guidance
+- [prompt/question-generator/output-modes](prompt/question-generator/output-modes): output-mode guidance
+- [prompt/question-generator/contracts](prompt/question-generator/contracts): stage contracts and shared-state schemas
+- [tools/question_generator](tools/question_generator): Python assembler and orchestration runtime
+- [tests/question_generator](tests/question_generator): unit tests, review prompts, and prompt artifacts
+- [tmp/question-runs](tmp/question-runs): local run artifacts from end-to-end workflows
 
 ## How It Works
 
@@ -39,7 +39,7 @@ For non-render stages, the runtime:
 6. merges the allowed fields back into `shared_state.json`
 
 The durable workflow state lives in one file shaped by:
-- [shared_state_schema.json](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json)
+- [shared_state_schema.json](prompt/question-generator/contracts/shared_state_schema.json)
 
 ## Setup
 
@@ -94,7 +94,7 @@ conda run -n truth-seek python -m unittest \
 
 ## Recommended Reading
 
-- [AGENTS.md](/Users/canzheng/Work/sandbox/truth-seek/AGENTS.md)
-- [prompt/question-generator/README.md](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/README.md)
-- [prompt/question-generator/IMPLEMENTATION.md](/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/IMPLEMENTATION.md)
-- [docs/superpowers/specs/2026-03-13-question-generator-architecture-design.md](/Users/canzheng/Work/sandbox/truth-seek/docs/superpowers/specs/2026-03-13-question-generator-architecture-design.md)
+- [AGENTS.md](AGENTS.md)
+- [prompt/question-generator/README.md](prompt/question-generator/README.md)
+- [prompt/question-generator/IMPLEMENTATION.md](prompt/question-generator/IMPLEMENTATION.md)
+- [docs/superpowers/specs/2026-03-13-question-generator-architecture-design.md](docs/superpowers/specs/2026-03-13-question-generator-architecture-design.md)

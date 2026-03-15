@@ -20,11 +20,6 @@ STAGE_NAME_MAP = {
     "render": "10-render",
 }
 
-CONTRACT_FILE_MAP = {
-    "monitoring": "09-monitoring-layer.contract.json",
-    "render": "10-renderer.contract.json",
-}
-
 ADAPTER_DIR_MAP = {
     "task": "tasks",
     "domain": "domains",
@@ -70,10 +65,7 @@ def stage_stub(stage: str) -> str:
 
 def contract_path(stage: str) -> Path:
     normalized_stage = normalize_stage_name(stage)
-    filename = CONTRACT_FILE_MAP.get(
-        normalized_stage,
-        f"{stage_stub(normalized_stage)}.contract.json",
-    )
+    filename = f"{stage_stub(normalized_stage)}.contract.json"
     return contracts_dir() / filename
 
 

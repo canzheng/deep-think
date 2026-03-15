@@ -10,7 +10,7 @@ stage assembler. It focuses on:
 - current limitations
 
 This is the implementation reference for the Python runtime under:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
+- `tools/question_generator/`
 
 ## Purpose
 
@@ -59,13 +59,13 @@ The implementation has four layers.
 
 These are the authored prompt documents:
 - source-of-truth host prompt:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md`
+  - `prompt/question-generator/question-generator-modular.md`
 - stage templates:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
+  - `prompt/question-generator/stages/`
 - adapters:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/`
+  - `prompt/question-generator/adapters/`
 - output modes:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/`
+  - `prompt/question-generator/output-modes/`
 
 These files define the actual prompt content and domain logic.
 
@@ -73,11 +73,11 @@ These files define the actual prompt content and domain logic.
 
 These are the machine-readable control files:
 - stage contracts:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/`
+  - `prompt/question-generator/contracts/`
 - shared state schema:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+  - `prompt/question-generator/contracts/shared_state_schema.json`
 - implementation notes:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/implementation-notes.md`
+  - `prompt/question-generator/contracts/implementation-notes.md`
 
 Contracts are the assembly authority. They define:
 - required upstream stage dependencies
@@ -90,7 +90,7 @@ Contracts are the assembly authority. They define:
 ### 3. Python runtime
 
 The runtime lives under:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
+- `tools/question_generator/`
 
 It resolves files, parses contracts, renders state, resolves adapters,
 assembles prompts, manages run artifacts, and launches the ephemeral
@@ -99,7 +99,7 @@ stage-answering Codex subprocess.
 ### 4. Tests
 
 Tests live under:
-- `/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/`
+- `tests/question_generator/`
 
 The test suite verifies pathing, contract parsing, state resolution, state
 rendering, adapter resolution, adapter rendering, prompt assembly, CLI
@@ -108,7 +108,7 @@ behavior, and the worked example.
 ### `orchestrator.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/orchestrator.py`
+- `tools/question_generator/orchestrator.py`
 
 Responsibilities:
 - initialize one run directory
@@ -136,7 +136,7 @@ Key implementation choices:
 ### `pathing.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/pathing.py`
+- `tools/question_generator/pathing.py`
 
 Responsibilities:
 - resolve repository root
@@ -154,13 +154,13 @@ Key implementation choices:
   `question_generation` and `signal_translation`.
 - Stage template naming and contract naming are intentionally separate because
   two contracts use legacy file names:
-  - `09-monitoring-layer.contract.json`
-  - `10-renderer.contract.json`
+  - `09-monitoring.contract.json`
+  - `10-render.contract.json`
 
 ### `models.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/models.py`
+- `tools/question_generator/models.py`
 
 Responsibilities:
 - define the typed dataclasses used by the runtime
@@ -180,7 +180,7 @@ Key implementation choice:
 ### `contracts.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/contracts.py`
+- `tools/question_generator/contracts.py`
 
 Responsibilities:
 - load stage contracts from disk
@@ -202,7 +202,7 @@ Key implementation choices:
 ### `state_resolution.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/state_resolution.py`
+- `tools/question_generator/state_resolution.py`
 
 Responsibilities:
 - convert stage-level dependencies into actual shared-state sections
@@ -232,7 +232,7 @@ Why this mapping exists:
 ### `state_rendering.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/state_rendering.py`
+- `tools/question_generator/state_rendering.py`
 
 Responsibilities:
 - render resolved state sections into readable markdown blocks
@@ -244,7 +244,7 @@ Current format:
 
 Key implementation choices:
 - The renderer is registry-driven through
-  `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/registry.py`.
+  `tools/question_generator/renderers/registry.py`.
 - Specialized section renderers summarize the most useful fields first while
   keeping headings stable and prompt-friendly.
 - Unknown sections still fall back to the legacy JSON block rendering so new
@@ -726,7 +726,7 @@ The render contract should still remain the source of truth for:
 
 Current render-specific contract keys:
 - `reads_required_common`
-  - wrapper-only reads used by `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/10-render.md`
+  - wrapper-only reads used by `prompt/question-generator/stages/10-render.md`
 - `reads_by_output_mode`
   - subtemplate-only reads keyed by canonical output-mode name
 
@@ -1092,12 +1092,12 @@ From `uncertainty_map`:
 - `task_material_uncertainties`
 
 Archived v7 section coverage for render is documented in:
-- `/Users/canzheng/Work/sandbox/truth-seek/docs/superpowers/specs/2026-03-14-render-output-mode-subtemplates-design.md`
+- `docs/superpowers/specs/2026-03-14-render-output-mode-subtemplates-design.md`
 
 ### `adapter_resolution.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/adapter_resolution.py`
+- `tools/question_generator/adapter_resolution.py`
 
 Responsibilities:
 - resolve the contract's adapter-dimension dependencies into concrete files
@@ -1118,7 +1118,7 @@ This separation matters:
 ### `adapter_rendering.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/adapter_rendering.py`
+- `tools/question_generator/adapter_rendering.py`
 
 Responsibilities:
 - render stage guidance for the current stage
@@ -1218,7 +1218,7 @@ Important prompt-use rule:
 ### `assembler.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
+- `tools/question_generator/assembler.py`
 
 Responsibilities:
 - orchestrate the full prompt assembly for one stage
@@ -1294,7 +1294,7 @@ Render-stage Mustache context values:
 ### `cli.py`
 
 File:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/cli.py`
+- `tools/question_generator/cli.py`
 
 Responsibilities:
 - expose prompt assembly from the command line
@@ -1319,11 +1319,11 @@ It is best understood as a stage prompt generator, not a full workflow runner.
 ## Shared State
 
 The shared state template lives at:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+- `prompt/question-generator/contracts/shared_state_schema.json`
 
 It is the durable pre-render state for the workflow and now composes one schema
 file per top-level section from
-`/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/`.
+`prompt/question-generator/contracts/state-sections/`.
 
 Main sections:
 - `topic`
@@ -1602,14 +1602,14 @@ Assemble a stage prompt:
 ```bash
 python -m tools.question_generator.cli \
   --stage routing \
-  --state /Users/canzheng/Work/sandbox/truth-seek/research-state/problems/iran_war.json
+  --state research-state/problems/iran_war.json
 ```
 
 Include optional stage dependencies:
 ```bash
 python -m tools.question_generator.cli \
   --stage decision_logic \
-  --state /Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/fixtures/minimal_state.json \
+  --state tests/question_generator/fixtures/minimal_state.json \
   --include-optional structure \
   --include-optional question_generation
 ```

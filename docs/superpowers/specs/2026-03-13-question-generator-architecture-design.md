@@ -51,13 +51,13 @@ The system has four main layers.
 
 These are the authored prompt files that define the prompt logic:
 - host prompt:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md`
+  - `prompt/question-generator/question-generator-modular.md`
 - stage templates:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
+  - `prompt/question-generator/stages/`
 - adapters:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/`
+  - `prompt/question-generator/adapters/`
 - output modes:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/`
+  - `prompt/question-generator/output-modes/`
 
 These files define what the model should do.
 
@@ -65,9 +65,9 @@ These files define what the model should do.
 
 These are the machine-readable rules that define how stages interact:
 - stage contracts:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/*.contract.json`
+  - `prompt/question-generator/contracts/*.contract.json`
 - shared state contract:
-  - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+  - `prompt/question-generator/contracts/shared_state_schema.json`
 
 Contracts define:
 - what a stage reads
@@ -82,7 +82,7 @@ These files define what the runtime and orchestrator may rely on.
 ### 3.3. Python Assembler Runtime
 
 The runtime lives under:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/`
+- `tools/question_generator/`
 
 Its current job is to:
 - load the correct stage template
@@ -192,7 +192,7 @@ Important constraints:
   prompt layout
 
 This behavior is implemented in:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
+- `tools/question_generator/assembler.py`
 
 ## 6. Prompt-Facing Concepts And Render Context
 
@@ -405,21 +405,21 @@ These files are execution artifacts, not additional shared-state sections.
 ### 8.1. Current State
 
 The live shared-state contract now uses one top-level composed schema:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+- `prompt/question-generator/contracts/shared_state_schema.json`
 
 It composes one schema file per top-level section:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/topic.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/routing.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/boundary.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/structure.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/scenarios.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/questions.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/evidence_plan.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/uncertainty_map.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/decision_logic.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/synthesis.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/signals.schema.json`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/state-sections/monitoring.schema.json`
+- `prompt/question-generator/contracts/state-sections/topic.schema.json`
+- `prompt/question-generator/contracts/state-sections/routing.schema.json`
+- `prompt/question-generator/contracts/state-sections/boundary.schema.json`
+- `prompt/question-generator/contracts/state-sections/structure.schema.json`
+- `prompt/question-generator/contracts/state-sections/scenarios.schema.json`
+- `prompt/question-generator/contracts/state-sections/questions.schema.json`
+- `prompt/question-generator/contracts/state-sections/evidence_plan.schema.json`
+- `prompt/question-generator/contracts/state-sections/uncertainty_map.schema.json`
+- `prompt/question-generator/contracts/state-sections/decision_logic.schema.json`
+- `prompt/question-generator/contracts/state-sections/synthesis.schema.json`
+- `prompt/question-generator/contracts/state-sections/signals.schema.json`
+- `prompt/question-generator/contracts/state-sections/monitoring.schema.json`
 
 `shared_state_schema.json` remains the one-file contract for the live state
 object while using `$ref` composition internally.
@@ -471,7 +471,7 @@ broader whole-state view.
 ### 9.2. Compact Field-Level Dependency Map
 
 The compact dependency map in
-`/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/IMPLEMENTATION.md`
+`prompt/question-generator/IMPLEMENTATION.md`
 should be treated as the target source of truth for non-render prompt inputs.
 
 Meaning:
@@ -702,7 +702,7 @@ whole state" mental model, even though the runtime still uses the broader
 compatibility path for `Render` today.
 
 For an archived-v7-to-current render coverage table, see:
-- `/Users/canzheng/Work/sandbox/truth-seek/docs/superpowers/specs/2026-03-14-render-output-mode-subtemplates-design.md`
+- `docs/superpowers/specs/2026-03-14-render-output-mode-subtemplates-design.md`
 
 ## 13. Testing Strategy
 
@@ -827,15 +827,15 @@ The structured review gate should be built around these checked-in artifacts:
 
 Recommended locations:
 - reviewer prompt:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/non_render_prompt_review_prompt.md`
+  - `tests/question_generator/non_render_prompt_review_prompt.md`
 - review schema:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/non_render_prompt_review_schema.json`
+  - `tests/question_generator/non_render_prompt_review_schema.json`
 - assembly harness:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/assemble_non_render_prompts.py`
+  - `tests/question_generator/assemble_non_render_prompts.py`
 - review checker:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/check_non_render_prompt_review.py`
+  - `tests/question_generator/check_non_render_prompt_review.py`
 - workflow notes:
-  - `/Users/canzheng/Work/sandbox/truth-seek/tests/question_generator/non_render_prompt_quality.md`
+  - `tests/question_generator/non_render_prompt_quality.md`
 
 ### 13.8. Relationship To Deterministic Tests
 

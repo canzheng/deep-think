@@ -1,20 +1,20 @@
 # Repository Guidance
 
 The source of truth for the question generator is:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md`
+- `prompt/question-generator/question-generator-modular.md`
 
 Modular components live under:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/adapters/`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/output-modes/`
+- `prompt/question-generator/adapters/`
+- `prompt/question-generator/output-modes/`
 
 Stage prompt templates live under:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/`
+- `prompt/question-generator/stages/`
 
 Stage input/output contracts live under:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/`
+- `prompt/question-generator/contracts/`
 
 The shared state template lives at:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+- `prompt/question-generator/contracts/shared_state_schema.json`
 
 Rules:
 - Stage prompt templates must remain consistent with the modular generator source.

@@ -27,9 +27,10 @@ from tools.question_generator.orchestrator import (
 
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+REPO_ROOT = Path(__file__).resolve().parents[2]
 MINIMAL_STATE_PATH = FIXTURES_DIR / "minimal_state.json"
 RECIPE_PATH = (
-    Path(__file__).resolve().parents[2]
+    REPO_ROOT
     / "prompt"
     / "question-generator"
     / "recipes"
@@ -137,7 +138,7 @@ class OrchestratorTest(unittest.TestCase):
             command = build_codex_exec_command(
                 stage="decision_logic",
                 codex_bin="codex",
-                workspace_dir=Path("/Users/canzheng/Work/sandbox/truth-seek"),
+                workspace_dir=REPO_ROOT,
                 response_schema_path=artifact_dir / RESPONSE_SCHEMA_FILENAME,
                 response_raw_path=artifact_dir / "response.raw.md",
             )
@@ -158,7 +159,7 @@ class OrchestratorTest(unittest.TestCase):
             command = build_codex_exec_command(
                 stage="render",
                 codex_bin="codex",
-                workspace_dir=Path("/Users/canzheng/Work/sandbox/truth-seek"),
+                workspace_dir=REPO_ROOT,
                 response_schema_path=artifact_dir / RESPONSE_SCHEMA_FILENAME,
                 response_raw_path=artifact_dir / "response.raw.md",
             )

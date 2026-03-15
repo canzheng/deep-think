@@ -1,7 +1,7 @@
 # Shared State Field Reference
 
 This document explains the fields in:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+- `prompt/question-generator/contracts/shared_state_schema.json`
 
 It is the human-readable companion to the schema. Use it when:
 - authoring or reviewing contracts

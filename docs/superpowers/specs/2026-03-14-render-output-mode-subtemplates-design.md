@@ -56,10 +56,10 @@ It is preferred over splitting `Render` into multiple workflow stages because:
 
 Current implementation:
 - `Render` now uses an output-mode-selected Mustache path in
-  `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
+  `tools/question_generator/assembler.py`
 - `10-render.md` acts as the shared render wrapper
 - output-mode-specific render bodies live under
-  `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/`
+  `prompt/question-generator/stages/render/`
 - the legacy compatibility placeholders are no longer used in prompt assembly
 
 What has already been modernized:
@@ -92,13 +92,13 @@ This control flow belongs in Python, not in Mustache templates.
 ### 5.3. Template Family
 
 Recommended layout:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/10-render.md`
+- `prompt/question-generator/stages/10-render.md`
   - shared render wrapper, only if it continues to add real value
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/research-memo.md`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/decision-memo.md`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/monitoring-dashboard.md`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/scenario-tree.md`
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/deep-research-prompt.md`
+- `prompt/question-generator/stages/render/research-memo.md`
+- `prompt/question-generator/stages/render/decision-memo.md`
+- `prompt/question-generator/stages/render/monitoring-dashboard.md`
+- `prompt/question-generator/stages/render/scenario-tree.md`
+- `prompt/question-generator/stages/render/deep-research-prompt.md`
 
 Preferred rule:
 - use the shared wrapper only for content that is truly common across all

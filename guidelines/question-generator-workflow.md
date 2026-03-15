@@ -11,17 +11,17 @@ file. Each stage should:
   state, and the routed adapters selected from `routing`
 
 Canonical state template:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+- `prompt/question-generator/contracts/shared_state_schema.json`
 
 Reference prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/question-generator-modular.md`
+- `prompt/question-generator/question-generator-modular.md`
 
 Assembler runtime:
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
-- `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/cli.py`
+- `tools/question_generator/assembler.py`
+- `tools/question_generator/cli.py`
 
 Checked-in recipe for the end-to-end workflow:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/recipes/non-render.recipe.json`
+- `prompt/question-generator/recipes/non-render.recipe.json`
 
 ## Workflow Overview
 
@@ -66,7 +66,7 @@ Answering-session rule:
 ## How To Use The State File
 
 1. Initialize a fresh copy of
-   `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/shared_state_schema.json`
+   `prompt/question-generator/contracts/shared_state_schema.json`
    for the current topic.
 2. Run the workflow stages in order.
 3. After each stage, update only the state sections that stage owns.
@@ -98,91 +98,91 @@ State rules:
 ## Stage 1 - Routing
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/01-routing.md`
+- `prompt/question-generator/stages/01-routing.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/01-routing.contract.json`
+- `prompt/question-generator/contracts/01-routing.contract.json`
 
 
 ## Stage 2 - Boundary
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/02-boundary.md`
+- `prompt/question-generator/stages/02-boundary.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/02-boundary.contract.json`
+- `prompt/question-generator/contracts/02-boundary.contract.json`
 
 
 ## Stage 3 - Structure
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/03-structure.md`
+- `prompt/question-generator/stages/03-structure.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/03-structure.contract.json`
+- `prompt/question-generator/contracts/03-structure.contract.json`
 
 
 ## Stage 4 - Scenarios
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/04-scenarios.md`
+- `prompt/question-generator/stages/04-scenarios.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/04-scenarios.contract.json`
+- `prompt/question-generator/contracts/04-scenarios.contract.json`
 
 
 ## Stage 5 - Question Generation
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/05-question-generation.md`
+- `prompt/question-generator/stages/05-question-generation.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/05-question-generation.contract.json`
+- `prompt/question-generator/contracts/05-question-generation.contract.json`
 
 
 ## Stage 6 - Evidence Planning
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/06-evidence-planning.md`
+- `prompt/question-generator/stages/06-evidence-planning.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/06-evidence-planning.contract.json`
+- `prompt/question-generator/contracts/06-evidence-planning.contract.json`
 
 
 ## Stage 7 - Decision Logic
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/07-decision-logic.md`
+- `prompt/question-generator/stages/07-decision-logic.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/07-decision-logic.contract.json`
+- `prompt/question-generator/contracts/07-decision-logic.contract.json`
 
 
 ## Stage 8 - Signal Translation
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/08-signal-translation.md`
+- `prompt/question-generator/stages/08-signal-translation.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/08-signal-translation.contract.json`
+- `prompt/question-generator/contracts/08-signal-translation.contract.json`
 
 
 ## Stage 9 - Monitoring
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/09-monitoring.md`
+- `prompt/question-generator/stages/09-monitoring.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/09-monitoring-layer.contract.json`
+- `prompt/question-generator/contracts/09-monitoring.contract.json`
 
 
 ## Stage 10 - Render
 
 Stage prompt:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/10-render.md`
+- `prompt/question-generator/stages/10-render.md`
 
 Stage contract:
-- `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/contracts/10-renderer.contract.json`
+- `prompt/question-generator/contracts/10-render.contract.json`
 
 
 ## Stage Ownership Summary

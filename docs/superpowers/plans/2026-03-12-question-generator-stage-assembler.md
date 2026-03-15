@@ -65,8 +65,8 @@ git commit -m "chore: add python environment and dependency manifests"
 - Modify: `prompt/question-generator/contracts/06-evidence-planning.contract.json`
 - Modify: `prompt/question-generator/contracts/07-decision-logic.contract.json`
 - Modify: `prompt/question-generator/contracts/08-signal-translation.contract.json`
-- Modify: `prompt/question-generator/contracts/09-monitoring-layer.contract.json`
-- Modify: `prompt/question-generator/contracts/10-renderer.contract.json`
+- Modify: `prompt/question-generator/contracts/09-monitoring.contract.json`
+- Modify: `prompt/question-generator/contracts/10-render.contract.json`
 - Modify: `prompt/question-generator/contracts/implementation-notes.md`
 - Test: `tests/question_generator/test_contract_loading.py`
 
