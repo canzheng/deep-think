@@ -1,11 +1,26 @@
 ---
 name: question-generator-skill
-description: Use when a user provides a natural-language topic and wants the truth-seek question-generator workflow to produce a final artifact with a routing confirmation step.
+description: Use when a user wants to analyze a topic, generate a research or decision artifact, or structure an uncertain question into a memo, scenario tree, monitoring plan, or research prompt.
 ---
 
 # Question Generator Skill
 
 Use this skill to run the truth-seek question-generator from a raw user topic.
+
+This workflow involves back-and-forth interaction with AI models across
+multiple stages, so it can take time to complete. The runtime now uses a
+500-second timeout to reduce premature termination, and the user should not
+interrupt the process just because a stage takes a while to return.
+
+## Trigger Examples
+
+Use this skill for requests like:
+- "Analyze whether we should expand into healthcare next year."
+- "Turn this topic into a decision memo."
+- "Build a research plan for this question."
+- "Create a scenario tree for this issue."
+- "What should I monitor for this topic?"
+- "Help me think through this uncertain decision."
 
 ## Workflow
 

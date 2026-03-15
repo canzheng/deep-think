@@ -4,11 +4,21 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 
+from tools.question_generator.adapter_models import load_adapter_payload
 from tools.question_generator.adapter_rendering import render_adapter_sections
 from tools.question_generator.models import ResolvedModule
+from tools.question_generator.pathing import adapters_dir
 
 
 class AdapterRenderingTest(unittest.TestCase):
+    def test_all_decision_mode_adapters_load_required_fields(self) -> None:
+        for adapter_path in sorted((adapters_dir() / "decision-modes").glob("*.json")):
+            with self.subTest(adapter=adapter_path.name):
+                payload = load_adapter_payload("decision_mode", adapter_path)
+
+                self.assertTrue(payload.monitoring_style)
+                self.assertTrue(payload.failure_mode)
+
     def test_rendered_stage_guidance_uses_structured_json_and_prompt_facing_labels(self) -> None:
         adapter_payload = {
             "value": "Decide",

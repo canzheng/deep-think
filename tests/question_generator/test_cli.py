@@ -22,7 +22,7 @@ RECIPE_PATH = (
 
 
 class CliTest(unittest.TestCase):
-    def test_run_commands_default_timeout_to_120_seconds(self) -> None:
+    def test_run_commands_default_timeout_to_500_seconds(self) -> None:
         parser = build_workflow_parser()
 
         run_stage_args = parser.parse_args(
@@ -48,8 +48,8 @@ class CliTest(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(run_stage_args.timeout_seconds, 120)
-        self.assertEqual(run_recipe_args.timeout_seconds, 120)
+        self.assertEqual(run_stage_args.timeout_seconds, 500)
+        self.assertEqual(run_recipe_args.timeout_seconds, 500)
 
     def test_new_workflow_commands_parse_expected_arguments(self) -> None:
         parser = build_workflow_parser()

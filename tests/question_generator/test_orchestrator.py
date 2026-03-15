@@ -53,8 +53,8 @@ class OrchestratorTest(unittest.TestCase):
             {"topic": "Should Atlas expand into healthcare?"},
         )
 
-    def test_default_timeout_is_120_seconds(self) -> None:
-        self.assertEqual(DEFAULT_TIMEOUT_SECONDS, 120)
+    def test_default_timeout_is_500_seconds(self) -> None:
+        self.assertEqual(DEFAULT_TIMEOUT_SECONDS, 500)
 
     def test_load_recipe_reads_non_render_stage_sequence(self) -> None:
         recipe = load_recipe(RECIPE_PATH)

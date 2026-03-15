@@ -57,7 +57,7 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--stage", required=True)
     run_parser.add_argument("--include-optional", action="append", default=[])
     run_parser.add_argument("--codex-bin", default="codex")
-    run_parser.add_argument("--timeout-seconds", type=int, default=120)
+    run_parser.add_argument("--timeout-seconds", type=int, default=500)
 
     recipe_parser = subparsers.add_parser("run-recipe")
     recipe_parser.add_argument("--recipe", required=True)
@@ -65,7 +65,7 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     recipe_parser.add_argument("--output-dir", required=True)
     recipe_parser.add_argument("--run-id", required=True)
     recipe_parser.add_argument("--codex-bin", default="codex")
-    recipe_parser.add_argument("--timeout-seconds", type=int, default=120)
+    recipe_parser.add_argument("--timeout-seconds", type=int, default=500)
 
     recipe_on_run_parser = subparsers.add_parser("run-recipe-on-run")
     recipe_on_run_parser.add_argument("--recipe", required=True)
@@ -73,7 +73,7 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     recipe_on_run_parser.add_argument("--start-stage")
     recipe_on_run_parser.add_argument("--stop-stage")
     recipe_on_run_parser.add_argument("--codex-bin", default="codex")
-    recipe_on_run_parser.add_argument("--timeout-seconds", type=int, default=120)
+    recipe_on_run_parser.add_argument("--timeout-seconds", type=int, default=500)
 
     update_routing_parser = subparsers.add_parser("update-routing")
     update_routing_parser.add_argument("--run-dir", required=True)
@@ -86,7 +86,7 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     run_topic_parser.add_argument("--run-id", required=True)
     run_topic_parser.add_argument("--pause-after-stage")
     run_topic_parser.add_argument("--codex-bin", default="codex")
-    run_topic_parser.add_argument("--timeout-seconds", type=int, default=120)
+    run_topic_parser.add_argument("--timeout-seconds", type=int, default=500)
 
     return parser
 

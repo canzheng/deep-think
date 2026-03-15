@@ -26,7 +26,7 @@ STAGE_RECORD_FILENAME = "stage.json"
 ANSWERING_MODEL = "gpt-5.4"
 ANSWERING_REASONING_EFFORT = "high"
 DEFAULT_CODEX_BIN = "codex"
-DEFAULT_TIMEOUT_SECONDS = 120
+DEFAULT_TIMEOUT_SECONDS = 500
 
 
 def load_recipe(recipe_path: Path) -> dict:

@@ -21,6 +21,12 @@
     "build the decision frame",
     "avoid fake precision"
   ],
+  "monitoring_style": [
+    "watch for threshold-crossing signals that turn a framing exercise into a live decision"
+  ],
+  "failure_mode": [
+    "treating a preparatory frame as sufficient when commitment conditions have already arrived"
+  ],
   "stage_guidance": {
     "routing": {
       "importance": "Important",
