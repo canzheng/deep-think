@@ -47,6 +47,15 @@ class ExampleAssemblyTest(unittest.TestCase):
         self.assertIn('"decision_logic"', prompt)
         self.assertIn('"synthesis"', prompt)
 
+    def test_render_example_uses_output_mode_specific_prompt_shape(self) -> None:
+        prompt = assemble_stage_prompt("render", STATE)
+
+        self.assertIn("Decision context:", prompt)
+        self.assertIn("Recommendation frame:", prompt)
+        self.assertIn("What must be true:", prompt)
+        self.assertNotIn("## Relevant Context", prompt)
+        self.assertNotIn("### The current routing for this run is:", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

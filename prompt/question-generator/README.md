@@ -77,11 +77,14 @@ Assembler runtime:
 Assembly model:
 - stage template supplies the core prompt body
 - non-render stage templates are Mustache templates over a prepared stage render context
+- render also uses Mustache, but Python first selects one render subtemplate
+  based on `routing.output_mode`
 - contract supplies required and optional stage dependencies, adapter
   dependencies, and output schema
 - shared state supplies the routed context and prior stage outputs
 - routed adapters supply stage-specific guidance
-- render currently remains a compatibility exception and still uses the broader section-rendering path
+- render uses output-mode-selected template bodies instead of a broad
+  whole-state context dump
 
 Supported non-render Mustache context values:
 - `{{{topic}}}` -> a markdown-safe rendered topic block
@@ -101,9 +104,8 @@ Current prompt-facing assembly:
 - `Stage Guidance` is the only prompt-visible adapter section in the first structured-adapter migration
 - stage-guidance entries use the prompt-facing importance labels `Important`, `Moderate`, `Light`, and `None`
 - conditional adapter guidance uses the same `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` wrapper convention as other conditional prompt blocks
-- render still uses section rendering under
-  `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/renderers/`
-  with a JSON fallback for sections that do not yet have a specialized renderer
+- render uses output-mode-selected subtemplates under
+  `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/render/`
 - assembled `Required Output` and `Feedback` blocks expand schema `$ref`
   entries before rendering so stage prompts see concrete JSON shapes
 - `shared_state_schema.json` is a composed JSON Schema that references one
@@ -151,7 +153,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
-  --run-id demo-non-render
+  --run-id demo-workflow
 ```
 
 Manual debug workflow:

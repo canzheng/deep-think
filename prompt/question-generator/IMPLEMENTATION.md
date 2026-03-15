@@ -220,7 +220,7 @@ Key implementation choices:
   models.
 - Required and optional reads are handled separately.
 - Optional reads are included only if the caller explicitly selects them.
-- `Render` is treated as a special case and receives the full state.
+- `Render` no longer depends on whole-state resolution for prompt assembly.
 
 Why this mapping exists:
 - Contracts describe workflow dependencies in stage terms.
@@ -237,8 +237,7 @@ Responsibilities:
 - render resolved state sections into readable markdown blocks
 
 Current format:
-- render-stage compatibility path only
-- one `## Relevant Context` section for `Render`
+- readable section rendering for diagnostic or fallback use
 - one section renderer per top-level shared-state section when available
 - JSON fallback for sections without a specialized renderer
 
@@ -251,11 +250,13 @@ Key implementation choices:
   sections can be added incrementally.
 - Non-render stages no longer depend on `state_rendering.py` for prompt
   assembly. They now inline only the fields their Mustache templates reference.
+- `Render` also no longer depends on `state_rendering.py` for prompt assembly.
+  It now receives an explicit output-mode-selected context instead.
 
 Tradeoff:
-- Render still benefits from a broad readable state summary.
-- Non-render prompts are now less noisy because they no longer receive whole
-  state sections by default.
+- readable section renderers remain useful for diagnostics and examples.
+- stage prompts stay less noisy because they no longer receive whole state
+  sections by default.
 
 ## Proposed Compact Field-Level Dependency Map
 
@@ -697,6 +698,366 @@ From `evidence_plan`:
   Use when monitoring cadence or source preference should reflect source
   hierarchy, not just signal-level defaults.
 
+### 10. Render
+
+`output_mode` is required to choose the render subtemplate, but it should not
+also render as a `Stage Guidance` item. Render subtemplates own their own
+adapter guidance.
+
+Per-subtemplate adapter guidance:
+
+- `Research Memo`
+  - required: `domain`, `evidence_mode`, `uncertainty_mode`
+  - conditional: `decision_mode`
+- `Decision Memo`
+  - required: `decision_mode`, `uncertainty_mode`
+  - conditional: `evidence_mode`
+- `Monitoring Dashboard`
+  - required: `uncertainty_mode`, `decision_mode`
+  - conditional: `evidence_mode`, `domain`
+- `Scenario Tree`
+  - required: `uncertainty_mode`, `decision_mode`
+  - conditional: `domain`
+- `Deep-Research Prompt`
+  - required: `evidence_mode`, `uncertainty_mode`, `decision_mode`
+  - conditional: `domain`
+- `Investment Worksheet`
+  - required: `evidence_mode`, `uncertainty_mode`, `decision_mode`
+  - conditional: `domain`
+
+Common framing fields useful across output modes:
+
+From `routing`:
+- `question`
+- `explicit_constraints`
+- `desired_output`
+- `decision_context`
+- `risk_tolerance`
+- `time_horizon`
+- `unit_of_analysis`
+- `assumptions`
+
+Prior-stage fields required by common output mode:
+
+If `output_mode = Research Memo`:
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `core_system`
+- `adjacent_systems`
+- `out_of_scope_factors`
+- `scope_assumptions`
+
+From `structure`:
+- `stakeholders`
+- `decisive_stakeholders`
+- `incentives`
+- `constraints`
+- `causal_mechanism`
+- `killer_variables`
+- `bottlenecks`
+- `threshold_variables`
+- `scarce_resources`
+
+From `scenarios`:
+- `base_case.name`
+- `base_case.summary`
+- `base_case.branch_points`
+- `base_case.branch_triggers`
+- `base_case.reversibility`
+- `base_case.probability_logic`
+- `base_case.decision_mode_implications`
+- `alternative_scenarios[].name`
+- `alternative_scenarios[].summary`
+- `alternative_scenarios[].branch_points`
+- `alternative_scenarios[].branch_triggers`
+- `alternative_scenarios[].reversibility`
+- `alternative_scenarios[].probability_logic`
+- `alternative_scenarios[].decision_mode_implications`
+
+From `questions`:
+- `top_killer_questions`
+- `clarifying`
+- `structural`
+- `stakeholder`
+- `evidence`
+- adapter-specific question buckets when they materially sharpen the memo:
+  - `task_specific`
+  - `domain_specific`
+  - `output_mode_specific`
+  - `evidence_mode_specific`
+  - `uncertainty_mode_specific`
+  - `decision_mode_specific`
+
+From `evidence_plan`:
+- `evidence_hierarchy`
+- `preferred_source_types`
+- `backup_source_types`
+- `conflict_resolution_rules`
+- `question_to_evidence_mapping`
+
+From `signals`:
+- `signal`
+- `linked_question`
+- `cadence`
+- `thresholds`
+- `changes_action_vs_belief`
+  Use as an optional compact monitoring layer when the memo should end with
+  watch items.
+
+From `decision_logic`:
+- `appropriate_evidence_threshold`
+- `triggers`
+  Use when the memo should explicitly translate research into action
+  implications.
+
+From `uncertainty_map`:
+- `reducible_unknowns`
+- `partially_reducible_unknowns`
+- `irreducible_uncertainties`
+- `task_material_uncertainties`
+  Use when the memo needs an explicit uncertainty section or a stronger
+  `What Would Change the Conclusion` ending.
+
+If `output_mode = Decision Memo`:
+
+From `decision_logic`:
+- `must_know_before_action`
+- `can_learn_after_action`
+- `appropriate_evidence_threshold`
+- `reversibility_logic`
+- `sizing_logic`
+- `staging_logic`
+- `hedge_exit_kill_criteria`
+- `triggers`
+
+From `scenarios`:
+- `base_case.probability_logic`
+- `base_case.reversibility`
+- `base_case.decision_mode_implications`
+- `base_case.branch_triggers`
+- `alternative_scenarios[].probability_logic`
+- `alternative_scenarios[].reversibility`
+- `alternative_scenarios[].decision_mode_implications`
+- `alternative_scenarios[].branch_triggers`
+
+From `evidence_plan`:
+- `evidence_hierarchy`
+- `question_to_evidence_mapping`
+
+From `uncertainty_map`:
+- `reducible_unknowns`
+- `partially_reducible_unknowns`
+- `irreducible_uncertainties`
+- `task_material_uncertainties`
+
+From `synthesis`:
+- `recommendation_or_action_frame`
+- `why_now_or_why_not_now`
+- `what_must_be_true`
+- `key_risks_and_failure_modes`
+
+From `questions`:
+- `top_killer_questions`
+
+From `monitoring`:
+- `what_to_monitor_next`
+
+If `output_mode = Monitoring Dashboard`:
+
+From `monitoring`:
+- `what_to_watch`
+- `signal_most_reducing_dominant_uncertainty`
+- `signal_most_likely_to_change_action`
+- `what_to_monitor_next`
+
+From `signals`:
+- `signal`
+- `linked_question`
+- `preferred_evidence_source`
+- `backup_evidence_source`
+- `cadence`
+- `thresholds`
+- `update_rules`
+- `belief_update_implications`
+- `confidence_under_current_uncertainty_mode`
+- `changes_action_vs_belief`
+
+From `decision_logic`:
+- `triggers`
+- `hedge_exit_kill_criteria`
+  Use when the dashboard should imply action thresholds, not just observation.
+
+From `scenarios`:
+- `base_case.branch_triggers`
+- `alternative_scenarios[].branch_triggers`
+  Use when the dashboard should show path competition.
+
+From `routing`:
+- `uncertainty_mode`
+- `decision_mode`
+  Use when the dashboard should explicitly name the dominant modes.
+
+From `uncertainty_map`:
+- `task_material_uncertainties`
+  Use when the dashboard should end with a stronger `What Would Change the
+  Conclusion` section.
+
+If `output_mode = Scenario Tree`:
+
+From `scenarios`:
+- `base_case.name`
+- `base_case.summary`
+- `base_case.branch_points`
+- `base_case.branch_triggers`
+- `base_case.reversibility`
+- `base_case.probability_logic`
+- `base_case.decision_mode_implications`
+- `alternative_scenarios[].name`
+- `alternative_scenarios[].summary`
+- `alternative_scenarios[].branch_points`
+- `alternative_scenarios[].branch_triggers`
+- `alternative_scenarios[].reversibility`
+- `alternative_scenarios[].probability_logic`
+- `alternative_scenarios[].decision_mode_implications`
+
+From `structure`:
+- `causal_mechanism`
+- `killer_variables`
+- `threshold_variables`
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `core_system`
+- `scope_assumptions`
+  Use when the tree needs explicit scope framing.
+
+From `signals`:
+- `signal`
+- `thresholds`
+- `update_rules`
+- `changes_action_vs_belief`
+  Use when the tree should show monitoring triggers or branch-confirmation rules.
+
+From `evidence_plan`:
+- `question_to_evidence_mapping`
+  Use when the tree should include `Evidence That Would Raise / Lower Each
+  Scenario`.
+
+From `signals`:
+- `belief_update_implications`
+  Use when the tree should include `Evidence That Would Raise / Lower Each
+  Scenario`.
+
+From `uncertainty_map`:
+- `reducible_unknowns`
+- `partially_reducible_unknowns`
+- `irreducible_uncertainties`
+- `task_material_uncertainties`
+  Use when the tree should include `Confidence and Key Unknowns` or
+  `What Would Change the Conclusion`.
+
+If `output_mode = Deep-Research Prompt`:
+
+From `boundary`:
+- `exact_object_of_analysis`
+- `core_system`
+- `adjacent_systems`
+- `out_of_scope_factors`
+- `scope_assumptions`
+
+From `structure`:
+- `stakeholders`
+- `decisive_stakeholders`
+- `incentives`
+- `constraints`
+- `causal_mechanism`
+- `killer_variables`
+- `bottlenecks`
+- `threshold_variables`
+- `scarce_resources`
+
+From `scenarios`:
+- `base_case.name`
+- `base_case.summary`
+- `base_case.branch_points`
+- `base_case.branch_triggers`
+- `base_case.reversibility`
+- `base_case.probability_logic`
+- `base_case.decision_mode_implications`
+- `alternative_scenarios[].name`
+- `alternative_scenarios[].summary`
+- `alternative_scenarios[].branch_points`
+- `alternative_scenarios[].branch_triggers`
+- `alternative_scenarios[].reversibility`
+- `alternative_scenarios[].probability_logic`
+- `alternative_scenarios[].decision_mode_implications`
+
+From `questions`:
+- `top_killer_questions`
+- `clarifying`
+- `structural`
+- `stakeholder`
+- `evidence`
+- `task_specific`
+- `domain_specific`
+- `output_mode_specific`
+- `evidence_mode_specific`
+- `uncertainty_mode_specific`
+- `decision_mode_specific`
+
+From `evidence_plan`:
+- `evidence_hierarchy`
+- `preferred_source_types`
+- `backup_source_types`
+- `conflict_resolution_rules`
+- `question_to_evidence_mapping`
+
+From `uncertainty_map`:
+- `reducible_unknowns`
+- `partially_reducible_unknowns`
+- `irreducible_uncertainties`
+- `task_material_uncertainties`
+
+If `output_mode = Investment Worksheet`:
+
+From `structure`:
+- `causal_mechanism`
+- `decisive_stakeholders`
+- `killer_variables`
+- `bottlenecks`
+
+From `scenarios`:
+- `base_case.probability_logic`
+
+From `questions`:
+- `top_killer_questions`
+
+From `evidence_plan`:
+- `evidence_hierarchy`
+
+From `decision_logic`:
+- `must_know_before_action`
+- `reversibility_logic`
+- `sizing_logic`
+- `staging_logic`
+- `triggers`
+
+From `synthesis`:
+- `recommendation_or_action_frame`
+- `why_now_or_why_not_now`
+- `what_must_be_true`
+
+From `signals`:
+- `signal`
+- `changes_action_vs_belief`
+
+From `uncertainty_map`:
+- `task_material_uncertainties`
+
+Archived v7 section coverage for render is documented in:
+- `/Users/canzheng/Work/sandbox/truth-seek/docs/superpowers/specs/2026-03-14-render-output-mode-subtemplates-design.md`
+
 ### `adapter_resolution.py`
 
 File:
@@ -880,11 +1241,19 @@ Conditional blocks in non-render templates:
 - rely on the template’s own instruction text plus the top-level
   `[CONDITIONAL]` rule rather than orchestration-time reasoning
 
-Render-stage compatibility placeholders:
-- `{{current_state}}` -> rendered `Relevant Context` block
-- `{{active_steering}}` -> legacy rendered `Stage Guidance` block
-- `{{required_output}}` -> rendered output-schema block with `$ref` entries expanded
-- `{{feedback}}` -> rendered feedback-schema block with `$ref` entries expanded when supported
+Render-stage Mustache context values:
+- `{{{topic}}}` -> markdown-safe rendered topic block
+- `{{render_mode}}` -> selected output mode
+- `{{routing.*}}` -> compact routing and framing fields
+- `{{{render_body}}}` -> the already-rendered output-mode-selected body template
+- `{{#stage_guidance.required}} ... {{/stage_guidance.required}}` -> required
+  guidance entries
+- `{{#stage_guidance.conditional}} ... {{/stage_guidance.conditional}}` ->
+  conditionally relevant guidance entries
+- `{{{required_output_schema}}}` -> rendered output-schema block with `$ref`
+  entries expanded
+- `{{{feedback_schema}}}` -> rendered feedback-schema block with `$ref`
+  entries expanded when supported
 
 ### `cli.py`
 
@@ -1083,7 +1452,7 @@ This gives a prompt shaped like:
 
 We considered a heavier prompt IR and a custom substitution system. The current
 implementation uses markdown templates plus a minimal Mustache renderer for
-non-render stages and keeps render on the broader compatibility path for now.
+both non-render stages and render-stage subtemplates.
 
 Reasons:
 - the authored prompt assets already exist as markdown documents

@@ -465,8 +465,8 @@ The primary role of the shared-state schemas is now:
 - stage-output schema reuse
 - stable field paths for Mustache templates
 
-Render remains the one stage that may still use a broader render-time context
-view until its own field-level template design is settled.
+Render now uses an output-mode-selected field-level context rather than a
+broader whole-state view.
 
 ### 9.2. Compact Field-Level Dependency Map
 
@@ -569,6 +569,140 @@ It should not:
 - impose a hardcoded final section order that conflicts with the output mode
 
 The selected output mode should define the final deliverable structure.
+
+The current preferred dependency model for `Render` is:
+
+- adapters:
+  - `output_mode` is required to select the render subtemplate
+  - render subtemplates own their own adapter guidance; the shared wrapper
+    should not
+  - `Research Memo`
+    - required: `domain`, `evidence_mode`, `uncertainty_mode`
+    - conditional: `decision_mode`
+  - `Decision Memo`
+    - required: `decision_mode`, `uncertainty_mode`
+    - conditional: `evidence_mode`
+  - `Monitoring Dashboard`
+    - required: `uncertainty_mode`, `decision_mode`
+    - conditional: `evidence_mode`, `domain`
+  - `Scenario Tree`
+    - required: `uncertainty_mode`, `decision_mode`
+    - conditional: `domain`
+  - `Deep-Research Prompt`
+    - required: `evidence_mode`, `uncertainty_mode`, `decision_mode`
+    - conditional: `domain`
+  - `Investment Worksheet`
+    - required: `evidence_mode`, `uncertainty_mode`, `decision_mode`
+    - conditional: `domain`
+- common framing fields from `routing`:
+  - `question`
+  - `explicit_constraints`
+  - `desired_output`
+  - `decision_context`
+  - `risk_tolerance`
+  - `time_horizon`
+  - `unit_of_analysis`
+  - `assumptions`
+
+Preferred output-mode-driven render inputs:
+
+- `Research Memo`
+  - `boundary`: `exact_object_of_analysis`, `core_system`,
+    `adjacent_systems`, `out_of_scope_factors`, `scope_assumptions`
+  - `structure`: `stakeholders`, `decisive_stakeholders`, `incentives`,
+    `constraints`, `causal_mechanism`, `killer_variables`, `bottlenecks`,
+    `threshold_variables`, `scarce_resources`
+  - `scenarios`: all scenario fields for `base_case` and
+    `alternative_scenarios[]`
+  - `questions`: `top_killer_questions`, `clarifying`, `structural`,
+    `stakeholder`, `evidence`, plus adapter-specific question buckets when
+    they materially sharpen the memo
+  - `evidence_plan`: `evidence_hierarchy`, `preferred_source_types`,
+    `backup_source_types`, `conflict_resolution_rules`,
+    `question_to_evidence_mapping`
+  - `signals`: a compact optional monitoring layer using `signal`,
+    `linked_question`, `cadence`, `thresholds`, and
+    `changes_action_vs_belief`
+  - `decision_logic`: `appropriate_evidence_threshold` and `triggers`
+    when the memo should translate research into action implications
+
+- `Decision Memo`
+  - `decision_logic`: `must_know_before_action`, `can_learn_after_action`,
+    `appropriate_evidence_threshold`, `reversibility_logic`, `sizing_logic`,
+    `staging_logic`, `hedge_exit_kill_criteria`, `triggers`
+  - `scenarios`: `probability_logic`, `reversibility`,
+    `decision_mode_implications`, and `branch_triggers` for `base_case` and
+    `alternative_scenarios[]`
+  - `evidence_plan`: `evidence_hierarchy` and
+    `question_to_evidence_mapping`
+  - `uncertainty_map`: `reducible_unknowns`,
+    `partially_reducible_unknowns`, `irreducible_uncertainties`,
+    `task_material_uncertainties`
+  - `synthesis`: `recommendation_or_action_frame`, `why_now_or_why_not_now`,
+    `what_must_be_true`, `key_risks_and_failure_modes`
+
+- `Monitoring Dashboard`
+  - `monitoring`: `what_to_watch`,
+    `signal_most_reducing_dominant_uncertainty`,
+    `signal_most_likely_to_change_action`, `what_to_monitor_next`
+  - `signals`: `signal`, `linked_question`, `preferred_evidence_source`,
+    `backup_evidence_source`, `cadence`, `thresholds`, `update_rules`,
+    `belief_update_implications`,
+    `confidence_under_current_uncertainty_mode`,
+    `changes_action_vs_belief`
+  - `decision_logic`: `triggers` and `hedge_exit_kill_criteria` when the
+    dashboard should imply action thresholds
+  - `scenarios`: `branch_triggers` for `base_case` and
+    `alternative_scenarios[]` when path competition should be shown
+
+- `Scenario Tree`
+  - `scenarios`: all scenario fields for `base_case` and
+    `alternative_scenarios[]`
+  - `structure`: `causal_mechanism`, `killer_variables`,
+    `threshold_variables`
+  - `boundary`: `exact_object_of_analysis`, `core_system`,
+    `scope_assumptions` when the tree needs explicit scope framing
+  - `signals`: `signal`, `thresholds`, `update_rules`,
+    `changes_action_vs_belief` when the tree should show monitoring triggers
+
+- `Deep-Research Prompt`
+  - `boundary`: `exact_object_of_analysis`, `core_system`,
+    `adjacent_systems`, `out_of_scope_factors`, `scope_assumptions`
+  - `structure`: `stakeholders`, `decisive_stakeholders`, `incentives`,
+    `constraints`, `causal_mechanism`, `killer_variables`, `bottlenecks`,
+    `threshold_variables`, `scarce_resources`
+  - `scenarios`: all scenario fields for `base_case` and
+    `alternative_scenarios[]`
+  - `questions`: `top_killer_questions`, `clarifying`, `structural`,
+    `stakeholder`, `evidence`, `task_specific`, `domain_specific`,
+    `output_mode_specific`, `evidence_mode_specific`,
+    `uncertainty_mode_specific`, `decision_mode_specific`
+  - `evidence_plan`: `evidence_hierarchy`, `preferred_source_types`,
+    `backup_source_types`, `conflict_resolution_rules`,
+    `question_to_evidence_mapping`
+  - `uncertainty_map`: `reducible_unknowns`,
+    `partially_reducible_unknowns`, `irreducible_uncertainties`,
+    `task_material_uncertainties`
+
+- `Investment Worksheet`
+  - `structure`: `causal_mechanism`, `decisive_stakeholders`,
+    `killer_variables`, `bottlenecks`
+  - `scenarios`: `base_case.probability_logic`
+  - `questions`: `top_killer_questions`
+  - `evidence_plan`: `evidence_hierarchy`
+  - `decision_logic`: `must_know_before_action`, `reversibility_logic`,
+    `sizing_logic`, `staging_logic`, `triggers`
+  - `synthesis`: `recommendation_or_action_frame`, `why_now_or_why_not_now`,
+    `what_must_be_true`
+  - `signals`: `signal`, `changes_action_vs_belief`
+  - `uncertainty_map`: `task_material_uncertainties`
+
+This map is now detailed enough to replace the old "`Render` just reads the
+whole state" mental model, even though the runtime still uses the broader
+compatibility path for `Render` today.
+
+For an archived-v7-to-current render coverage table, see:
+- `/Users/canzheng/Work/sandbox/truth-seek/docs/superpowers/specs/2026-03-14-render-output-mode-subtemplates-design.md`
 
 ## 13. Testing Strategy
 

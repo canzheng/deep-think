@@ -20,7 +20,7 @@ Assembler runtime:
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/assembler.py`
 - `/Users/canzheng/Work/sandbox/truth-seek/tools/question_generator/cli.py`
 
-Checked-in recipe for the non-render workflow:
+Checked-in recipe for the end-to-end workflow:
 - `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/recipes/non-render.recipe.json`
 
 ## Workflow Overview
@@ -82,8 +82,8 @@ Answering-session rule:
 
 Recipe execution:
 - use `run-recipe` when you want the orchestrator to execute a checked-in stage sequence
-- the checked-in non-render recipe runs `Routing` through `Monitoring`
-- keep `Render` out of that recipe so the pre-render workflow can be run and inspected independently
+- the checked-in recipe runs `Routing` through `Render`
+- use stage-level commands if you want to pause before `Render` and inspect the pre-render state independently
 
 State rules:
 - Routing must be completed before any downstream task runs.

@@ -44,10 +44,10 @@ class OrchestratorTest(unittest.TestCase):
     def test_load_recipe_reads_non_render_stage_sequence(self) -> None:
         recipe = load_recipe(RECIPE_PATH)
 
-        self.assertEqual(recipe["name"], "non_render_workflow")
+        self.assertEqual(recipe["name"], "question_generator_workflow")
         self.assertEqual(recipe["stages"][0]["stage"], "routing")
-        self.assertEqual(recipe["stages"][-1]["stage"], "monitoring")
-        self.assertEqual(len(recipe["stages"]), 9)
+        self.assertEqual(recipe["stages"][-1]["stage"], "render")
+        self.assertEqual(len(recipe["stages"]), 10)
 
     def test_initialize_run_creates_manifest_and_shared_state_copy(self) -> None:
         with TemporaryDirectory() as tmpdir:
@@ -366,9 +366,10 @@ class OrchestratorTest(unittest.TestCase):
                     "decision_logic",
                     "signal_translation",
                     "monitoring",
+                    "render",
                 ],
             )
-            self.assertEqual(len(result["stages"]), 9)
+            self.assertEqual(len(result["stages"]), 10)
 
 
 if __name__ == "__main__":

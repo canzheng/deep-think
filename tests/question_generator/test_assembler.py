@@ -7,6 +7,10 @@ from unittest.mock import patch
 
 
 from tools.question_generator.assembler import assemble_stage_prompt
+from tools.question_generator.adapter_rendering import build_stage_guidance
+from tools.question_generator.adapter_resolution import resolve_stage_modules
+from tools.question_generator.contracts import load_contract
+from tools.question_generator.render_context import build_render_context, render_wrapper_template
 
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
@@ -57,6 +61,25 @@ def random_topic() -> str:
 
 
 class AssemblerTest(unittest.TestCase):
+    def _render_prompt_for_mode(self, output_mode: str) -> str:
+        state = load_populated_state()
+        state["routing"]["output_mode"] = output_mode
+        return assemble_stage_prompt("render", state)
+
+    def _render_guidance_for_mode(self, output_mode: str) -> dict:
+        state = load_populated_state()
+        state["routing"]["output_mode"] = output_mode
+        contract = load_contract("render")
+        resolved_modules = resolve_stage_modules(contract, state["routing"])
+        stage_guidance = build_stage_guidance("render", resolved_modules)
+        context = build_render_context(
+            state,
+            stage_guidance=stage_guidance,
+            required_output_schema="",
+            feedback_schema="",
+        )
+        return context["stage_guidance"]
+
     def test_decision_logic_prompt_supports_mustache_sections_for_repeated_objects(self) -> None:
         state = load_populated_state()
         with TemporaryDirectory() as tmpdir:
@@ -231,7 +254,8 @@ class AssemblerTest(unittest.TestCase):
                 self.assertNotIn("{{{required_output_schema}}}", prompt)
                 self.assertTrue(prompt.splitlines()[0].strip())
                 self.assertIn(state["topic"], prompt)
-                self.assertEqual(prompt.count("## Required Output"), 1)
+                expected_required_output_count = 0 if stage == "render" else 1
+                self.assertEqual(prompt.count("## Required Output"), expected_required_output_count)
                 self.assertEqual(
                     prompt.count("[CONDITIONAL condition="),
                     prompt.count("[/CONDITIONAL]"),
@@ -263,7 +287,7 @@ class AssemblerTest(unittest.TestCase):
                 expected_feedback_count = 1 if stage in {"question_generation", "evidence_planning"} else 0
                 self.assertEqual(prompt.count("## Feedback"), expected_feedback_count)
 
-                if "## Stage Guidance" in prompt:
+                if "## Stage Guidance" in prompt and "## Required Output" in prompt:
                     self.assertLess(prompt.index("## Stage Guidance"), prompt.index("## Required Output"))
                 if stage == "routing":
                     self.assertLess(prompt.index("## Step 1 - Determine Primary Task"), prompt.index("## Required Output"))
@@ -275,10 +299,187 @@ class AssemblerTest(unittest.TestCase):
         prompt = assemble_stage_prompt("render", STATE)
 
         self.assertIn("You are generating the final deliverable for the current topic.", prompt)
-        self.assertIn("## Relevant Context", prompt)
-        self.assertIn("## Stage Guidance", prompt)
-        self.assertIn("### The current routing for this run is:", prompt)
+        self.assertNotIn("## Relevant Context", prompt)
+        self.assertNotIn("### The current routing for this run is:", prompt)
+        self.assertNotIn("{{current_state}}", prompt)
+        self.assertNotIn("{{active_steering}}", prompt)
         self.assertNotIn("## Feedback", prompt)
+
+    def test_render_selects_mode_specific_templates(self) -> None:
+        from tools.question_generator.render_context import select_render_template
+
+        decision_template = select_render_template("Decision Memo")
+        monitoring_template = select_render_template("Monitoring Dashboard")
+        scenario_tree_template = select_render_template("Scenario Tree")
+
+        self.assertNotEqual(decision_template, monitoring_template)
+        self.assertNotEqual(decision_template, scenario_tree_template)
+        self.assertTrue(str(decision_template).endswith("stages/render/decision-memo.md"))
+        self.assertTrue(str(monitoring_template).endswith("stages/render/monitoring-dashboard.md"))
+        self.assertTrue(str(scenario_tree_template).endswith("stages/render/scenario-tree.md"))
+
+    def test_render_wrapper_no_longer_owns_stage_guidance(self) -> None:
+        wrapper = render_wrapper_template().read_text(encoding="utf-8")
+
+        self.assertNotIn("## Stage Guidance", wrapper)
+        self.assertNotIn("stage guidance", wrapper.lower())
+
+    def test_decision_memo_render_filters_stage_guidance_to_decision_and_uncertainty(self) -> None:
+        guidance = self._render_guidance_for_mode("Decision Memo")
+
+        self.assertEqual(
+            {entry["dimension"] for entry in guidance["required"]},
+            {"decision_mode", "uncertainty_mode"},
+        )
+        self.assertEqual(
+            {entry["dimension"] for entry in guidance["conditional"]},
+            {"evidence_mode"},
+        )
+
+    def test_research_memo_render_filters_stage_guidance_to_memo_relevant_dimensions(self) -> None:
+        guidance = self._render_guidance_for_mode("Research Memo")
+
+        self.assertEqual(
+            {entry["dimension"] for entry in guidance["required"]},
+            {"domain", "evidence_mode", "uncertainty_mode"},
+        )
+        self.assertEqual(
+            {entry["dimension"] for entry in guidance["conditional"]},
+            {"decision_mode"},
+        )
+
+    def test_deep_research_render_filters_stage_guidance_to_research_relevant_dimensions(self) -> None:
+        guidance = self._render_guidance_for_mode("Deep-Research Prompt")
+
+        self.assertEqual(
+            {entry["dimension"] for entry in guidance["required"]},
+            {"evidence_mode", "uncertainty_mode", "decision_mode"},
+        )
+        self.assertEqual(
+            {entry["dimension"] for entry in guidance["conditional"]},
+            {"domain"},
+        )
+
+    def test_decision_memo_render_prompt_uses_filtered_stage_guidance(self) -> None:
+        prompt = self._render_prompt_for_mode("Decision Memo")
+
+        self.assertIn(
+            "- Moderate: Outputs should make staged commitment and option value explicit.",
+            prompt,
+        )
+        self.assertIn(
+            "- Moderate: Should show uncertainty explicitly and distinguish evidence from inference.",
+            prompt,
+        )
+        self.assertIn(
+            '[CONDITIONAL condition="Use this only if the preferred proof style should change how high the evidence bar is presented."]',
+            prompt,
+        )
+        self.assertNotIn(
+            "- Important: Pushes the final artifact toward recommendation, evidence threshold, and triggers.",
+            prompt,
+        )
+        self.assertNotIn(
+            "- Light: Mainly affects examples and operational vocabulary.",
+            prompt,
+        )
+
+    def test_research_memo_render_includes_uncertainty_map_and_research_priorities(self) -> None:
+        prompt = self._render_prompt_for_mode("Research Memo")
+
+        self.assertIn("Uncertainty map:", prompt)
+        self.assertIn(
+            "whether pilot success will be strong and repeatable enough to justify expansion",
+            prompt,
+        )
+        self.assertIn("Research priorities:", prompt)
+
+    def test_monitoring_dashboard_render_includes_dominant_modes(self) -> None:
+        prompt = self._render_prompt_for_mode("Monitoring Dashboard")
+
+        self.assertIn("Dominant uncertainty mode:", prompt)
+        self.assertIn("Dominant decision mode:", prompt)
+        self.assertIn("Hidden-Variable Dominated", prompt)
+        self.assertIn("Optionality / Staged Commitment", prompt)
+
+    def test_scenario_tree_render_includes_evidence_shift_section(self) -> None:
+        prompt = self._render_prompt_for_mode("Scenario Tree")
+
+        self.assertIn("Evidence that would raise / lower each scenario:", prompt)
+        self.assertIn("What would change the conclusion:", prompt)
+
+    def test_deep_research_render_includes_mode_labels_and_rule_inputs(self) -> None:
+        prompt = self._render_prompt_for_mode("Deep-Research Prompt")
+
+        self.assertIn("Evidence mode and source priorities:", prompt)
+        self.assertIn("Evidence mode: Operating-Metric-First", prompt)
+        self.assertIn("Uncertainty mode: Hidden-Variable Dominated", prompt)
+        self.assertIn("Decision mode: Optionality / Staged Commitment", prompt)
+        self.assertIn("Treat single-customer anecdotes as weak unless supported by metrics", prompt)
+        self.assertIn("Healthcare buyers care more about workflow reliability than novelty.", prompt)
+
+    def test_investment_worksheet_render_includes_uncertainty_mode_rationale(self) -> None:
+        prompt = self._render_prompt_for_mode("Investment Worksheet")
+
+        self.assertIn("Uncertainty mode rationale:", prompt)
+        self.assertIn("Hidden-Variable Dominated", prompt)
+
+    def test_research_memo_render_includes_what_to_monitor_next(self) -> None:
+        prompt = self._render_prompt_for_mode("Research Memo")
+
+        self.assertIn("What to monitor next:", prompt)
+        self.assertIn("time-to-compliance approval", prompt)
+
+    def test_monitoring_dashboard_render_includes_compact_evidence_and_decision_implications(self) -> None:
+        prompt = self._render_prompt_for_mode("Monitoring Dashboard")
+
+        self.assertIn("Evidence plan:", prompt)
+        self.assertIn("Decision-mode implications:", prompt)
+        self.assertIn("What must be known before acting:", prompt)
+        self.assertIn("What can be learned after acting:", prompt)
+        self.assertIn("Appropriate evidence threshold:", prompt)
+
+    def test_scenario_tree_render_includes_what_to_monitor_next(self) -> None:
+        prompt = self._render_prompt_for_mode("Scenario Tree")
+
+        self.assertIn("What to monitor next:", prompt)
+        self.assertIn("implementation queue length", prompt)
+
+    def test_deep_research_render_includes_uncertainty_map_and_conclusion_change_sections(self) -> None:
+        prompt = self._render_prompt_for_mode("Deep-Research Prompt")
+
+        self.assertIn("Uncertainty map:", prompt)
+        self.assertIn("What to monitor next:", prompt)
+        self.assertIn("What would change the conclusion:", prompt)
+
+    def test_investment_worksheet_render_includes_what_to_monitor_next(self) -> None:
+        prompt = self._render_prompt_for_mode("Investment Worksheet")
+
+        self.assertIn("What to monitor next:", prompt)
+
+    def test_monitoring_dashboard_render_includes_no_essay_quality_rule(self) -> None:
+        prompt = self._render_prompt_for_mode("Monitoring Dashboard")
+
+        self.assertIn("Do not drift into essay form.", prompt)
+
+    def test_deep_research_render_requires_directly_executable_final_prompt(self) -> None:
+        prompt = self._render_prompt_for_mode("Deep-Research Prompt")
+
+        self.assertIn("The final prompt must be directly executable.", prompt)
+
+    def test_render_wrapper_avoids_question_duplication_in_subtemplates(self) -> None:
+        decision_prompt = self._render_prompt_for_mode("Decision Memo")
+        deep_research_prompt = self._render_prompt_for_mode("Deep-Research Prompt")
+        worksheet_prompt = self._render_prompt_for_mode("Investment Worksheet")
+
+        self.assertEqual(decision_prompt.count("Decision to be made:"), 0)
+        self.assertEqual(deep_research_prompt.count("Research objective:"), 0)
+        self.assertEqual(worksheet_prompt.count("Expression type:"), 0)
+        self.assertEqual(deep_research_prompt.count("Prefer reversible moves"), 1)
+        self.assertEqual(
+            deep_research_prompt.count("Healthcare buyers care more about workflow reliability than novelty."),
+            1,
+        )
 
 
 if __name__ == "__main__":

@@ -182,7 +182,7 @@ class CliTest(unittest.TestCase):
                 "tools.question_generator.cli.run_recipe",
                 return_value={
                     "run_dir": str(Path(tmpdir) / "demo-run"),
-                    "stages": [{"stage": "routing"}, {"stage": "monitoring"}],
+                    "stages": [{"stage": "routing"}, {"stage": "render"}],
                 },
             ) as mocked_run_recipe:
                 stdout = io.StringIO()

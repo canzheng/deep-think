@@ -66,14 +66,14 @@ conda run -n truth-seek python -m tools.question_generator.cli \
   --state tests/question_generator/fixtures/minimal_state.json
 ```
 
-Run the full non-render recipe:
+Run the full question-generator recipe:
 
 ```bash
 conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
-  --run-id demo-non-render
+  --run-id demo-workflow
 ```
 
 Run the question-generator test suite:

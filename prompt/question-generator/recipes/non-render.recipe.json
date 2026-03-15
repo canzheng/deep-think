@@ -1,6 +1,6 @@
 {
-  "name": "non_render_workflow",
-  "description": "Run the question-generator workflow from routing through monitoring, excluding render.",
+  "name": "question_generator_workflow",
+  "description": "Run the question-generator workflow from routing through render.",
   "stages": [
     {
       "stage": "routing"
@@ -28,6 +28,9 @@
     },
     {
       "stage": "monitoring"
+    },
+    {
+      "stage": "render"
     }
   ]
 }

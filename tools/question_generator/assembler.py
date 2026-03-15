@@ -13,6 +13,11 @@ from tools.question_generator.adapter_rendering import build_stage_guidance, ren
 from tools.question_generator.adapter_resolution import resolve_stage_modules
 from tools.question_generator.contracts import load_contract
 from tools.question_generator.pathing import contract_path, normalize_stage_name, stage_template_path
+from tools.question_generator.render_context import (
+    build_render_context,
+    render_wrapper_template,
+    select_render_template,
+)
 from tools.question_generator.state_rendering import render_state_sections
 from tools.question_generator.state_resolution import resolve_state_sections
 
@@ -55,47 +60,23 @@ def _assemble_render_stage_prompt(
 ) -> str:
     contract_file = contract_path(stage)
     contract = load_contract(stage)
-    template = stage_template_path(stage).read_text().strip()
-    state_sections = resolve_state_sections(contract, state, optional_reads=optional_reads)
-    state_block = render_state_sections(stage, state_sections)
     modules = resolve_stage_modules(contract, state.get("routing", {}))
-    steering_block = render_adapter_sections(stage, modules) if modules else ""
-    output_block = _render_required_output(contract.output_schema.raw, base_path=contract_file)
-    feedback_block = (
-        _render_feedback(contract.feedback.schema, base_path=contract_file)
-        if contract.feedback.supported
-        else ""
+    stage_guidance = build_stage_guidance(stage, modules) if modules else {"required": [], "conditional": []}
+    context = build_render_context(
+        state,
+        stage_guidance=stage_guidance,
+        required_output_schema=_render_schema_block(contract.output_schema.raw, base_path=contract_file),
+        feedback_schema=(
+            _render_schema_block(contract.feedback.schema, base_path=contract_file)
+            if contract.feedback.supported
+            else ""
+        ),
     )
-    placeholder_values = {
-        "topic": _render_topic_block(state.get("topic", "")),
-        "current_state": state_block,
-        "active_steering": steering_block,
-        "required_output": output_block,
-        "feedback": feedback_block,
-    }
-    rendered_template, used_placeholders = _render_template_placeholders(
-        template,
-        placeholder_values,
-    )
-    topic_only_state = list(state_sections.keys()) == ["topic"]
-
-    blocks = [
-        rendered_template,
-    ]
-    if (
-        state_block
-        and "current_state" not in used_placeholders
-        and not ("topic" in used_placeholders and topic_only_state)
-    ):
-        blocks.append(state_block)
-    if steering_block and "active_steering" not in used_placeholders:
-        blocks.append(steering_block)
-    if output_block and "required_output" not in used_placeholders:
-        blocks.append(output_block)
-    if feedback_block and "feedback" not in used_placeholders:
-        blocks.append(feedback_block)
-
-    return "\n\n".join(block for block in blocks if block)
+    body_template = select_render_template(state["routing"]["output_mode"]).read_text().strip()
+    wrapper_template = render_wrapper_template().read_text().strip()
+    context["topic"] = _render_topic_block(state.get("topic", ""))
+    context["render_body"] = chevron.render(body_template, context).strip()
+    return chevron.render(wrapper_template, context).strip()
 
 
 def _build_non_render_context(
