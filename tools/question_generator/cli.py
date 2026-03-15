@@ -102,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
             args.stage,
             response_path=Path(args.response),
         )
-        print(record["response_parsed_path"])
+        print(record.get("response_parsed_path") or record.get("response_raw_path"))
         return 0
 
     if args.command == "run-stage":
@@ -113,7 +113,7 @@ def main(argv: list[str] | None = None) -> int:
             codex_bin=args.codex_bin,
             timeout_seconds=args.timeout_seconds,
         )
-        print(record["response_parsed_path"])
+        print(record.get("response_parsed_path") or record.get("response_raw_path"))
         return 0
 
     if args.command == "run-recipe":

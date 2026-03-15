@@ -115,18 +115,19 @@ Responsibilities:
 - load one workflow recipe
 - persist a copied `shared_state.json`
 - prepare one stage prompt into stage-local artifacts
-- prepare one stage response schema artifact
+- prepare one stage response schema artifact for JSON-returning stages
 - build the pinned `codex exec --ephemeral` command for the answering session
 - invoke one disposable answering session per stage
 - persist subprocess stdout and stderr artifacts
-- persist raw and parsed stage responses
+- persist raw stage responses for all stages and parsed stage responses for JSON-returning stages
 - merge only the stage-owned shared-state sections
 - execute a full multi-stage workflow by iterating the recipe entries
 
 Key implementation choices:
 - prompt and reply artifacts live outside the shared-state schema
 - response parsing accepts either plain JSON or fenced JSON blocks
-- the response schema passed to Codex is derived from the contract output schema
+- the response schema passed to Codex is derived from the contract output schema for JSON-returning stages
+- `Render` returns plain text, so it does not pass `--output-schema` at execution time
 - merge behavior is controlled by contract ownership, not by ad hoc field lists
 - the answering session is created and destroyed automatically per stage run
 
@@ -704,6 +705,39 @@ From `evidence_plan`:
 also render as a `Stage Guidance` item. Render subtemplates own their own
 adapter guidance.
 
+`Render` now differs from the analytical stages in one more important way:
+- it returns the final deliverable as plain text
+- it does not return a JSON state update
+- it does not write back into shared state
+
+That means:
+- no runtime `--output-schema` constraint for `Render`
+- no JSON-only answering wrapper for `Render`
+- no required `response.schema.json` artifact for `Render`
+- no `response.parsed.json` artifact for `Render`
+
+The render contract should still remain the source of truth for:
+- adapter dependencies via `depends_on`
+- wrapper-only reads
+- output-mode-specific subtemplate reads
+- write behavior via `writes`
+- compatibility metadata via `output_schema`, even though `Render` no longer
+  uses that schema at execution time
+
+Current render-specific contract keys:
+- `reads_required_common`
+  - wrapper-only reads used by `/Users/canzheng/Work/sandbox/truth-seek/prompt/question-generator/stages/10-render.md`
+- `reads_by_output_mode`
+  - subtemplate-only reads keyed by canonical output-mode name
+
+Important rule:
+- `reads_required_common` is for the wrapper only
+- `reads_by_output_mode` is for the selected subtemplate only
+- overlap is allowed
+- the runtime resolves these declarations from the render contract and then
+  builds the Mustache context from the declared wrapper and subtemplate read
+  sets rather than from a hardcoded Python dependency map
+
 Per-subtemplate adapter guidance:
 
 - `Research Memo`
@@ -725,7 +759,8 @@ Per-subtemplate adapter guidance:
   - required: `evidence_mode`, `uncertainty_mode`, `decision_mode`
   - conditional: `domain`
 
-Common framing fields useful across output modes:
+Common framing fields useful across output modes and appropriate for
+`reads_required_common`:
 
 From `routing`:
 - `question`
@@ -737,7 +772,8 @@ From `routing`:
 - `unit_of_analysis`
 - `assumptions`
 
-Prior-stage fields required by common output mode:
+Prior-stage fields required by common output mode and appropriate for
+`reads_by_output_mode`:
 
 If `output_mode = Research Memo`:
 

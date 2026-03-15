@@ -37,6 +37,8 @@ class StageContract:
     output_schema: OutputSchema
     reads_required: list[str] | None = None
     reads_optional: list[OptionalRead] | None = None
+    reads_required_common: list[str] | None = None
+    reads_by_output_mode: dict[str, list[str]] | None = None
     raw: dict[str, Any] | None = None
 
 

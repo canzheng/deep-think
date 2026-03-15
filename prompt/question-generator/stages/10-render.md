@@ -56,6 +56,9 @@ Assumptions:
 Output requirements:
 - Produce the final deliverable itself, not commentary about how to produce it.
 - Use the selected output mode as the primary guide for organization.
+- Return the final deliverable in clean Markdown.
+- Use explicit structure that fits the selected output mode, such as headings, bullets, numbered lists, or tables when helpful.
+- Do not use flat prose when the selected output mode calls for a more structured artifact.
 - Surface the most important conclusions first when the selected output mode allows it.
 - Preserve the most important open questions, uncertainties, monitoring signals, decision implications, and any subtemplate-specific guidance when they are relevant to the deliverable.
 - Keep the final deliverable internally consistent with the provided context and guidance.

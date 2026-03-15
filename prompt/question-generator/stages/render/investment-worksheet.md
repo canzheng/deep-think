@@ -30,7 +30,7 @@ Killer variables / bottlenecks:
 - {{.}}
 {{/structure.bottlenecks}}
 
-Market-implied view:
+Current path view:
 - Base case probability logic: {{scenarios.base_case.probability_logic}}
 
 Evidence mode rationale:

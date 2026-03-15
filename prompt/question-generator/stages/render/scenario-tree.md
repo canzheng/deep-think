@@ -73,7 +73,7 @@ Signals to watch:
   {{/thresholds}}
 {{/signals}}
 
-Evidence that would raise / lower each scenario:
+Evidence and signals that would shift scenario confidence:
 {{#evidence_plan.question_to_evidence_mapping}}
 - {{question}}
   {{#preferred_sources}}

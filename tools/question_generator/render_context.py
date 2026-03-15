@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 from pathlib import Path
 
+from tools.question_generator.contracts import load_contract
 from tools.question_generator.pathing import normalize_stage_name, output_modes_dir, stages_dir
 
 
@@ -100,17 +101,27 @@ def build_render_context(
     required_output_schema: str,
     feedback_schema: str,
 ) -> dict[str, object]:
+    contract = load_contract("render")
     output_mode = state["routing"]["output_mode"]
     context: dict[str, object] = {
-        "topic": state.get("topic", ""),
-        "routing": _build_routing_context(state["routing"]),
         "stage_guidance": _filter_render_stage_guidance(output_mode, stage_guidance),
         "required_output_schema": required_output_schema,
         "feedback_schema": feedback_schema,
         "render_mode": output_mode,
         "render_template_path": str(select_render_template(output_mode)),
     }
-    context.update(_build_output_mode_context(output_mode, state))
+    context.update(
+        _build_render_reads_context(
+            state=state,
+            read_names=contract.reads_required_common or [],
+        )
+    )
+    context.update(
+        _build_render_reads_context(
+            state=state,
+            read_names=(contract.reads_by_output_mode or {}).get(output_mode, []),
+        )
+    )
     return context
 
 
@@ -134,115 +145,29 @@ def _build_routing_context(routing: dict) -> dict:
     return {field: copy.deepcopy(routing.get(field)) for field in allowed_fields if field in routing}
 
 
-def _build_output_mode_context(output_mode: str, state: dict) -> dict[str, object]:
-    if output_mode == "Research Memo":
-        return {
-            "boundary": copy.deepcopy(state["boundary"]),
-            "structure": copy.deepcopy(state["structure"]),
-            "scenarios": copy.deepcopy(state["scenarios"]),
-            "questions": copy.deepcopy(state["questions"]),
-            "evidence_plan": copy.deepcopy(state["evidence_plan"]),
-            "uncertainty_map": copy.deepcopy(state["uncertainty_map"]),
-            "signals": copy.deepcopy(state["signals"]),
-            "monitoring": _pick_fields(state["monitoring"], ["what_to_monitor_next"]),
-            "decision_logic": _pick_fields(
-                state["decision_logic"],
-                ["appropriate_evidence_threshold", "triggers"],
-            ),
-        }
+def _build_render_reads_context(
+    *,
+    state: dict,
+    read_names: list[str],
+) -> dict[str, object]:
+    context: dict[str, object] = {}
+    for read_name in read_names:
+        key = _render_read_to_state_key(read_name)
+        if key == "topic":
+            context["topic"] = state.get("topic", "")
+            continue
+        if key == "routing":
+            context["routing"] = _build_routing_context(state.get("routing", {}))
+            continue
+        if key in state:
+            context[key] = copy.deepcopy(state[key])
+    return context
 
-    if output_mode == "Decision Memo":
-        return {
-            "decision_logic": copy.deepcopy(state["decision_logic"]),
-            "synthesis": copy.deepcopy(state["synthesis"]),
-            "scenarios": copy.deepcopy(state["scenarios"]),
-            "evidence_plan": _pick_fields(
-                state["evidence_plan"],
-                ["evidence_hierarchy", "question_to_evidence_mapping"],
-            ),
-            "uncertainty_map": copy.deepcopy(state["uncertainty_map"]),
-            "questions": _pick_fields(state["questions"], ["top_killer_questions"]),
-            "monitoring": _pick_fields(state["monitoring"], ["what_to_monitor_next"]),
-        }
 
-    if output_mode == "Monitoring Dashboard":
-        return {
-            "boundary": _pick_fields(state["boundary"], ["exact_object_of_analysis", "core_system"]),
-            "scenarios": copy.deepcopy(state["scenarios"]),
-            "monitoring": copy.deepcopy(state["monitoring"]),
-            "signals": copy.deepcopy(state["signals"]),
-            "evidence_plan": _pick_fields(state["evidence_plan"], ["evidence_hierarchy"]),
-            "uncertainty_map": _pick_fields(state["uncertainty_map"], ["task_material_uncertainties"]),
-            "decision_logic": _pick_fields(
-                state["decision_logic"],
-                [
-                    "must_know_before_action",
-                    "can_learn_after_action",
-                    "appropriate_evidence_threshold",
-                    "reversibility_logic",
-                    "sizing_logic",
-                    "staging_logic",
-                    "triggers",
-                    "hedge_exit_kill_criteria",
-                ],
-            ),
-            "questions": _pick_fields(state["questions"], ["top_killer_questions"]),
-        }
-
-    if output_mode == "Scenario Tree":
-        return {
-            "boundary": _pick_fields(
-                state["boundary"],
-                ["exact_object_of_analysis", "core_system", "scope_assumptions"],
-            ),
-            "structure": _pick_fields(
-                state["structure"],
-                ["causal_mechanism", "killer_variables", "threshold_variables"],
-            ),
-            "scenarios": copy.deepcopy(state["scenarios"]),
-            "evidence_plan": _pick_fields(
-                state["evidence_plan"],
-                ["question_to_evidence_mapping"],
-            ),
-            "monitoring": _pick_fields(state["monitoring"], ["what_to_monitor_next"]),
-            "signals": _pick_fields(
-                {"signals": state["signals"]},
-                ["signals"],
-            )["signals"],
-            "questions": _pick_fields(state["questions"], ["top_killer_questions"]),
-            "uncertainty_map": copy.deepcopy(state["uncertainty_map"]),
-        }
-
-    if output_mode == "Deep-Research Prompt":
-        return {
-            "boundary": copy.deepcopy(state["boundary"]),
-            "structure": copy.deepcopy(state["structure"]),
-            "scenarios": copy.deepcopy(state["scenarios"]),
-            "questions": copy.deepcopy(state["questions"]),
-            "evidence_plan": copy.deepcopy(state["evidence_plan"]),
-            "monitoring": _pick_fields(state["monitoring"], ["what_to_monitor_next"]),
-            "decision_logic": _pick_fields(state["decision_logic"], ["triggers"]),
-            "uncertainty_map": copy.deepcopy(state["uncertainty_map"]),
-        }
-
-    if output_mode == "Investment Worksheet":
-        return {
-            "boundary": _pick_fields(state["boundary"], ["exact_object_of_analysis", "core_system"]),
-            "structure": copy.deepcopy(state["structure"]),
-            "scenarios": copy.deepcopy(state["scenarios"]),
-            "questions": _pick_fields(state["questions"], ["top_killer_questions"]),
-            "evidence_plan": _pick_fields(
-                state["evidence_plan"],
-                ["evidence_hierarchy", "question_to_evidence_mapping"],
-            ),
-            "decision_logic": copy.deepcopy(state["decision_logic"]),
-            "synthesis": copy.deepcopy(state["synthesis"]),
-            "signals": copy.deepcopy(state["signals"]),
-            "monitoring": _pick_fields(state["monitoring"], ["what_to_monitor_next"]),
-            "uncertainty_map": _pick_fields(state["uncertainty_map"], ["task_material_uncertainties"]),
-        }
-
-    raise ValueError(f"Unsupported render output mode: {output_mode!r}")
+def _render_read_to_state_key(read_name: str) -> str:
+    if read_name == "evidence_planning":
+        return "evidence_plan"
+    return normalize_stage_name(read_name)
 
 
 def _filter_render_stage_guidance(
@@ -265,7 +190,3 @@ def _filter_render_stage_guidance(
             filtered["conditional"].append({**copy.deepcopy(entry), "condition": condition})
 
     return filtered
-
-
-def _pick_fields(section: dict, fields: list[str]) -> dict:
-    return {field: copy.deepcopy(section[field]) for field in fields if field in section}

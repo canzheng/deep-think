@@ -125,6 +125,15 @@ The context should not contain:
 - one giant full-state markdown block
 - hidden broad summaries that the template did not explicitly ask for
 
+The render contract is the source of truth for render reads:
+- `reads_required_common` declares wrapper-only reads
+- `reads_by_output_mode` declares subtemplate-only reads keyed by canonical
+  output-mode name
+- overlap is allowed
+
+The Python runtime should use those contract declarations to assemble the
+render context rather than maintaining a separate hardcoded dependency map.
+
 ## 6. Render Inputs
 
 ### 6.1. Common Framing
@@ -149,6 +158,11 @@ the output-mode-specific deliverable shape.
 
 Render `Stage Guidance` should be owned by the selected subtemplate, not the
 shared wrapper.
+
+`Render` returns the final deliverable as plain text:
+- no runtime `--output-schema` constraint
+- no JSON-only answering wrapper
+- no required `response.schema.json` or `response.parsed.json` artifact
 
 Per-subtemplate adapter influence:
 

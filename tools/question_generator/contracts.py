@@ -58,5 +58,7 @@ def load_contract_file(path: Path) -> StageContract:
             )
             for item in payload.get("reads_optional", [])
         ],
+        reads_required_common=payload.get("reads_required_common"),
+        reads_by_output_mode=payload.get("reads_by_output_mode"),
         raw=payload,
     )

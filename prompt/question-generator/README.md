@@ -118,11 +118,14 @@ Current orchestration behavior:
 - the live `shared_state.json` remains the sole analysis input passed between stages
 - a JSON recipe can define an ordered multi-stage workflow
 - each prepared stage writes its assembled `prompt.md` into a stage-specific artifact directory
-- each prepared stage also writes `response.schema.json`
+- each JSON-returning stage also writes `response.schema.json`
 - automatic stage execution launches a fresh ephemeral Codex answering session
 - that answering session always uses `gpt-5.4` with `high` reasoning effort
 - each executed stage persists `codex.stdout.jsonl` and `codex.stderr.txt`
-- each applied response writes both `response.raw.md` and `response.parsed.json`
+- every applied response writes `response.raw.md`
+- JSON-returning stages also write `response.parsed.json`
+- `Render` returns the final deliverable as plain text and does not use
+  `--output-schema`
 - only contract-owned state sections are merged back into `shared_state.json`
 - debug artifacts live beside shared state, not inside it
 

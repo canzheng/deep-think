@@ -92,20 +92,11 @@ class ContractLoadingTest(unittest.TestCase):
                     )
                 else:
                     self.assertEqual(contract.writes, [])
-                    self.assertEqual(
-                        contract.output_schema.required,
-                        ["deliverable"],
-                    )
-                    self.assertIn("deliverable", contract.output_schema.properties)
-                    deliverable = contract.output_schema.properties["deliverable"]
-                    self.assertEqual(
-                        deliverable["properties"]["uses_shared_state_as_sole_analysis_input"]["const"],
-                        True,
-                    )
-                    self.assertEqual(
-                        deliverable["properties"]["must_not_write_state"]["const"],
-                        True,
-                    )
+                    self.assertIsNotNone(contract.reads_required_common)
+                    self.assertIsNotNone(contract.reads_by_output_mode)
+                    self.assertIn("routing", contract.reads_required_common)
+                    self.assertIn("Decision Memo", contract.reads_by_output_mode)
+                    self.assertIn("decision_logic", contract.reads_by_output_mode["Decision Memo"])
 
                 if filename in FEEDBACK_SCHEMA_REQUIRED:
                     self.assertIsNotNone(contract.feedback.schema)

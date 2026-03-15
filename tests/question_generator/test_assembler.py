@@ -1,6 +1,7 @@
 import json
 import random
 import unittest
+from types import SimpleNamespace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -418,6 +419,31 @@ class AssemblerTest(unittest.TestCase):
         self.assertIn("Treat single-customer anecdotes as weak unless supported by metrics", prompt)
         self.assertIn("Healthcare buyers care more about workflow reliability than novelty.", prompt)
 
+    def test_render_context_uses_contract_declared_common_and_mode_reads(self) -> None:
+        state = load_populated_state()
+        state["routing"]["output_mode"] = "Decision Memo"
+        contract = SimpleNamespace(
+            reads_required_common=["topic", "routing"],
+            reads_by_output_mode={
+                "Decision Memo": ["decision_logic", "questions"],
+            },
+        )
+
+        with patch("tools.question_generator.render_context.load_contract", return_value=contract):
+            context = build_render_context(
+                state,
+                stage_guidance={"required": [], "conditional": []},
+                required_output_schema="",
+                feedback_schema="",
+            )
+
+        self.assertIn("topic", context)
+        self.assertIn("routing", context)
+        self.assertIn("decision_logic", context)
+        self.assertIn("questions", context)
+        self.assertNotIn("scenarios", context)
+        self.assertNotIn("boundary", context)
+
     def test_investment_worksheet_render_includes_uncertainty_mode_rationale(self) -> None:
         prompt = self._render_prompt_for_mode("Investment Worksheet")
 
@@ -465,7 +491,10 @@ class AssemblerTest(unittest.TestCase):
     def test_deep_research_render_requires_directly_executable_final_prompt(self) -> None:
         prompt = self._render_prompt_for_mode("Deep-Research Prompt")
 
-        self.assertIn("The final prompt must be directly executable.", prompt)
+        self.assertIn(
+            "The final prompt must be directly executable and avoid extra framing that would get in the user's way.",
+            prompt,
+        )
 
     def test_render_wrapper_avoids_question_duplication_in_subtemplates(self) -> None:
         decision_prompt = self._render_prompt_for_mode("Decision Memo")

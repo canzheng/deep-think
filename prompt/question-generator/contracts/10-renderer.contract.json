@@ -1,5 +1,73 @@
 {
   "stage": "render",
+  "reads_required_common": [
+    "topic",
+    "routing"
+  ],
+  "reads_by_output_mode": {
+    "Research Memo": [
+      "boundary",
+      "structure",
+      "scenarios",
+      "questions",
+      "evidence_planning",
+      "uncertainty_map",
+      "decision_logic",
+      "monitoring",
+      "signals"
+    ],
+    "Decision Memo": [
+      "decision_logic",
+      "scenarios",
+      "evidence_planning",
+      "uncertainty_map",
+      "synthesis",
+      "questions",
+      "monitoring"
+    ],
+    "Monitoring Dashboard": [
+      "boundary",
+      "scenarios",
+      "monitoring",
+      "signals",
+      "evidence_planning",
+      "uncertainty_map",
+      "decision_logic",
+      "questions"
+    ],
+    "Scenario Tree": [
+      "boundary",
+      "structure",
+      "scenarios",
+      "evidence_planning",
+      "monitoring",
+      "signals",
+      "questions",
+      "uncertainty_map"
+    ],
+    "Deep-Research Prompt": [
+      "boundary",
+      "structure",
+      "scenarios",
+      "questions",
+      "evidence_planning",
+      "uncertainty_map",
+      "decision_logic",
+      "monitoring"
+    ],
+    "Investment Worksheet": [
+      "structure",
+      "scenarios",
+      "routing",
+      "evidence_planning",
+      "uncertainty_map",
+      "decision_logic",
+      "synthesis",
+      "signals",
+      "questions",
+      "monitoring"
+    ]
+  },
   "depends_on": ["output_mode", "task", "domain", "evidence_mode", "uncertainty_mode", "decision_mode"],
   "writes": [],
   "output_format": "rendered_deliverable",

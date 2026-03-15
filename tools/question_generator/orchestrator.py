@@ -91,18 +91,18 @@ def prepare_stage(
     )
     prompt_path = stage_dir / PROMPT_FILENAME
     prompt_path.write_text(prompt, encoding="utf-8")
-    response_schema_path = stage_dir / RESPONSE_SCHEMA_FILENAME
-    _write_json(response_schema_path, build_stage_response_schema(normalized_stage))
-
     record = {
         "stage": normalized_stage,
         "status": "prompt_prepared",
         "prepared_at": _timestamp(),
         "prompt_path": str(prompt_path),
-        "response_schema_path": str(response_schema_path),
         "optional_reads": optional_reads or [],
         "writes": load_contract(normalized_stage).writes,
     }
+    if normalized_stage != "render":
+        response_schema_path = stage_dir / RESPONSE_SCHEMA_FILENAME
+        _write_json(response_schema_path, build_stage_response_schema(normalized_stage))
+        record["response_schema_path"] = str(response_schema_path)
     _write_stage_record(run_dir, normalized_stage, record)
     return record
 
@@ -123,16 +123,27 @@ def apply_stage_response(
     stage_dir = _stage_dir(run_dir, normalized_stage)
     stage_dir.mkdir(parents=True, exist_ok=True)
     raw_path = stage_dir / RESPONSE_RAW_FILENAME
-    parsed_path = stage_dir / RESPONSE_PARSED_FILENAME
-
     raw_path.write_text(response_text, encoding="utf-8")
-    parsed_payload = extract_json_payload(response_text)
     contract = load_contract(normalized_stage)
+    prior_record = _load_stage_record(run_dir, normalized_stage)
+    if normalized_stage == "render":
+        record = {
+            **prior_record,
+            "stage": normalized_stage,
+            "status": "response_applied",
+            "response_applied_at": _timestamp(),
+            "response_raw_path": str(raw_path),
+            "merged_sections": contract.writes,
+        }
+        _write_stage_record(run_dir, normalized_stage, record)
+        return record
+
+    parsed_path = stage_dir / RESPONSE_PARSED_FILENAME
+    parsed_payload = extract_json_payload(response_text)
     _validate_stage_payload(contract, parsed_payload)
     _merge_stage_payload(run_dir, contract.writes, parsed_payload)
     _write_json(parsed_path, parsed_payload)
 
-    prior_record = _load_stage_record(run_dir, normalized_stage)
     record = {
         **prior_record,
         "stage": normalized_stage,
@@ -171,12 +182,13 @@ def build_stage_response_schema(stage: str) -> dict:
 
 def build_codex_exec_command(
     *,
+    stage: str,
     codex_bin: str,
     workspace_dir: Path,
     response_schema_path: Path,
     response_raw_path: Path,
 ) -> list[str]:
-    return [
+    command = [
         codex_bin,
         "exec",
         "--ephemeral",
@@ -188,29 +200,45 @@ def build_codex_exec_command(
         "read-only",
         "-C",
         str(workspace_dir),
-        "--output-schema",
-        str(response_schema_path),
-        "--json",
-        "-o",
-        str(response_raw_path),
-        "-",
     ]
-
-
-def build_stage_agent_prompt(stage_prompt: str) -> str:
-    return "\n\n".join(
+    if normalize_stage_name(stage) != "render":
+        command.extend(
+            [
+                "--output-schema",
+                str(response_schema_path),
+                "--json",
+            ]
+        )
+    command.extend(
         [
-            "You are the answering model for one question-generator workflow stage.",
-            "Do not run shell commands.",
-            "Do not inspect files.",
-            "Do not browse project context beyond the prompt you were given.",
-            "Do not use tools.",
-            "Return exactly one JSON object matching the provided schema.",
-            "Do not include markdown fences or explanatory prose.",
-            "If a secondary classification or rationale is not needed, use null.",
-            stage_prompt,
+            "-o",
+            str(response_raw_path),
+            "-",
         ]
     )
+    return command
+
+
+def build_stage_agent_prompt(stage: str, stage_prompt: str) -> str:
+    instructions = [
+        "You are the answering model for one question-generator workflow stage.",
+        "Do not run shell commands.",
+        "Do not inspect files.",
+        "Do not browse project context beyond the prompt you were given.",
+        "Do not use tools.",
+    ]
+    if normalize_stage_name(stage) == "render":
+        instructions.append("Return the final deliverable directly as plain text.")
+    else:
+        instructions.extend(
+            [
+                "Return exactly one JSON object matching the provided schema.",
+                "Do not include markdown fences or explanatory prose.",
+                "If a secondary classification or rationale is not needed, use null.",
+            ]
+        )
+    instructions.append(stage_prompt)
+    return "\n\n".join(instructions)
 
 
 def run_stage(
@@ -226,22 +254,22 @@ def run_stage(
     prepared = prepare_stage(run_dir, normalized_stage, optional_reads=optional_reads)
     stage_dir = _stage_dir(run_dir, normalized_stage)
     prompt_path = Path(prepared["prompt_path"])
-    response_schema_path = Path(prepared["response_schema_path"])
     response_raw_path = stage_dir / RESPONSE_RAW_FILENAME
     stdout_path = stage_dir / CODEX_STDOUT_FILENAME
     stderr_path = stage_dir / CODEX_STDERR_FILENAME
     workspace = repo_root() if workspace_dir is None else workspace_dir
     command = build_codex_exec_command(
+        stage=normalized_stage,
         codex_bin=codex_bin,
         workspace_dir=workspace,
-        response_schema_path=response_schema_path,
+        response_schema_path=Path(prepared.get("response_schema_path", stage_dir / RESPONSE_SCHEMA_FILENAME)),
         response_raw_path=response_raw_path,
     )
 
     try:
         completed = subprocess.run(
             command,
-            input=build_stage_agent_prompt(prompt_path.read_text(encoding="utf-8")),
+            input=build_stage_agent_prompt(normalized_stage, prompt_path.read_text(encoding="utf-8")),
             text=True,
             capture_output=True,
             timeout=timeout_seconds,

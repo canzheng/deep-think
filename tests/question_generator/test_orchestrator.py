@@ -87,6 +87,25 @@ class OrchestratorTest(unittest.TestCase):
             self.assertEqual(stage_record["stage"], "decision_logic")
             self.assertTrue((prompt_path.parent / RESPONSE_SCHEMA_FILENAME).is_file())
 
+    def test_prepare_stage_for_render_skips_response_schema_artifact(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+            )
+
+            result = prepare_stage(run_dir, "render")
+
+            prompt_path = Path(result["prompt_path"])
+            self.assertTrue(prompt_path.is_file())
+            self.assertFalse((prompt_path.parent / RESPONSE_SCHEMA_FILENAME).exists())
+
+            manifest = load_run_manifest(run_dir)
+            stage_record = manifest["stages"]["render"]
+            self.assertEqual(stage_record["status"], "prompt_prepared")
+            self.assertNotIn("response_schema_path", stage_record)
+
     def test_build_stage_response_schema_adds_optional_feedback_when_supported(self) -> None:
         schema = build_stage_response_schema("question_generation")
 
@@ -116,6 +135,7 @@ class OrchestratorTest(unittest.TestCase):
         with TemporaryDirectory() as tmpdir:
             artifact_dir = Path(tmpdir)
             command = build_codex_exec_command(
+                stage="decision_logic",
                 codex_bin="codex",
                 workspace_dir=Path("/Users/canzheng/Work/sandbox/truth-seek"),
                 response_schema_path=artifact_dir / RESPONSE_SCHEMA_FILENAME,
@@ -132,12 +152,38 @@ class OrchestratorTest(unittest.TestCase):
         self.assertIn("--output-schema", command)
         self.assertIn("-", command)
 
+    def test_build_codex_exec_command_omits_output_schema_for_render(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            artifact_dir = Path(tmpdir)
+            command = build_codex_exec_command(
+                stage="render",
+                codex_bin="codex",
+                workspace_dir=Path("/Users/canzheng/Work/sandbox/truth-seek"),
+                response_schema_path=artifact_dir / RESPONSE_SCHEMA_FILENAME,
+                response_raw_path=artifact_dir / "response.raw.md",
+            )
+
+        self.assertEqual(command[0:2], ["codex", "exec"])
+        self.assertNotIn("--output-schema", command)
+        self.assertNotIn("--json", command)
+        self.assertIn("-o", command)
+        self.assertEqual(command[-1], "-")
+
     def test_build_stage_agent_prompt_forbids_tools_and_requires_json_only(self) -> None:
-        prompt = build_stage_agent_prompt("Stage body")
+        prompt = build_stage_agent_prompt("decision_logic", "Stage body")
 
         self.assertIn("Do not run shell commands", prompt)
         self.assertIn("Do not inspect files", prompt)
         self.assertIn("Return exactly one JSON object", prompt)
+        self.assertIn("Stage body", prompt)
+
+    def test_build_stage_agent_prompt_for_render_asks_for_direct_deliverable(self) -> None:
+        prompt = build_stage_agent_prompt("render", "Stage body")
+
+        self.assertIn("Do not run shell commands", prompt)
+        self.assertIn("Return the final deliverable directly as plain text.", prompt)
+        self.assertNotIn("Return exactly one JSON object", prompt)
+        self.assertNotIn("Do not include markdown fences or explanatory prose.", prompt)
         self.assertIn("Stage body", prompt)
 
     def test_apply_stage_response_persists_raw_and_parsed_payload_and_merges_owned_sections(self) -> None:
@@ -224,6 +270,38 @@ class OrchestratorTest(unittest.TestCase):
                     "decision_logic",
                     response_text=bad_response,
                 )
+
+    def test_apply_stage_response_for_render_persists_text_without_json_parsing(self) -> None:
+        response_text = "# Investment Worksheet\n\nDecision: wait for confirmation."
+
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+            )
+            prepare_stage(run_dir, "render")
+
+            result = apply_stage_response(
+                run_dir,
+                "render",
+                response_text=response_text,
+            )
+
+            raw_path = Path(result["response_raw_path"])
+            self.assertTrue(raw_path.is_file())
+            self.assertEqual(raw_path.read_text(encoding="utf-8"), response_text)
+            self.assertNotIn("response_parsed_path", result)
+
+            manifest = load_run_manifest(run_dir)
+            stage_record = manifest["stages"]["render"]
+            self.assertEqual(stage_record["status"], "response_applied")
+            self.assertEqual(stage_record["response_raw_path"], str(raw_path))
+            self.assertNotIn("response_parsed_path", stage_record)
+
+            with (run_dir / SHARED_STATE_FILENAME).open() as state_file:
+                state = json.load(state_file)
+            self.assertNotIn("deliverable", state)
 
     def test_run_stage_invokes_codex_and_applies_response(self) -> None:
         response_text = """{

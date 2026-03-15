@@ -70,9 +70,6 @@ Evidence plan:
 {{/evidence_plan.question_to_evidence_mapping}}
 
 Research priorities:
-{{#questions.top_killer_questions}}
-- {{question}}
-{{/questions.top_killer_questions}}
 {{#evidence_plan.question_to_evidence_mapping}}
 - {{question}}
   {{#preferred_sources}}

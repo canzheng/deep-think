@@ -8,7 +8,8 @@ Each guidance item includes an importance label that indicates how strongly it s
 - {{importance}}: {{guidance}}
 [/CONDITIONAL]
 {{/stage_guidance.conditional}}
-- The final prompt must be directly executable.
+
+- The final prompt must be directly executable and avoid extra framing that would get in the user's way.
 
 Boundary:
 - Exact object of analysis: {{boundary.exact_object_of_analysis}}
@@ -115,4 +116,4 @@ What would change the conclusion:
 {{/uncertainty_map.task_material_uncertainties}}
 
 Final prompt:
-- Produce a deep research workflow that uses the objective, mechanisms, questions, evidence priorities, and uncertainty map above as the governing structure.
+- Produce the final deep research prompt itself, using the objective, mechanisms, questions, evidence priorities, and uncertainty map above as the governing structure.
