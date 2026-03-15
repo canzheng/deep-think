@@ -51,6 +51,61 @@ class CliTest(unittest.TestCase):
         self.assertEqual(run_stage_args.timeout_seconds, 120)
         self.assertEqual(run_recipe_args.timeout_seconds, 120)
 
+    def test_new_workflow_commands_parse_expected_arguments(self) -> None:
+        parser = build_workflow_parser()
+
+        init_topic_args = parser.parse_args(
+            [
+                "init-topic-run",
+                "--topic",
+                "Should Atlas expand into healthcare?",
+                "--output-dir",
+                "/tmp/question-runs",
+                "--run-id",
+                "topic-run",
+            ]
+        )
+        update_routing_args = parser.parse_args(
+            [
+                "update-routing",
+                "--run-dir",
+                "/tmp/question-runs/topic-run",
+                "--patch-json",
+                '{"output_mode":"Research Memo"}',
+            ]
+        )
+        run_on_run_args = parser.parse_args(
+            [
+                "run-recipe-on-run",
+                "--recipe",
+                str(RECIPE_PATH),
+                "--run-dir",
+                "/tmp/question-runs/topic-run",
+                "--start-stage",
+                "boundary",
+            ]
+        )
+        run_topic_args = parser.parse_args(
+            [
+                "run-topic",
+                "--topic",
+                "Should Atlas expand into healthcare?",
+                "--recipe",
+                str(RECIPE_PATH),
+                "--output-dir",
+                "/tmp/question-runs",
+                "--run-id",
+                "topic-run",
+                "--pause-after-stage",
+                "routing",
+            ]
+        )
+
+        self.assertEqual(init_topic_args.run_id, "topic-run")
+        self.assertEqual(update_routing_args.patch_json, '{"output_mode":"Research Memo"}')
+        self.assertEqual(run_on_run_args.start_stage, "boundary")
+        self.assertEqual(run_topic_args.pause_after_stage, "routing")
+
     def test_cli_prints_assembled_prompt(self) -> None:
         stdout = io.StringIO()
         with redirect_stdout(stdout):
@@ -204,6 +259,109 @@ class CliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_run_recipe.called)
             self.assertIn("demo-run", stdout.getvalue())
+
+    def test_init_topic_run_command_uses_topic_initializer(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            with patch(
+                "tools.question_generator.cli.initialize_topic_run",
+                return_value=Path(tmpdir) / "topic-run",
+            ) as mocked_initialize_topic_run:
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "init-topic-run",
+                            "--topic",
+                            "Should Atlas expand into healthcare?",
+                            "--output-dir",
+                            tmpdir,
+                            "--run-id",
+                            "topic-run",
+                        ]
+                    )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(mocked_initialize_topic_run.called)
+            self.assertIn("topic-run", stdout.getvalue())
+
+    def test_update_routing_command_uses_routing_patcher(self) -> None:
+        with patch(
+            "tools.question_generator.cli.update_routing",
+            return_value={"output_mode": "Research Memo"},
+        ) as mocked_update_routing:
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "update-routing",
+                        "--run-dir",
+                        "/tmp/question-runs/topic-run",
+                        "--patch-json",
+                        '{"output_mode":"Research Memo"}',
+                    ]
+                )
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(mocked_update_routing.called)
+        self.assertIn("Research Memo", stdout.getvalue())
+
+    def test_run_recipe_on_run_command_uses_existing_run_recipe_runner(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            with patch(
+                "tools.question_generator.cli.run_recipe_on_run",
+                return_value={
+                    "run_dir": str(Path(tmpdir) / "topic-run"),
+                    "stages": [{"stage": "boundary"}, {"stage": "render"}],
+                },
+            ) as mocked_run_recipe_on_run:
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "run-recipe-on-run",
+                            "--recipe",
+                            str(RECIPE_PATH),
+                            "--run-dir",
+                            str(Path(tmpdir) / "topic-run"),
+                            "--start-stage",
+                            "boundary",
+                        ]
+                    )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(mocked_run_recipe_on_run.called)
+            self.assertIn("topic-run", stdout.getvalue())
+
+    def test_run_topic_command_uses_topic_runner(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            with patch(
+                "tools.question_generator.cli.run_topic",
+                return_value={
+                    "run_dir": str(Path(tmpdir) / "topic-run"),
+                    "stages": [{"stage": "routing"}],
+                },
+            ) as mocked_run_topic:
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "run-topic",
+                            "--topic",
+                            "Should Atlas expand into healthcare?",
+                            "--recipe",
+                            str(RECIPE_PATH),
+                            "--output-dir",
+                            tmpdir,
+                            "--run-id",
+                            "topic-run",
+                            "--pause-after-stage",
+                            "routing",
+                        ]
+                    )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(mocked_run_topic.called)
+            self.assertIn("topic-run", stdout.getvalue())
 
 
 if __name__ == "__main__":

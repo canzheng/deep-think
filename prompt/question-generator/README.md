@@ -58,6 +58,12 @@ conda activate truth-seek
 The current assembler target is dependency-light and relies on the Python
 standard library plus `chevron` and `unittest`.
 
+State-template note:
+- `shared_state_schema.json` is the schema for the live workflow state
+- it is not an instance template to copy directly into a run
+- a topic-first workflow may start from the minimal state object
+  `{"topic": "<raw user request>"}`
+
 Assembler runtime:
 - stage pathing and contract loading:
   - `tools/question_generator/pathing.py`
@@ -157,6 +163,25 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
   --run-id demo-workflow
+```
+
+Topic-first workflow with routing confirmation:
+```bash
+conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+  --topic "Should Atlas expand into healthcare next quarter?" \
+  --recipe prompt/question-generator/recipes/non-render.recipe.json \
+  --output-dir tmp/question-runs \
+  --run-id atlas-healthcare \
+  --pause-after-stage routing
+
+conda run -n truth-seek python -m tools.question_generator.cli update-routing \
+  --run-dir tmp/question-runs/atlas-healthcare \
+  --patch-json '{"output_mode":"Research Memo"}'
+
+conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run \
+  --recipe prompt/question-generator/recipes/non-render.recipe.json \
+  --run-dir tmp/question-runs/atlas-healthcare \
+  --start-stage boundary
 ```
 
 Manual debug workflow:

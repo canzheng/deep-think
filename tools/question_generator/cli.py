@@ -8,11 +8,15 @@ import sys
 from tools.question_generator.assembler import assemble_stage_prompt
 from tools.question_generator.orchestrator import (
     apply_stage_response,
+    initialize_topic_run,
     initialize_run,
     load_recipe,
     prepare_stage,
     run_recipe,
+    run_recipe_on_run,
     run_stage,
+    run_topic,
+    update_routing,
 )
 
 
@@ -32,6 +36,11 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--state", required=True)
     init_parser.add_argument("--output-dir", required=True)
     init_parser.add_argument("--run-id", required=True)
+
+    init_topic_parser = subparsers.add_parser("init-topic-run")
+    init_topic_parser.add_argument("--topic", required=True)
+    init_topic_parser.add_argument("--output-dir", required=True)
+    init_topic_parser.add_argument("--run-id", required=True)
 
     prepare_parser = subparsers.add_parser("prepare-stage")
     prepare_parser.add_argument("--run-dir", required=True)
@@ -58,6 +67,27 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     recipe_parser.add_argument("--codex-bin", default="codex")
     recipe_parser.add_argument("--timeout-seconds", type=int, default=120)
 
+    recipe_on_run_parser = subparsers.add_parser("run-recipe-on-run")
+    recipe_on_run_parser.add_argument("--recipe", required=True)
+    recipe_on_run_parser.add_argument("--run-dir", required=True)
+    recipe_on_run_parser.add_argument("--start-stage")
+    recipe_on_run_parser.add_argument("--stop-stage")
+    recipe_on_run_parser.add_argument("--codex-bin", default="codex")
+    recipe_on_run_parser.add_argument("--timeout-seconds", type=int, default=120)
+
+    update_routing_parser = subparsers.add_parser("update-routing")
+    update_routing_parser.add_argument("--run-dir", required=True)
+    update_routing_parser.add_argument("--patch-json", required=True)
+
+    run_topic_parser = subparsers.add_parser("run-topic")
+    run_topic_parser.add_argument("--topic", required=True)
+    run_topic_parser.add_argument("--recipe", required=True)
+    run_topic_parser.add_argument("--output-dir", required=True)
+    run_topic_parser.add_argument("--run-id", required=True)
+    run_topic_parser.add_argument("--pause-after-stage")
+    run_topic_parser.add_argument("--codex-bin", default="codex")
+    run_topic_parser.add_argument("--timeout-seconds", type=int, default=120)
+
     return parser
 
 
@@ -81,6 +111,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "init-run":
         run_dir = initialize_run(
             state_path=Path(args.state),
+            output_dir=Path(args.output_dir),
+            run_id=args.run_id,
+        )
+        print(run_dir)
+        return 0
+
+    if args.command == "init-topic-run":
+        run_dir = initialize_topic_run(
+            topic=args.topic,
             output_dir=Path(args.output_dir),
             run_id=args.run_id,
         )
@@ -122,6 +161,40 @@ def main(argv: list[str] | None = None) -> int:
             state_path=Path(args.state),
             output_dir=Path(args.output_dir),
             run_id=args.run_id,
+            codex_bin=args.codex_bin,
+            timeout_seconds=args.timeout_seconds,
+        )
+        print(result["run_dir"])
+        return 0
+
+    if args.command == "run-recipe-on-run":
+        result = run_recipe_on_run(
+            recipe_path=Path(args.recipe),
+            run_dir=Path(args.run_dir),
+            start_stage=args.start_stage,
+            stop_stage=args.stop_stage,
+            codex_bin=args.codex_bin,
+            timeout_seconds=args.timeout_seconds,
+        )
+        print(result["run_dir"])
+        return 0
+
+    if args.command == "update-routing":
+        patch = json.loads(args.patch_json)
+        updated = update_routing(
+            Path(args.run_dir),
+            patch,
+        )
+        print(json.dumps(updated, indent=2, ensure_ascii=True))
+        return 0
+
+    if args.command == "run-topic":
+        result = run_topic(
+            topic=args.topic,
+            recipe_path=Path(args.recipe),
+            output_dir=Path(args.output_dir),
+            run_id=args.run_id,
+            pause_after_stage=args.pause_after_stage,
             codex_bin=args.codex_bin,
             timeout_seconds=args.timeout_seconds,
         )

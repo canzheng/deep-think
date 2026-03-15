@@ -41,6 +41,11 @@ For non-render stages, the runtime:
 The durable workflow state lives in one file shaped by:
 - [shared_state_schema.json](prompt/question-generator/contracts/shared_state_schema.json)
 
+Important:
+- `shared_state_schema.json` is the schema contract for the live state
+- it is not a starter instance file
+- a topic-first run can begin from the minimal state `{"topic": "<raw user request>"}`
+
 ## Setup
 
 Create the Conda environment:
@@ -74,6 +79,35 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
   --run-id demo-workflow
+```
+
+Initialize a run directly from a raw topic:
+
+```bash
+conda run -n truth-seek python -m tools.question_generator.cli init-topic-run \
+  --topic "Should Atlas expand into healthcare next quarter?" \
+  --output-dir tmp/question-runs \
+  --run-id atlas-healthcare
+```
+
+Run from a raw topic and stop after routing for user verification:
+
+```bash
+conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+  --topic "Should Atlas expand into healthcare next quarter?" \
+  --recipe prompt/question-generator/recipes/non-render.recipe.json \
+  --output-dir tmp/question-runs \
+  --run-id atlas-healthcare \
+  --pause-after-stage routing
+```
+
+Resume an existing run after routing confirmation:
+
+```bash
+conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run \
+  --recipe prompt/question-generator/recipes/non-render.recipe.json \
+  --run-dir tmp/question-runs/atlas-healthcare \
+  --start-stage boundary
 ```
 
 Run the question-generator test suite:

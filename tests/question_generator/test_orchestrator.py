@@ -17,18 +17,24 @@ from tools.question_generator.orchestrator import (
     build_codex_exec_command,
     build_stage_agent_prompt,
     build_stage_response_schema,
+    initialize_topic_run,
     initialize_run,
     load_recipe,
     load_run_manifest,
     prepare_stage,
+    run_recipe_on_run,
+    run_topic,
     run_recipe,
     run_stage,
+    update_routing,
 )
+from tools.question_generator.bootstrap import bootstrap_topic_state
 
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MINIMAL_STATE_PATH = FIXTURES_DIR / "minimal_state.json"
+POPULATED_STATE_PATH = FIXTURES_DIR / "populated_state.json"
 RECIPE_PATH = (
     REPO_ROOT
     / "prompt"
@@ -39,6 +45,14 @@ RECIPE_PATH = (
 
 
 class OrchestratorTest(unittest.TestCase):
+    def test_bootstrap_topic_state_returns_minimal_topic_only_payload(self) -> None:
+        payload = bootstrap_topic_state("Should Atlas expand into healthcare?")
+
+        self.assertEqual(
+            payload,
+            {"topic": "Should Atlas expand into healthcare?"},
+        )
+
     def test_default_timeout_is_120_seconds(self) -> None:
         self.assertEqual(DEFAULT_TIMEOUT_SECONDS, 120)
 
@@ -64,6 +78,30 @@ class OrchestratorTest(unittest.TestCase):
 
             manifest = load_run_manifest(run_dir)
             self.assertEqual(manifest["run_id"], "demo-run")
+            self.assertEqual(manifest["state_path"], str(run_dir / SHARED_STATE_FILENAME))
+            self.assertEqual(manifest["stages"], {})
+
+    def test_initialize_topic_run_creates_manifest_and_topic_only_shared_state(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_topic_run(
+                topic="Should Atlas expand into healthcare?",
+                output_dir=Path(tmpdir),
+                run_id="topic-run",
+            )
+
+            self.assertEqual(run_dir, Path(tmpdir) / "topic-run")
+            self.assertTrue((run_dir / SHARED_STATE_FILENAME).is_file())
+            self.assertTrue((run_dir / MANIFEST_FILENAME).is_file())
+
+            with (run_dir / SHARED_STATE_FILENAME).open() as state_file:
+                state = json.load(state_file)
+            self.assertEqual(
+                state,
+                {"topic": "Should Atlas expand into healthcare?"},
+            )
+
+            manifest = load_run_manifest(run_dir)
+            self.assertEqual(manifest["run_id"], "topic-run")
             self.assertEqual(manifest["state_path"], str(run_dir / SHARED_STATE_FILENAME))
             self.assertEqual(manifest["stages"], {})
 
@@ -272,6 +310,42 @@ class OrchestratorTest(unittest.TestCase):
                     response_text=bad_response,
                 )
 
+    def test_update_routing_merges_partial_patch_without_clobbering_other_fields(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=POPULATED_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+            )
+
+            patch_payload = {
+                "output_mode": "Research Memo",
+                "classification_rationales": {
+                    "output_mode": "The user asked for an explanatory memo instead of a decision artifact.",
+                },
+                "time_horizon": "next 12 months",
+            }
+
+            updated_routing = update_routing(run_dir, patch_payload)
+
+            self.assertEqual(updated_routing["output_mode"], "Research Memo")
+            self.assertEqual(updated_routing["task"], "Decide")
+            self.assertEqual(updated_routing["domain"], "Company / Product Strategy")
+            self.assertEqual(updated_routing["time_horizon"], "next 12 months")
+            self.assertEqual(
+                updated_routing["classification_rationales"]["output_mode"],
+                "The user asked for an explanatory memo instead of a decision artifact.",
+            )
+            self.assertEqual(
+                updated_routing["classification_rationales"]["task"],
+                "The main need is to decide whether to act now under uncertainty.",
+            )
+
+            with (run_dir / SHARED_STATE_FILENAME).open() as state_file:
+                state = json.load(state_file)
+            self.assertEqual(state["routing"]["output_mode"], "Research Memo")
+            self.assertEqual(state["routing"]["domain"], "Company / Product Strategy")
+
     def test_apply_stage_response_for_render_persists_text_without_json_parsing(self) -> None:
         response_text = "# Investment Worksheet\n\nDecision: wait for confirmation."
 
@@ -449,6 +523,81 @@ class OrchestratorTest(unittest.TestCase):
                 ],
             )
             self.assertEqual(len(result["stages"]), 10)
+
+    def test_run_recipe_on_run_executes_remaining_stages_from_requested_start_stage(self) -> None:
+        executed_stages: list[str] = []
+
+        def fake_run_stage(run_dir, stage, **kwargs):
+            executed_stages.append(stage)
+            return {
+                "stage": stage,
+                "status": "response_applied",
+                "response_parsed_path": str(Path(run_dir) / "stages" / stage / "response.parsed.json"),
+            }
+
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="resume-run",
+            )
+
+            with patch("tools.question_generator.orchestrator.run_stage", side_effect=fake_run_stage):
+                result = run_recipe_on_run(
+                    recipe_path=RECIPE_PATH,
+                    run_dir=run_dir,
+                    start_stage="boundary",
+                )
+
+            self.assertEqual(
+                executed_stages,
+                [
+                    "boundary",
+                    "structure",
+                    "scenarios",
+                    "question_generation",
+                    "evidence_planning",
+                    "decision_logic",
+                    "signal_translation",
+                    "monitoring",
+                    "render",
+                ],
+            )
+            self.assertEqual(result["run_dir"], str(run_dir))
+            self.assertEqual(len(result["stages"]), 9)
+
+    def test_run_topic_initializes_from_topic_and_can_pause_after_routing(self) -> None:
+        executed_stages: list[str] = []
+
+        def fake_run_stage(run_dir, stage, **kwargs):
+            executed_stages.append(stage)
+            return {
+                "stage": stage,
+                "status": "response_applied",
+                "response_parsed_path": str(Path(run_dir) / "stages" / stage / "response.parsed.json"),
+            }
+
+        with TemporaryDirectory() as tmpdir:
+            with patch("tools.question_generator.orchestrator.run_stage", side_effect=fake_run_stage):
+                result = run_topic(
+                    topic="Should Atlas expand into healthcare?",
+                    recipe_path=RECIPE_PATH,
+                    output_dir=Path(tmpdir),
+                    run_id="topic-run",
+                    pause_after_stage="routing",
+                )
+
+            self.assertEqual(executed_stages, ["routing"])
+            self.assertEqual(result["run_dir"], str(Path(tmpdir) / "topic-run"))
+            self.assertEqual(len(result["stages"]), 1)
+            self.assertEqual(result["stages"][0]["stage"], "routing")
+
+            with (Path(result["run_dir"]) / SHARED_STATE_FILENAME).open() as state_file:
+                state = json.load(state_file)
+            self.assertEqual(
+                state,
+                {"topic": "Should Atlas expand into healthcare?"},
+            )
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ from pathlib import Path
 from shutil import copyfile
 
 from tools.question_generator.assembler import _expand_schema_refs, assemble_stage_prompt
+from tools.question_generator.bootstrap import bootstrap_topic_state
 from tools.question_generator.contracts import load_contract
 from tools.question_generator.pathing import contract_path, normalize_stage_name, repo_root, stage_stub
 
@@ -57,6 +58,29 @@ def initialize_run(
 
     shared_state_path = run_dir / SHARED_STATE_FILENAME
     copyfile(state_path, shared_state_path)
+
+    manifest = {
+        "run_id": run_id,
+        "created_at": _timestamp(),
+        "state_path": str(shared_state_path),
+        "stages": {},
+    }
+    _write_json(run_dir / MANIFEST_FILENAME, manifest)
+    return run_dir
+
+
+def initialize_topic_run(
+    *,
+    topic: str,
+    output_dir: Path,
+    run_id: str,
+) -> Path:
+    run_dir = output_dir / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / STAGES_DIRNAME).mkdir(parents=True, exist_ok=True)
+
+    shared_state_path = run_dir / SHARED_STATE_FILENAME
+    _write_json(shared_state_path, bootstrap_topic_state(topic))
 
     manifest = {
         "run_id": run_id,
@@ -335,15 +359,40 @@ def run_recipe(
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     workspace_dir: Path | None = None,
 ) -> dict:
-    recipe = load_recipe(recipe_path)
     run_dir = initialize_run(
         state_path=state_path,
         output_dir=output_dir,
         run_id=run_id,
     )
 
+    return run_recipe_on_run(
+        recipe_path=recipe_path,
+        run_dir=run_dir,
+        codex_bin=codex_bin,
+        timeout_seconds=timeout_seconds,
+        workspace_dir=workspace_dir,
+    )
+
+
+def run_recipe_on_run(
+    *,
+    recipe_path: Path,
+    run_dir: Path,
+    start_stage: str | None = None,
+    stop_stage: str | None = None,
+    codex_bin: str = DEFAULT_CODEX_BIN,
+    timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    workspace_dir: Path | None = None,
+) -> dict:
+    recipe = load_recipe(recipe_path)
+    selected_items = _select_recipe_items(
+        recipe["stages"],
+        start_stage=start_stage,
+        stop_stage=stop_stage,
+    )
+
     stage_results = []
-    for item in recipe["stages"]:
+    for item in selected_items:
         stage_results.append(
             run_stage(
                 run_dir,
@@ -366,6 +415,47 @@ def run_recipe(
         "recipe_name": recipe.get("name", ""),
         "stages": stage_results,
     }
+
+
+def run_topic(
+    *,
+    topic: str,
+    recipe_path: Path,
+    output_dir: Path,
+    run_id: str,
+    pause_after_stage: str | None = None,
+    codex_bin: str = DEFAULT_CODEX_BIN,
+    timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    workspace_dir: Path | None = None,
+) -> dict:
+    run_dir = initialize_topic_run(
+        topic=topic,
+        output_dir=output_dir,
+        run_id=run_id,
+    )
+
+    return run_recipe_on_run(
+        recipe_path=recipe_path,
+        run_dir=run_dir,
+        stop_stage=pause_after_stage,
+        codex_bin=codex_bin,
+        timeout_seconds=timeout_seconds,
+        workspace_dir=workspace_dir,
+    )
+
+
+def update_routing(run_dir: Path, patch: dict) -> dict:
+    if not isinstance(patch, dict) or not patch:
+        raise ValueError("Routing patch must be a non-empty JSON object")
+
+    state = _load_shared_state(run_dir)
+    if "routing" not in state or not isinstance(state["routing"], dict):
+        raise ValueError("Routing cannot be updated before the routing stage has populated it")
+
+    merged_routing = _deep_merge_dicts(state["routing"], patch)
+    state["routing"] = merged_routing
+    _write_json(run_dir / SHARED_STATE_FILENAME, state)
+    return merged_routing
 
 
 def extract_json_payload(response_text: str) -> dict:
@@ -442,6 +532,47 @@ def _load_shared_state(run_dir: Path) -> dict:
 
 def _stage_dir(run_dir: Path, stage: str) -> Path:
     return run_dir / STAGES_DIRNAME / stage_stub(stage)
+
+
+def _select_recipe_items(
+    items: list[dict],
+    *,
+    start_stage: str | None = None,
+    stop_stage: str | None = None,
+) -> list[dict]:
+    normalized_start = normalize_stage_name(start_stage) if start_stage else None
+    normalized_stop = normalize_stage_name(stop_stage) if stop_stage else None
+
+    available_stages = [normalize_stage_name(item["stage"]) for item in items]
+    if normalized_start and normalized_start not in available_stages:
+        raise ValueError(f"Unknown start stage {start_stage!r} for recipe")
+    if normalized_stop and normalized_stop not in available_stages:
+        raise ValueError(f"Unknown stop stage {stop_stage!r} for recipe")
+
+    selected: list[dict] = []
+    started = normalized_start is None
+    for item in items:
+        normalized_stage = normalize_stage_name(item["stage"])
+        if not started and normalized_stage == normalized_start:
+            started = True
+        if not started:
+            continue
+
+        selected.append(item)
+        if normalized_stop and normalized_stage == normalized_stop:
+            break
+
+    return selected
+
+
+def _deep_merge_dicts(existing: dict, patch: dict) -> dict:
+    merged = dict(existing)
+    for key, value in patch.items():
+        if isinstance(value, dict) and isinstance(existing.get(key), dict):
+            merged[key] = _deep_merge_dicts(existing[key], value)
+            continue
+        merged[key] = value
+    return merged
 
 
 def _try_json_loads(value: str) -> object | None:
