@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "stage-guidance.schema.json",
   "title": "Stage Guidance",
+  "description": "Stage guidance keyed by normalized runtime stage ids rather than user-facing stage labels.",
   "type": "object",
   "properties": {
     "routing": { "$ref": "#/$defs/stageGuidanceEntry" },

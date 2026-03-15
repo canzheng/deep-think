@@ -2,6 +2,7 @@ import unittest
 
 
 from tools.question_generator.contracts import load_contract
+from tools.question_generator.render_context import build_render_context
 from tools.question_generator.state_resolution import resolve_state_sections
 
 
@@ -51,12 +52,21 @@ class StateResolutionTest(unittest.TestCase):
         self.assertIn("questions", resolved)
         self.assertEqual(resolved["questions"], STATE["questions"])
 
-    def test_render_receives_full_state(self) -> None:
-        contract = load_contract("render")
+    def test_render_context_uses_contract_declared_reads_instead_of_state_resolution_helper(self) -> None:
+        context = build_render_context(
+            STATE,
+            stage_guidance={"required": [], "conditional": []},
+            required_output_schema="",
+            feedback_schema="",
+        )
 
-        resolved = resolve_state_sections(contract, STATE)
-
-        self.assertEqual(resolved, STATE)
+        self.assertIn("routing", context)
+        self.assertIn("decision_logic", context)
+        self.assertIn("synthesis", context)
+        self.assertIn("questions", context)
+        self.assertIn("monitoring", context)
+        self.assertNotIn("boundary", context)
+        self.assertNotIn("structure", context)
 
 
 if __name__ == "__main__":

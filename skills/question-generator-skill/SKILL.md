@@ -25,7 +25,9 @@ Use this skill for requests like:
 ## Workflow
 
 1. Treat the user's natural-language topic of interest as the raw `topic`.
-2. Run the topic bootstrap flow through the Conda environment.
+2. Run the topic bootstrap flow through the Conda environment so the initial
+   workflow state is the minimal payload `{"topic": "..."}` rather than a
+   copy of `shared_state_schema.json`.
 3. Execute `Routing` first and stop.
 4. Present the inferred routing summary to the user for confirmation.
 5. If the user gives clear corrections, update only those `routing` fields directly.

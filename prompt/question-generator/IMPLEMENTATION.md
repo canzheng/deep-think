@@ -58,14 +58,16 @@ The implementation has four layers.
 ### 1. Modular prompt assets
 
 These are the authored prompt documents:
-- source-of-truth host prompt:
+- conceptual host prompt and top-level design reference:
   - `prompt/question-generator/question-generator-modular.md`
-- stage templates:
+- runtime stage templates:
   - `prompt/question-generator/stages/`
 - adapters:
   - `prompt/question-generator/adapters/`
-- output modes:
+- output-mode guidance:
   - `prompt/question-generator/output-modes/`
+- runtime render subtemplates:
+  - `prompt/question-generator/stages/render/`
 
 These files define the actual prompt content and domain logic.
 
@@ -1305,20 +1307,21 @@ Parameters:
 - `--include-optional` (repeatable)
 
 Important behavioral note:
-- the CLI assembles a prompt
-- it does not run the stage
+- the bare `--stage ... --state ...` CLI mode assembles a prompt
+- workflow subcommands handle stage execution separately
 
 That means:
 - input: current shared state JSON
 - output: the assembled prompt for the requested stage
 
-It is best understood as a stage prompt generator, not a full workflow runner.
+That invocation mode is best understood as a stage prompt generator. The same
+CLI module also exposes workflow commands for end-to-end orchestration.
 
 ## Data Model
 
 ## Shared State
 
-The shared state template lives at:
+The shared state schema lives at:
 - `prompt/question-generator/contracts/shared_state_schema.json`
 
 It is the durable pre-render state for the workflow and now composes one schema
@@ -1589,7 +1592,8 @@ This means the current runtime is best described as:
 - a stage prompt assembler
 
 not:
-- a complete end-to-end workflow runner
+- the only entry point for the workflow; orchestration helpers also support
+  end-to-end automated stage execution
 
 ## How To Use It
 
@@ -1600,14 +1604,14 @@ conda activate truth-seek
 
 Assemble a stage prompt:
 ```bash
-python -m tools.question_generator.cli \
+conda run -n truth-seek python -m tools.question_generator.cli \
   --stage routing \
   --state research-state/problems/iran_war.json
 ```
 
 Include optional stage dependencies:
 ```bash
-python -m tools.question_generator.cli \
+conda run -n truth-seek python -m tools.question_generator.cli \
   --stage decision_logic \
   --state tests/question_generator/fixtures/minimal_state.json \
   --include-optional structure \
@@ -1617,11 +1621,11 @@ python -m tools.question_generator.cli \
 What happens:
 - the CLI prints the assembled prompt to stdout
 
-What does not happen yet:
-- no model call
-- no response parsing
-- no contract validation of model output
-- no state merge
+Workflow commands also support:
+- run initialization from an existing state file or raw topic
+- automatic stage execution through fresh ephemeral Codex sessions
+- response parsing and validation for JSON-returning stages
+- contract-owned state merge back into `shared_state.json`
 
 ## Testing
 

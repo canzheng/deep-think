@@ -9,6 +9,12 @@ It is the human-readable companion to the schema. Use it when:
 - debugging stage output shape
 - understanding what each state field is meant to represent
 
+Important:
+- `shared_state_schema.json` is the schema for live workflow state, not a
+  starter instance file
+- topic-first orchestration bootstraps the minimal initial payload
+  `{"topic": "<raw user request>"}`
+
 The shared state is durable pre-render workflow state. It should capture
 analysis that downstream stages need to consume, not presentation-only detail.
 

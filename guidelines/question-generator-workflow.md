@@ -65,9 +65,10 @@ Answering-session rule:
 
 ## How To Use The State File
 
-1. Initialize a fresh copy of
-   `prompt/question-generator/contracts/shared_state_schema.json`
-   for the current topic.
+1. Start from a minimal topic bootstrap payload such as
+   `{"topic": "<raw user request>"}` and treat
+   `prompt/question-generator/contracts/shared_state_schema.json` as the schema
+   for the live state, not as a run-instance template.
 2. Run the workflow stages in order.
 3. After each stage, update only the state sections that stage owns.
 4. Persist the full state and pass it to the next stage.
@@ -76,9 +77,12 @@ Answering-session rule:
    Codex stdout/stderr as run artifacts.
 7. If a feedback loop is triggered, update the relevant upstream section and
    then continue forward again.
-8. At render time, pass the full accumulated state plus the selected
-   output-mode module to the renderer.
-9. The renderer should treat the shared state as its sole analysis input.
+8. At render time, derive the prompt context from the accumulated shared state
+   using the render contract's `reads_required_common` and
+   `reads_by_output_mode` declarations, then render with the selected runtime
+   subtemplate.
+9. The renderer should use only shared-state-derived context as analysis input
+   and should not inspect side artifacts or invent new analysis.
 
 Recipe execution:
 - use `run-recipe` when you want the orchestrator to execute a checked-in stage sequence
@@ -91,7 +95,8 @@ State rules:
   problem casually.
 - Contracts, not the old guidance files, define each stage's required and
   optional upstream stage dependencies plus adapter dependencies.
-- The renderer should format accumulated state, not invent new analysis.
+- The renderer should format contract-selected slices of accumulated state, not
+  invent new analysis.
 - If a downstream stage invalidates an upstream assumption, update the state and
   explicitly mark the feedback loop that was triggered.
 

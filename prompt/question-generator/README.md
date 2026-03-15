@@ -1,4 +1,5 @@
-This directory contains the modular question-generator source of truth.
+This directory contains the modular question-generator host prompt, runtime
+templates, contracts, and orchestration assets.
 
 Implementation reference:
 - `prompt/question-generator/IMPLEMENTATION.md`
@@ -8,19 +9,20 @@ Shared state reference:
 
 Current scope:
 - modular source prompt
-- stage prompt templates
+- runtime stage prompt templates
 - adapter files
 - stage contracts
-- shared state template
+- shared state schemas
 - python assembler runtime
 - external-session orchestration helpers with run-artifact persistence
 - archived `v1`-`v7` prompts live under
   `prompt/archived/`
 - `question-generator-modular.md` is the modular host prompt that references
-  these files and is the source of truth
+  these files and acts as the top-level design reference
 
 Layout:
 - `stages/`
+- `stages/render/`
 - `adapters/tasks/`
 - `adapters/domains/`
 - `adapters/evidence-modes/`
@@ -36,15 +38,19 @@ Layout:
   - `tools/question_generator/`
 
 Consistency rules:
-- Stage templates under `stages/` are the canonical stage prompt sources and
-  must stay consistent with `question-generator-modular.md`.
+- Runtime stage templates under `stages/` are the prompt files assembled by
+  Python and must stay consistent with `question-generator-modular.md`.
 - Contracts under `contracts/` define the state slices each stage may read and
   write, their adapter dependencies, their output schemas, and the shared state
   template.
-- Adapter stage relevance must use the canonical workflow stage names:
+- User-facing workflow stage names are:
   `Routing`, `Boundary`, `Structure`, `Scenarios`, `Question Generation`,
   `Evidence Planning`, `Decision Logic`, `Signal Translation`, `Monitoring`,
   `Render`.
+- Adapter `stage_guidance` object keys must use normalized runtime stage ids:
+  `routing`, `boundary`, `structure`, `scenarios`, `question_generation`,
+  `evidence_planning`, `decision_logic`, `signal_translation`, `monitoring`,
+  `render`.
 - Adapter stage-guidance importance levels must use only: `Important`,
   `Moderate`, `Light`, or `None`.
 - If a change lands in the modular source prompt, update the affected task
@@ -83,13 +89,13 @@ Assembler runtime:
 Assembly model:
 - stage template supplies the core prompt body
 - non-render stage templates are Mustache templates over a prepared stage render context
-- render also uses Mustache, but Python first selects one render subtemplate
-  based on `routing.output_mode`
+- render also uses Mustache, but Python first selects one runtime render
+  subtemplate under `stages/render/` based on `routing.output_mode`
 - contract supplies required and optional stage dependencies, adapter
   dependencies, and output schema
 - shared state supplies the routed context and prior stage outputs
 - routed adapters supply stage-specific guidance
-- render uses output-mode-selected template bodies instead of a broad
+- render uses contract-declared shared-state reads instead of a broad
   whole-state context dump
 
 Supported non-render Mustache context values:
@@ -112,6 +118,8 @@ Current prompt-facing assembly:
 - conditional adapter guidance uses the same `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` wrapper convention as other conditional prompt blocks
 - render uses output-mode-selected subtemplates under
   `prompt/question-generator/stages/render/`
+- render wrapper context comes from `reads_required_common`, and render
+  subtemplate context comes from `reads_by_output_mode`
 - assembled `Required Output` and `Feedback` blocks expand schema `$ref`
   entries before rendering so stage prompts see concrete JSON shapes
 - `shared_state_schema.json` is a composed JSON Schema that references one

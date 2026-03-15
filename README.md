@@ -7,10 +7,11 @@ The main working area today is:
 
 ## What This Repo Contains
 
-- [prompt/question-generator/question-generator-modular.md](prompt/question-generator/question-generator-modular.md): modular source of truth for the question generator
-- [prompt/question-generator/stages](prompt/question-generator/stages): stage prompt templates
+- [prompt/question-generator/question-generator-modular.md](prompt/question-generator/question-generator-modular.md): conceptual host prompt and top-level design reference
+- [prompt/question-generator/stages](prompt/question-generator/stages): runtime stage prompt templates
 - [prompt/question-generator/adapters](prompt/question-generator/adapters): structured adapter content and stage guidance
-- [prompt/question-generator/output-modes](prompt/question-generator/output-modes): output-mode guidance
+- [prompt/question-generator/output-modes](prompt/question-generator/output-modes): output-mode design guidance
+- [prompt/question-generator/stages/render](prompt/question-generator/stages/render): runtime render subtemplates selected by `routing.output_mode`
 - [prompt/question-generator/contracts](prompt/question-generator/contracts): stage contracts and shared-state schemas
 - [tools/question_generator](tools/question_generator): Python assembler and orchestration runtime
 - [tests/question_generator](tests/question_generator): unit tests, review prompts, and prompt artifacts
@@ -37,6 +38,11 @@ For non-render stages, the runtime:
 4. sends that prompt to a model
 5. validates the model output against the stage contract
 6. merges the allowed fields back into `shared_state.json`
+
+For `Render`, the runtime:
+1. selects the render subtemplate under `prompt/question-generator/stages/render/`
+2. builds the prompt context from shared-state fields declared in the render contract
+3. renders the final deliverable directly as plain text without merging new state
 
 The durable workflow state lives in one file shaped by:
 - [shared_state_schema.json](prompt/question-generator/contracts/shared_state_schema.json)

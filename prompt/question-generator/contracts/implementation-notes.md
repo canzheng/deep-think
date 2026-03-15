@@ -1,15 +1,16 @@
 # Implementation Notes
 
-## Shared State Template
+## Shared State Schema
 
-The shared state template now lives at:
+The shared state schema now lives at:
 - `prompt/question-generator/contracts/shared_state_schema.json`
 
 This file is intended to hold durable pre-render research state. The goal is to
 capture enough structured output from each stage that:
 - downstream stages can consume prior work without re-deriving it
 - contracts and state have a plausible landing place for stage-owned entities
-- the render stage can treat the accumulated state as its sole analysis input
+- the render stage can derive its prompt context only from accumulated
+  shared-state sections declared by the render contract
 
 ## Inclusion Decisions
 
