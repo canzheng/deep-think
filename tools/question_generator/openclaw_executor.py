@@ -36,6 +36,9 @@ class _OpenClawCapabilityUnavailable(RuntimeError):
     pass
 
 
+_CONNECTION_RESET_ERRNOS = {54, 104}
+
+
 class OpenClawStageExecutor:
     def __init__(
         self,
@@ -329,32 +332,44 @@ class OpenClawStageExecutor:
             },
             method="POST",
         )
-        try:
-            with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace")
-            raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
-                failure_reason="http_error",
-                message=f"OpenClaw chat-completions failed: HTTP {exc.code}",
-                trace_text=body,
-                error_text=body,
-            ) from exc
-        except urllib.error.URLError as exc:
-            raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
-                failure_reason="transport_error",
-                message=f"OpenClaw chat-completions request failed for {stage}",
-                error_text=str(exc),
-            ) from exc
-        except json.JSONDecodeError as exc:
-            raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
-                failure_reason="invalid_response",
-                message=f"OpenClaw chat-completions returned invalid JSON envelope for {stage}",
-                error_text=str(exc),
-            ) from exc
+        for attempt in range(2):
+            try:
+                with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="http_error",
+                    message=f"OpenClaw chat-completions failed: HTTP {exc.code}",
+                    trace_text=body,
+                    error_text=body,
+                ) from exc
+            except urllib.error.URLError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="transport_error",
+                    message=f"OpenClaw chat-completions request failed for {stage}",
+                    error_text=str(exc),
+                ) from exc
+            except OSError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="transport_error",
+                    message=f"OpenClaw chat-completions request failed for {stage}",
+                    error_text=str(exc),
+                ) from exc
+            except json.JSONDecodeError as exc:
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="invalid_response",
+                    message=f"OpenClaw chat-completions returned invalid JSON envelope for {stage}",
+                    error_text=str(exc),
+                ) from exc
 
     def _invoke_tool_http(
         self,
@@ -378,31 +393,43 @@ class OpenClawStageExecutor:
             },
             method="POST",
         )
-        try:
-            with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace")
+        for attempt in range(2):
             try:
-                parsed = json.loads(body)
-            except json.JSONDecodeError:
-                parsed = {"ok": False, "error": {"type": "http_error", "message": body}}
-            parsed["status_code"] = exc.code
-            return parsed
-        except urllib.error.URLError as exc:
-            raise ExecutorInvocationError(
-                backend_name="openclaw-llm-task",
-                failure_reason="transport_error",
-                message="OpenClaw llm-task request failed",
-                error_text=str(exc),
-            ) from exc
-        except json.JSONDecodeError as exc:
-            raise ExecutorInvocationError(
-                backend_name="openclaw-llm-task",
-                failure_reason="invalid_response",
-                message="OpenClaw llm-task returned invalid JSON envelope",
-                error_text=str(exc),
-            ) from exc
+                with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                try:
+                    parsed = json.loads(body)
+                except json.JSONDecodeError:
+                    parsed = {"ok": False, "error": {"type": "http_error", "message": body}}
+                parsed["status_code"] = exc.code
+                return parsed
+            except urllib.error.URLError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="transport_error",
+                    message="OpenClaw llm-task request failed",
+                    error_text=str(exc),
+                ) from exc
+            except OSError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="transport_error",
+                    message="OpenClaw llm-task request failed",
+                    error_text=str(exc),
+                ) from exc
+            except json.JSONDecodeError as exc:
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="invalid_response",
+                    message="OpenClaw llm-task returned invalid JSON envelope",
+                    error_text=str(exc),
+                ) from exc
 
 
 def _extract_llm_task_json(raw_result: dict) -> dict:
@@ -414,6 +441,17 @@ def _extract_llm_task_json(raw_result: dict) -> dict:
     if isinstance(raw_result.get("json"), dict):
         return raw_result["json"]
     raise ValueError("OpenClaw llm-task response did not include parsed JSON details")
+
+
+def _is_connection_reset_error(exc: BaseException) -> bool:
+    if isinstance(exc, urllib.error.URLError) and exc.reason is not None:
+        return _is_connection_reset_error(exc.reason)
+    if isinstance(exc, ConnectionResetError):
+        return True
+    errno_value = getattr(exc, "errno", None)
+    if errno_value in _CONNECTION_RESET_ERRNOS:
+        return True
+    return "connection reset by peer" in str(exc).lower()
 
 
 def _extract_chat_content(response: dict) -> str:
