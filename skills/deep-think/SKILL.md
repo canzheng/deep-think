@@ -15,7 +15,7 @@ interrupt the process just because a stage takes a while to return.
 ## Trigger Examples
 
 Use this skill for requests like:
-- "Analyze whether we should expand into healthcare next year."
+- "Analyze whether this company should expand into healthcare next year."
 - "Turn this topic into a decision memo."
 - "Build a research plan for this question."
 - "Create a scenario tree for this issue."

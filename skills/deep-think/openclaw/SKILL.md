@@ -7,8 +7,7 @@ metadata: {"openclaw":{"requires":{"bins":["python3"]}}}
 # Deep Think For OpenClaw
 
 Use this packaging artifact when Deep Think should run inside an OpenClaw
-environment as a self-contained bundle instead of relying on the repo-local
-Codex runtime.
+environment as a self-contained bundle.
 
 This artifact preserves the same workflow:
 - topic-first input
@@ -44,20 +43,58 @@ Use this skill for requests like:
 ## Workflow
 
 1. Treat the user's natural-language topic of interest as the raw `topic`.
-2. Run the bundled Python entrypoints with plain `python3`.
-3. Execute `Routing` first and stop.
-4. Present the inferred routing summary to the user for confirmation.
-5. If the user gives clear corrections, update only those `routing` fields directly.
-6. Never rerun `Routing`.
-7. Resume the workflow from `Boundary`.
-8. Return the final rendered artifact.
+2. Derive `run-id` by slugifying the topic into a short lowercase hyphenated label and appending a timestamp suffix for uniqueness, for example `atlas-expand-healthcare-20260317-101530`.
+3. Start the workflow with `python3 {baseDir}/scripts/run_topic.py` and always pass both `--run-id <run-id>` and `--pause-after-stage routing`.
+4. Let that command run through `Routing` and stop.
+5. Present the inferred routing summary to the user for confirmation.
+6. If the user gives clear corrections, apply them with `python3 {baseDir}/scripts/update_routing.py`.
+7. Never rerun `Routing`.
+8. Resume the workflow from `Boundary` with `python3 {baseDir}/scripts/resume_run.py`.
+9. Return the final rendered artifact.
+
+## Routing Review Rules
+
+Show the user these inferred routing fields:
+- normalized question
+- task
+- domain
+- output mode
+- evidence mode
+- uncertainty mode
+- decision mode
+- time horizon
+- unit of analysis
+- decision context
+- assumptions
+
+If the user confirms, continue immediately.
+
+If the user corrects fields:
+- interpret the correction directly
+- update only the clearly affected `routing` fields
+- preserve all unaffected fields
+- update `classification_rationales` when the user clearly changed the reason
+- update `assumptions` only when the user explicitly replaced or removed them
+
+If the user's correction is ambiguous:
+- ask one focused follow-up question
+- do not guess
+- do not rerun `Routing`
 
 ## Command Rules
 
-- Run the bundle through:
-  - `python3 {baseDir}/scripts/run_topic.py ...`
-  - `python3 {baseDir}/scripts/update_routing.py ...`
-  - `python3 {baseDir}/scripts/resume_run.py ...`
+- Derive `run-id` from the topic with:
+  - a short slug from the first meaningful words
+  - lowercase letters, numbers, and hyphens only
+  - a timestamp suffix for uniqueness
+  - example: `atlas-expand-healthcare-20260317-101530`
+- Start with:
+  - `python3 {baseDir}/scripts/run_topic.py --topic "<topic>" --run-id <run-id> --pause-after-stage routing`
+- If the user confirms routing as-is:
+  - `python3 {baseDir}/scripts/resume_run.py --run-dir {baseDir}/tmp/question-runs/<run-id>`
+- If the user corrects routing fields:
+  - `python3 {baseDir}/scripts/update_routing.py --run-dir {baseDir}/tmp/question-runs/<run-id> --patch-json '<json patch>'`
+  - then `python3 {baseDir}/scripts/resume_run.py --run-dir {baseDir}/tmp/question-runs/<run-id>`
 - Do not rely on `conda` or a separate repo checkout
 - Keep `shared_state.json` as the only workflow state
 - Keep run artifacts under `{baseDir}/tmp/question-runs`
