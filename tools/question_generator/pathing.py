@@ -28,6 +28,15 @@ ADAPTER_DIR_MAP = {
     "decision_mode": "decision-modes",
 }
 
+RENDER_TEMPLATE_MAP = {
+    "Research Memo": "research-memo.md",
+    "Decision Memo": "decision-memo.md",
+    "Monitoring Dashboard": "monitoring-dashboard.md",
+    "Scenario Tree": "scenario-tree.md",
+    "Deep-Research Prompt": "deep-research-prompt.md",
+    "Investment Worksheet": "investment-worksheet.md",
+}
+
 
 def repo_root() -> Path:
     return REPO_ROOT
@@ -43,10 +52,6 @@ def stages_dir() -> Path:
 
 def adapters_dir() -> Path:
     return PROMPT_ROOT / "adapters"
-
-
-def output_modes_dir() -> Path:
-    return PROMPT_ROOT / "output-modes"
 
 
 def _slugify(value: str) -> str:
@@ -81,5 +86,13 @@ def adapter_path(adapter_dimension: str, routed_value: str) -> Path:
     return adapter_family_dir(adapter_dimension) / f"{_slugify(routed_value)}.json"
 
 
-def output_mode_path(routed_value: str) -> Path:
-    return output_modes_dir() / f"{_slugify(routed_value)}.md"
+def render_template_path(output_mode: str) -> Path:
+    try:
+        filename = RENDER_TEMPLATE_MAP[output_mode]
+    except KeyError as exc:
+        supported = ", ".join(sorted(RENDER_TEMPLATE_MAP))
+        raise ValueError(
+            f"Unsupported render output mode: {output_mode!r}. Supported modes: {supported}"
+        ) from exc
+
+    return stages_dir() / "render" / filename

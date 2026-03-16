@@ -72,6 +72,8 @@ class NonRenderPromptQualityTest(unittest.TestCase):
         self.assertIn("Confidence To Execute", review_prompt)
         self.assertIn("Risk Of Misinterpretation", review_prompt)
         self.assertIn("JSON array", workflow_doc)
+        self.assertIn("local generated output", workflow_doc)
+        self.assertIn("should remain untracked", workflow_doc)
 
     def test_non_render_stage_list_matches_expected_order(self) -> None:
         from tests.question_generator.assemble_non_render_prompts import NON_RENDER_STAGES

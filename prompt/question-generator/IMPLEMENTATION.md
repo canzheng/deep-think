@@ -26,7 +26,9 @@ The assembler's job is:
 - take a target stage
 - load the matching stage template
 - load the matching stage contract
-- load the routed adapter and output-mode files that matter for that stage
+- load the routed adapter files that matter for that stage
+- select the runtime render subtemplate from `stages/render/` when the target
+  stage is `Render`
 - render all of that into one final prompt string
 
 In short:
@@ -64,8 +66,6 @@ These are the authored prompt documents:
   - `prompt/question-generator/stages/`
 - adapters:
   - `prompt/question-generator/adapters/`
-- output-mode guidance:
-  - `prompt/question-generator/output-modes/`
 - runtime render subtemplates:
   - `prompt/question-generator/stages/render/`
 
@@ -94,8 +94,19 @@ Contracts are the assembly authority. They define:
 The runtime lives under:
 - `tools/question_generator/`
 
-It resolves files, parses contracts, renders state, resolves adapters,
-assembles prompts, manages run artifacts, and launches the ephemeral
+Production assembly path:
+- `tools/question_generator/pathing.py`
+- `tools/question_generator/contracts.py`
+- `tools/question_generator/adapter_resolution.py`
+- `tools/question_generator/adapter_rendering.py`
+- `tools/question_generator/state_resolution.py` for non-render dependency-to-state mapping
+- `tools/question_generator/render_context.py` for render-specific contract reads and subtemplate selection
+- `tools/question_generator/assembler.py`
+- `tools/question_generator/orchestrator.py`
+- `tools/question_generator/cli.py`
+
+Together these modules resolve files, parse contracts, prepare stage contexts,
+assemble prompts, manage run artifacts, and launch the ephemeral
 stage-answering Codex subprocess.
 
 ### 4. Tests
@@ -103,9 +114,9 @@ stage-answering Codex subprocess.
 Tests live under:
 - `tests/question_generator/`
 
-The test suite verifies pathing, contract parsing, state resolution, state
-rendering, adapter resolution, adapter rendering, prompt assembly, CLI
-behavior, and the worked example.
+The test suite verifies pathing, contract parsing, state resolution, adapter
+resolution, adapter rendering, prompt assembly, CLI behavior, documentation
+consistency, prompt-quality review helpers, and the worked example.
 
 ### `orchestrator.py`
 
@@ -223,7 +234,7 @@ Key implementation choices:
   models.
 - Required and optional reads are handled separately.
 - Optional reads are included only if the caller explicitly selects them.
-- `Render` no longer depends on whole-state resolution for prompt assembly.
+- `Render` no longer depends on the generic state-section resolution helper for prompt assembly.
 
 Why this mapping exists:
 - Contracts describe workflow dependencies in stage terms.
@@ -231,35 +242,24 @@ Why this mapping exists:
 - Keeping the translation in one place avoids spreading stage-to-state logic
   across the assembler.
 
-### `state_rendering.py`
+### Retired `state_rendering.py` Path
 
-File:
+Removed files:
 - `tools/question_generator/state_rendering.py`
+- `tools/question_generator/renderers/`
 
-Responsibilities:
-- render resolved state sections into readable markdown blocks
+Why it was removed:
+- Non-render prompt assembly now passes only the shared-state fields that each
+  Mustache template references directly.
+- `Render` prompt assembly now uses explicit contract-declared reads together
+  with `stages/render/` subtemplate selection.
+- The old readable section-rendering path was no longer part of production
+  prompt assembly and had become isolated maintenance overhead.
 
-Current format:
-- readable section rendering for diagnostic or fallback use
-- one section renderer per top-level shared-state section when available
-- JSON fallback for sections without a specialized renderer
-
-Key implementation choices:
-- The renderer is registry-driven through
-  `tools/question_generator/renderers/registry.py`.
-- Specialized section renderers summarize the most useful fields first while
-  keeping headings stable and prompt-friendly.
-- Unknown sections still fall back to the legacy JSON block rendering so new
-  sections can be added incrementally.
-- Non-render stages no longer depend on `state_rendering.py` for prompt
-  assembly. They now inline only the fields their Mustache templates reference.
-- `Render` also no longer depends on `state_rendering.py` for prompt assembly.
-  It now receives an explicit output-mode-selected context instead.
-
-Tradeoff:
-- readable section renderers remain useful for diagnostics and examples.
-- stage prompts stay less noisy because they no longer receive whole state
-  sections by default.
+Current rule:
+- `resolve_state_sections()` is a non-render helper only.
+- `Render` does not go through state section resolution or markdown section
+  rendering.
 
 ## Proposed Compact Field-Level Dependency Map
 
@@ -1110,8 +1110,9 @@ Key implementation choices:
 - The actual routed values come from `state["routing"]`.
 - `Routing` itself resolves no modules, because routing defines the adapter
   selections rather than consuming them.
-- `output_mode` is resolved from `output-modes/`, while the other dimensions are
-  resolved from `adapters/`.
+- `output_mode` resolves to the runtime render subtemplate under
+  `stages/render/`, while the other dimensions resolve to JSON adapter files
+  under `adapters/`.
 
 This separation matters:
 - contracts define what a stage depends on in general
@@ -1138,22 +1139,24 @@ Key implementation choices:
   `stage_guidance` object.
 - For non-render stages, the renderer prepares structured `stage_guidance`
   entries split into `required` and `conditional`.
-- Output-mode files are treated differently:
-  - `Render` receives the full output-mode document
+- `output_mode` is treated differently from the JSON adapter families:
   - non-render stages receive a short moderate note that keeps them aligned to
     the eventual deliverable without pulling final-format section outlines into
     upstream analysis stages
+  - `Render` uses `routing.output_mode` to select the runtime subtemplate under
+    `stages/render/`
 
 Why output mode is special:
-- output modes are authored as deliverable definitions rather than stage-style
-  relevance adapters
-- we still want them available during assembly, especially for `Render` and
-  decision-oriented stages
+- it controls the final deliverable shape rather than stage-specific ontology
+  or evidence behavior
+- upstream stages still need a small amount of deliverable-awareness without
+  inheriting final-format section lists
 
 Tradeoff:
-- full output-mode injection remains simple and transparent for `Render`
 - upstream stages avoid prompt confusion from seeing final-deliverable section
   lists in the middle of analytical work
+- render selection stays explicit in Python instead of relying on a second
+  prompt-asset family
 
 Planned direction:
 - migrate adapter assets to structured JSON
@@ -1233,14 +1236,16 @@ Current assembly flow:
 5. resolve the routed modules
 6. branch by stage type:
    - non-render: prepare one Mustache render context and render the template
-   - render: use the compatibility section-rendering path
+   - render: build a render-specific contract-selected context and render the
+     selected subtemplate inside the render wrapper
 7. return one markdown prompt string
 
 Key implementation choices:
-- The assembler is intentionally a renderer, not a workflow executor.
-- It does not call the model.
-- It does not validate model output.
-- It does not merge state updates.
+- The assembler is intentionally the prompt-assembly layer, not the full
+  workflow controller.
+- It does not call the model directly.
+- It does not validate model output directly.
+- It does not merge state updates directly.
 - Non-render prompt templating uses `chevron` Mustache rendering rather than a
   custom placeholder engine.
 - The render context is prepared in Python, but prompt wording and layout stay
@@ -1248,7 +1253,7 @@ Key implementation choices:
 - `stage_guidance` remains the one adapter-derived prompt section for
   non-render stages.
 
-Those behaviors are left to a future orchestrator.
+Those execution behaviors are handled by `tools/question_generator/orchestrator.py`.
 
 Why this split was chosen:
 - prompt assembly and workflow execution are different concerns
@@ -1549,7 +1554,7 @@ Why:
 - deciding which optional reads to include is orchestration policy
 
 Tradeoff:
-- a future orchestrator must make those choices explicitly
+- the orchestrator or caller must make those choices explicitly
 
 ### Adapter headings are rendered in code
 
@@ -1565,28 +1570,25 @@ Tradeoff:
 - if we want more stage-specific heading nuance later, the renderer logic will
   need to grow
 
-### State is rendered as JSON blocks
+### State context is template-selected
 
 Decision:
-- render current state as readable headings plus JSON
+- let stage templates consume only the shared-state fields that matter to the
+  current stage
 
 Why:
-- transparent
-- faithful to the actual state shape
-- easy to debug during development
+- keeps prompts smaller and more stage-specific
+- makes render behavior align with contract-declared reads
+- avoids reviving the old broad context-dump path
 
 Tradeoff:
-- less polished than a prose summarizer
+- template authors must be deliberate about which fields they reference
 
 ## Current Limitations
 
 The current implementation does not yet include:
-- a full orchestrator that calls the model
-- output validation against the contract after model execution
-- state merge logic
-- automatic feedback-loop execution
-- stage-aware output-mode extraction comparable to adapter stage extraction
-- richer prose summarization of state sections
+- automatic policy for selecting optional reads from `reads_optional[].when`
+- richer adapter-derived guidance beyond `stage_guidance`
 
 This means the current runtime is best described as:
 - a stage prompt assembler
@@ -1639,20 +1641,18 @@ The tests currently cover:
 - path resolution
 - contract loading
 - state resolution
-- state rendering
 - adapter resolution
 - adapter rendering
 - assembled prompt shape
 - CLI behavior
+- documentation consistency
+- non-render prompt-quality workflow helpers
 - example prompt consistency
 
 ## Recommended Next Step
 
-The next major piece should be an orchestrator that:
-- assembles the prompt for a stage
-- calls the model
-- validates output against the contract
-- merges the returned state update
-- manages feedback loops
-
-That layer should sit on top of the current assembler rather than replacing it.
+The next major implementation work should focus on workflow policy rather than
+basic execution plumbing, for example:
+- deciding when optional reads should be included automatically
+- formalizing feedback-loop re-entry policy
+- adding more targeted guardrails around doc/template/contract drift

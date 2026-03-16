@@ -3,7 +3,7 @@ import unittest
 
 from tools.question_generator.adapter_resolution import resolve_stage_modules
 from tools.question_generator.contracts import load_contract
-from tools.question_generator.pathing import adapters_dir, output_modes_dir
+from tools.question_generator.pathing import adapters_dir, stages_dir
 
 
 ROUTING = {
@@ -36,7 +36,7 @@ class AdapterResolutionTest(unittest.TestCase):
         )
         self.assertEqual(
             resolved["output_mode"].path,
-            output_modes_dir() / "decision-memo.md",
+            stages_dir() / "render" / "decision-memo.md",
         )
 
 

@@ -4,17 +4,7 @@ import copy
 from pathlib import Path
 
 from tools.question_generator.contracts import load_contract
-from tools.question_generator.pathing import normalize_stage_name, output_modes_dir, stages_dir
-
-
-RENDER_TEMPLATE_MAP = {
-    "Research Memo": "research-memo.md",
-    "Decision Memo": "decision-memo.md",
-    "Monitoring Dashboard": "monitoring-dashboard.md",
-    "Scenario Tree": "scenario-tree.md",
-    "Deep-Research Prompt": "deep-research-prompt.md",
-    "Investment Worksheet": "investment-worksheet.md",
-}
+from tools.question_generator.pathing import RENDER_TEMPLATE_MAP, normalize_stage_name, render_template_path, stages_dir
 
 RENDER_STAGE_GUIDANCE_POLICY = {
     "Research Memo": {
@@ -79,15 +69,7 @@ RENDER_STAGE_GUIDANCE_POLICY = {
 
 
 def select_render_template(output_mode: str) -> Path:
-    try:
-        filename = RENDER_TEMPLATE_MAP[output_mode]
-    except KeyError as exc:
-        supported = ", ".join(sorted(RENDER_TEMPLATE_MAP))
-        raise ValueError(
-            f"Unsupported render output mode: {output_mode!r}. Supported modes: {supported}"
-        ) from exc
-
-    return stages_dir() / "render" / filename
+    return render_template_path(output_mode)
 
 
 def render_wrapper_template() -> Path:

@@ -130,18 +130,18 @@ Decision-mode modules:
 - Adversarial Game -> `prompt/question-generator/adapters/decision-modes/adversarial-game.json`
 - Exploration vs Exploitation -> `prompt/question-generator/adapters/decision-modes/exploration-vs-exploitation.json`
 
-Output-mode modules:
-- Research Memo -> `prompt/question-generator/output-modes/research-memo.md`
-- Decision Memo -> `prompt/question-generator/output-modes/decision-memo.md`
-- Monitoring Dashboard -> `prompt/question-generator/output-modes/monitoring-dashboard.md`
-- Scenario Tree -> `prompt/question-generator/output-modes/scenario-tree.md`
-- Investment Worksheet -> `prompt/question-generator/output-modes/investment-worksheet.md`
-- Deep-Research Prompt -> `prompt/question-generator/output-modes/deep-research-prompt.md`
+Output-mode render subtemplates:
+- Research Memo -> `prompt/question-generator/stages/render/research-memo.md`
+- Decision Memo -> `prompt/question-generator/stages/render/decision-memo.md`
+- Monitoring Dashboard -> `prompt/question-generator/stages/render/monitoring-dashboard.md`
+- Scenario Tree -> `prompt/question-generator/stages/render/scenario-tree.md`
+- Investment Worksheet -> `prompt/question-generator/stages/render/investment-worksheet.md`
+- Deep-Research Prompt -> `prompt/question-generator/stages/render/deep-research-prompt.md`
 
 Selection rules:
 - Always load the primary module for each of the six routing axes.
 - Load a secondary module only if a secondary classification was assigned.
-- Output generation must obey the selected output-mode module.
+- Output generation must obey the selected output-mode render subtemplate.
 - Question generation and signal translation must obey all selected modules simultaneously.
 
 ==================================================
@@ -151,7 +151,7 @@ PART IV - CROSS-MATRIX RULES
 Use all six layers at the same time:
 - task router
 - domain adapter
-- output mode adapter
+- output mode selection
 - evidence mode adapter
 - uncertainty mode adapter
 - decision mode adapter

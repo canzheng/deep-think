@@ -71,7 +71,7 @@ Answering-session rule:
    for the live state, not as a run-instance template.
 2. Run the workflow stages in order.
 3. After each stage, update only the state sections that stage owns.
-4. Persist the full state and pass it to the next stage.
+4. Persist the updated shared state and pass it to the next stage.
 5. Run the stage in a fresh ephemeral Codex answering session.
 6. Persist the stage prompt, response schema, raw reply, parsed reply, and
    Codex stdout/stderr as run artifacts.

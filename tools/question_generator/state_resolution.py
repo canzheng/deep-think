@@ -26,7 +26,7 @@ def resolve_state_sections(
     optional_reads: list[str] | None = None,
 ) -> OrderedDict[str, object]:
     if normalize_stage_name(contract.stage) == "render":
-        return OrderedDict(state.items())
+        raise ValueError("Render prompt assembly no longer uses state section resolution.")
 
     sections: OrderedDict[str, object] = OrderedDict()
     for read in contract.reads_required or []:

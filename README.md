@@ -10,7 +10,6 @@ The main working area today is:
 - [prompt/question-generator/question-generator-modular.md](prompt/question-generator/question-generator-modular.md): conceptual host prompt and top-level design reference
 - [prompt/question-generator/stages](prompt/question-generator/stages): runtime stage prompt templates
 - [prompt/question-generator/adapters](prompt/question-generator/adapters): structured adapter content and stage guidance
-- [prompt/question-generator/output-modes](prompt/question-generator/output-modes): output-mode design guidance
 - [prompt/question-generator/stages/render](prompt/question-generator/stages/render): runtime render subtemplates selected by `routing.output_mode`
 - [prompt/question-generator/contracts](prompt/question-generator/contracts): stage contracts and shared-state schemas
 - [tools/question_generator](tools/question_generator): Python assembler and orchestration runtime
@@ -128,7 +127,6 @@ conda run -n truth-seek python -m unittest \
   tests.question_generator.test_examples \
   tests.question_generator.test_non_render_prompt_quality \
   tests.question_generator.test_pathing \
-  tests.question_generator.test_state_rendering \
   tests.question_generator.test_state_resolution -v
 ```
 

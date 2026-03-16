@@ -52,6 +52,15 @@ class StateResolutionTest(unittest.TestCase):
         self.assertIn("questions", resolved)
         self.assertEqual(resolved["questions"], STATE["questions"])
 
+    def test_render_contract_is_not_supported_by_state_resolution_helper(self) -> None:
+        contract = load_contract("render")
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Render prompt assembly no longer uses state section resolution.",
+        ):
+            resolve_state_sections(contract, STATE)
+
     def test_render_context_uses_contract_declared_reads_instead_of_state_resolution_helper(self) -> None:
         context = build_render_context(
             STATE,

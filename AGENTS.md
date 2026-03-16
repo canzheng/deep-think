@@ -6,7 +6,6 @@ generator is:
 
 Prompt/design guidance modules live under:
 - `prompt/question-generator/adapters/`
-- `prompt/question-generator/output-modes/`
 
 Runtime stage prompt templates live under:
 - `prompt/question-generator/stages/`

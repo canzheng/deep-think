@@ -296,7 +296,7 @@ class AssemblerTest(unittest.TestCase):
                 if stage != "render":
                     self.assertNotIn("Required sections:", prompt)
 
-    def test_render_prompt_uses_full_state_and_no_feedback(self) -> None:
+    def test_render_prompt_uses_contract_selected_context_and_no_feedback(self) -> None:
         prompt = assemble_stage_prompt("render", STATE)
 
         self.assertIn("You are generating the final deliverable for the current topic.", prompt)

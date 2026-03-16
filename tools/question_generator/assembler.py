@@ -4,12 +4,11 @@ import copy
 import json
 import re
 from functools import lru_cache
-from pathlib import Path
 from urllib.parse import unquote
 
 import chevron
 
-from tools.question_generator.adapter_rendering import build_stage_guidance, render_adapter_sections
+from tools.question_generator.adapter_rendering import build_stage_guidance
 from tools.question_generator.adapter_resolution import resolve_stage_modules
 from tools.question_generator.contracts import load_contract
 from tools.question_generator.pathing import contract_path, normalize_stage_name, stage_template_path
@@ -18,8 +17,6 @@ from tools.question_generator.render_context import (
     render_wrapper_template,
     select_render_template,
 )
-from tools.question_generator.state_rendering import render_state_sections
-from tools.question_generator.state_resolution import resolve_state_sections
 
 
 def assemble_stage_prompt(
@@ -31,7 +28,7 @@ def assemble_stage_prompt(
     if normalized_stage != "render":
         return _assemble_non_render_stage_prompt(stage, state)
 
-    return _assemble_render_stage_prompt(stage, state, optional_reads=optional_reads)
+    return _assemble_render_stage_prompt(stage, state)
 
 
 def _assemble_non_render_stage_prompt(stage: str, state: dict) -> str:
@@ -56,7 +53,6 @@ def _assemble_non_render_stage_prompt(stage: str, state: dict) -> str:
 def _assemble_render_stage_prompt(
     stage: str,
     state: dict,
-    optional_reads: list[str] | None = None,
 ) -> str:
     contract_file = contract_path(stage)
     contract = load_contract(stage)
@@ -96,21 +92,6 @@ def _build_non_render_context(
     return context
 
 
-def _render_template_placeholders(template: str, values: dict[str, str]) -> tuple[str, set[str]]:
-    used_placeholders: set[str] = set()
-
-    def replace(match: re.Match[str]) -> str:
-        key = match.group(1)
-        if key not in values:
-            return match.group(0)
-
-        used_placeholders.add(key)
-        return values.get(key, "")
-
-    rendered = re.sub(r"\{\{\s*([a-z_]+)\s*\}\}", replace, template)
-    return rendered, used_placeholders
-
-
 def _render_topic_block(topic: str) -> str:
     if not topic:
         return ""
@@ -118,24 +99,6 @@ def _render_topic_block(topic: str) -> str:
     backtick_runs = [len(match.group(0)) for match in re.finditer(r"`+", topic)]
     fence = "`" * max(3, max(backtick_runs, default=0) + 1)
     return "\n".join([f"{fence}text", topic, fence])
-
-def _render_required_output(output_schema: dict, base_path: Path) -> str:
-    return "\n".join(
-        [
-            "## Required Output",
-            _render_schema_block(output_schema, base_path=base_path),
-        ]
-    )
-
-
-def _render_feedback(feedback_schema: dict, base_path: Path) -> str:
-    return "\n".join(
-        [
-            "## Feedback",
-            _render_schema_block(feedback_schema, base_path=base_path),
-        ]
-    )
-
 
 def _render_schema_block(schema: dict, *, base_path: Path) -> str:
     return "\n".join(

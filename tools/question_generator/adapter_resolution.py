@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from tools.question_generator.models import ResolvedModule, StageContract
-from tools.question_generator.pathing import adapter_path, normalize_stage_name, output_mode_path
+from tools.question_generator.pathing import adapter_path, normalize_stage_name, render_template_path
 
 
 def resolve_stage_modules(
@@ -18,7 +18,7 @@ def resolve_stage_modules(
             raise ValueError(f"Missing routed value for dependency '{dimension}'")
 
         if dimension == "output_mode":
-            path = output_mode_path(value)
+            path = render_template_path(value)
         else:
             path = adapter_path(dimension, value)
 

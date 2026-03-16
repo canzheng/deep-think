@@ -11,6 +11,10 @@ PROMPT_ROOT = REPO_ROOT / "prompt" / "question-generator"
 CONTRACTS_DIR = PROMPT_ROOT / "contracts"
 ADAPTERS_DIR = PROMPT_ROOT / "adapters"
 STAGE_GUIDANCE_SCHEMA_PATH = ADAPTERS_DIR / "schemas" / "stage-guidance.schema.json"
+AGENTS_PATH = REPO_ROOT / "AGENTS.md"
+README_PATH = REPO_ROOT / "README.md"
+PROMPT_README_PATH = PROMPT_ROOT / "README.md"
+IMPLEMENTATION_PATH = PROMPT_ROOT / "IMPLEMENTATION.md"
 
 
 class DocumentationConsistencyTest(unittest.TestCase):
@@ -37,6 +41,25 @@ class DocumentationConsistencyTest(unittest.TestCase):
             payload["$defs"]["stageGuidanceEntry"]["properties"]["importance"]["enum"],
             ["Important", "Moderate", "Light", "None"],
         )
+
+    def test_live_docs_use_stages_render_and_not_output_modes(self) -> None:
+        agents_text = AGENTS_PATH.read_text()
+        readme_text = README_PATH.read_text()
+        prompt_readme_text = PROMPT_README_PATH.read_text()
+        implementation_text = IMPLEMENTATION_PATH.read_text()
+
+        self.assertIn("prompt/question-generator/stages/render", readme_text)
+        self.assertIn("stages/render/", prompt_readme_text)
+        self.assertIn("prompt/question-generator/stages/render/", implementation_text)
+
+        for text in [agents_text, readme_text, prompt_readme_text, implementation_text]:
+            self.assertNotIn("output-modes/", text)
+
+    def test_implementation_doc_marks_state_rendering_as_retired(self) -> None:
+        implementation_text = IMPLEMENTATION_PATH.read_text()
+
+        self.assertIn("Retired `state_rendering.py` Path", implementation_text)
+        self.assertIn("non-render helper only", implementation_text)
 
 
 if __name__ == "__main__":

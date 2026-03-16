@@ -67,13 +67,17 @@ class PathingTest(unittest.TestCase):
             / "portfolio-construction.json",
         )
 
-    def test_output_mode_path_normalizes_values(self) -> None:
-        output_mode_path = pathing.output_mode_path("Decision Memo")
+    def test_render_template_path_uses_runtime_render_subtemplates(self) -> None:
+        render_template_path = pathing.render_template_path("Decision Memo")
         self.assertEqual(
-            output_mode_path,
-            pathing.output_modes_dir() / "decision-memo.md",
+            render_template_path,
+            pathing.stages_dir() / "render" / "decision-memo.md",
         )
-        self.assertTrue(output_mode_path.is_file())
+        self.assertTrue(render_template_path.is_file())
+
+    def test_render_template_path_rejects_unknown_output_mode(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unsupported render output mode"):
+            pathing.render_template_path("Unknown Mode")
 
     def test_adapters_directory_contains_only_json_modules(self) -> None:
         legacy_markdown_modules = sorted(

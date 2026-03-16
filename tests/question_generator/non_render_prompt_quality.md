@@ -53,7 +53,14 @@ This workflow uses:
 - the reviewer rubric at [non_render_prompt_review_prompt.md](tests/question_generator/non_render_prompt_review_prompt.md)
 - the structured output contract at [non_render_prompt_review_schema.json](tests/question_generator/non_render_prompt_review_schema.json)
 
-The assembled prompts should already use the repo’s prompt-facing labels such as `Relevant Context` and `Stage Guidance` when those runtime changes are active.
+Generated-output rule:
+- anything written under `tests/question_generator/artifacts/` is a local generated output
+- those files should remain untracked and can be regenerated at any time
+
+The assembled prompts should already use the current prompt-facing structure:
+stage-specific inline shared-state fields, `Stage Guidance`, `Required Output`,
+and `Feedback` where supported, without reviving a broad `Relevant Context`
+block.
 
 ## Step 1: Generate The Review Prompt Set
 
@@ -67,6 +74,7 @@ This creates:
 - the selected review topic
 - one fully assembled prompt file for each non-render stage
 - a manifest JSON file listing the prompt paths
+- only local generated outputs under `tests/question_generator/artifacts/`
 
 ## Step 2: Ask Codex To Review Each Prompt Separately
 

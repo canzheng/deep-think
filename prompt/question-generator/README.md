@@ -28,7 +28,6 @@ Layout:
 - `adapters/evidence-modes/`
 - `adapters/uncertainty-modes/`
 - `adapters/decision-modes/`
-- `output-modes/`
 - `recipes/`
 - `contracts/`
   - `shared_state_schema.json`
@@ -76,7 +75,6 @@ Assembler runtime:
   - `tools/question_generator/contracts.py`
 - state and adapter resolution:
   - `tools/question_generator/state_resolution.py`
-  - `tools/question_generator/state_rendering.py`
   - `tools/question_generator/adapter_resolution.py`
   - `tools/question_generator/adapter_rendering.py`
 - prompt assembly:
@@ -109,14 +107,14 @@ Supported non-render Mustache context values:
 Non-render rendering rule:
 - the assembler prepares one render context per stage
 - the template decides what context appears in the final prompt
-- the assembler does not append a large whole-section `Relevant Context` block for non-render stages
+- the assembler does not append a broad `Relevant Context` block for non-render stages
 
 Current prompt-facing assembly:
 - non-render prompts inline only the state fields their templates reference
 - `Stage Guidance` is the only prompt-visible adapter section in the first structured-adapter migration
 - stage-guidance entries use the prompt-facing importance labels `Important`, `Moderate`, `Light`, and `None`
 - conditional adapter guidance uses the same `[CONDITIONAL condition="..."] ... [/CONDITIONAL]` wrapper convention as other conditional prompt blocks
-- render uses output-mode-selected subtemplates under
+- render uses runtime output-mode-selected subtemplates under
   `prompt/question-generator/stages/render/`
 - render wrapper context comes from `reads_required_common`, and render
   subtemplate context comes from `reads_by_output_mode`
