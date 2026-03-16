@@ -1,0 +1,34 @@
+{
+  "stage": "scenarios",
+  "reads_required": ["routing", "boundary", "structure"],
+  "reads_optional": [
+    {
+      "stage": "question_generation",
+      "kind": "situation",
+      "when": [
+        "you allow exploratory questions before finalizing scenarios"
+      ]
+    },
+    {
+      "stage": "evidence_planning",
+      "kind": "situation",
+      "when": [
+        "evidence constraints force you to collapse or widen scenario branches"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["scenarios"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["scenarios"],
+    "properties": {
+      "scenarios": {"$ref": "./state-sections/scenarios.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": false
+  }
+}

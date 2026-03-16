@@ -1,0 +1,53 @@
+{
+  "value": "Sparse-Data Dominated",
+  "research_behavior": [
+    "maximize value of each datapoint",
+    "use scenario bands instead of point estimates",
+    "rank unknowns by decision relevance"
+  ],
+  "risk": [
+    "paralysis from missing data"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one where key data is delayed, missing, or unreliable."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can widen scope slightly to include substitute signals and coarse proxies."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Forces the stage to separate what is unknowable from what is merely delayed."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors wider bands, coarse branches, and reduced point-estimate confidence."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors minimum-evidence, proxy, and decision-under-missing-data questions."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Requires explicit hierarchy for scarce datapoints and careful proxy substitution."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Pushes action logic toward minimum robust action and avoidance of false certainty."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should be high-value, sparse, and event-driven rather than constantly refreshed."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be event-driven with clear update thresholds."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should make data gaps and their consequences explicit."
+    }
+  }
+}

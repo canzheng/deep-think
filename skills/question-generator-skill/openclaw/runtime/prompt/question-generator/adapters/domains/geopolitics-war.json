@@ -1,0 +1,78 @@
+{
+  "value": "Geopolitics / War",
+  "typical_ontology": [
+    "states",
+    "leaders",
+    "militaries",
+    "factions",
+    "proxies",
+    "allies",
+    "adversaries",
+    "domestic coalitions",
+    "energy/logistics/finance systems",
+    "escalation ladders"
+  ],
+  "typical_bottlenecks": [
+    "munitions",
+    "logistics",
+    "fiscal endurance",
+    "domestic tolerance",
+    "alliance cohesion",
+    "leadership legitimacy",
+    "shipping lanes",
+    "energy prices"
+  ],
+  "typical_signals": [
+    "mobilization",
+    "strike patterns",
+    "rhetoric shifts",
+    "diplomatic outreach",
+    "sanctions actions",
+    "shipping/insurance changes",
+    "commodity flows",
+    "protests",
+    "elite defections"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as a geopolitical or conflict system with state, coalition, and escalation logic."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls in adjacent systems like alliances, logistics, energy, finance, and domestic politics."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Makes states, leaders, militaries, factions, and coalitions the natural actors and bottlenecks."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors escalation, de-escalation, frozen conflict, coalition fracture, and endurance branches."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about endurance, coercion, coalition cohesion, logistics, and costly signals."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Prefers official behavior, primary statements, field indicators, and logistics evidence over pure narrative."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Shapes what intervention, leverage, deterrence, or exposure management means in this domain."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize mobilization, strike patterns, diplomacy, sanctions, and elite behavior."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track escalation ladders, logistics endurance, and coalition changes."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Mainly affects vocabulary and domain examples rather than structure by itself."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-adapter.schema.json",
+  "title": "Task Adapter",
+  "type": "object",
+  "required": ["value", "prioritize", "stage_guidance"],
+  "properties": {
+    "value": { "type": "string" },
+    "prioritize": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stage_guidance": { "$ref": "./stage-guidance.schema.json" }
+  },
+  "additionalProperties": false
+}

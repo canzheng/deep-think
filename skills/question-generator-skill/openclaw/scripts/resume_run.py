@@ -1,0 +1,34 @@
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+RUNTIME_ROOT = BASE_DIR / "runtime"
+VENDOR_ROOT = BASE_DIR / "vendor" / "chevron"
+CONFIG_PATH = BASE_DIR / "config" / "runtime.json"
+
+os.environ.setdefault("QUESTION_GENERATOR_RUNTIME_ROOT", str(RUNTIME_ROOT))
+os.environ.setdefault("QUESTION_GENERATOR_OPENCLAW_CONFIG_PATH", str(CONFIG_PATH))
+sys.path.insert(0, str(VENDOR_ROOT))
+sys.path.insert(0, str(RUNTIME_ROOT))
+
+from tools.question_generator.cli import main
+
+
+DEFAULT_RECIPE = BASE_DIR / "runtime" / "prompt" / "question-generator" / "recipes" / "non-render.recipe.json"
+
+
+def _build_args() -> list[str]:
+    args = sys.argv[1:]
+    if "--recipe" not in args:
+        args.extend(["--recipe", str(DEFAULT_RECIPE)])
+    if "--executor-backend" not in args:
+        args.extend(["--executor-backend", "openclaw"])
+    return ["run-recipe-on-run", *args]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(_build_args()))

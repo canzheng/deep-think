@@ -1,0 +1,53 @@
+{
+  "value": "Regime-Shift Dominated",
+  "research_behavior": [
+    "reduce reliance on old analogies",
+    "test whether historical relationships still hold",
+    "widen scenario space early"
+  ],
+  "risk": [
+    "declaring regime change too quickly"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one where old relationships may no longer hold."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can widen scope modestly to include structural changes that break prior assumptions."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Forces the stage to distrust stale structural relationships and test for new drivers."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors wider branches and explicit structural-discontinuity scenarios."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what changed structurally and which old analogies are broken."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Requires evidence that tests whether old signals still work and whether new mechanisms dominate."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Pushes action logic toward caution when prior models may be broken."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should test historical-indicator failure and new leading indicators."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should revisit priors and explicitly test for continuing regime change."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should show where historical confidence is no longer reliable."
+    }
+  }
+}

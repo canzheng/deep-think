@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shared_state_schema.json",
+  "title": "Question Generator Shared State",
+  "type": "object",
+  "required": [
+    "topic",
+    "routing",
+    "boundary",
+    "structure",
+    "scenarios",
+    "questions",
+    "evidence_plan",
+    "uncertainty_map",
+    "decision_logic",
+    "synthesis",
+    "signals",
+    "monitoring"
+  ],
+  "properties": {
+    "topic": {"$ref": "./state-sections/topic.schema.json"},
+    "routing": {"$ref": "./state-sections/routing.schema.json"},
+    "boundary": {"$ref": "./state-sections/boundary.schema.json"},
+    "structure": {"$ref": "./state-sections/structure.schema.json"},
+    "scenarios": {"$ref": "./state-sections/scenarios.schema.json"},
+    "questions": {"$ref": "./state-sections/questions.schema.json"},
+    "evidence_plan": {"$ref": "./state-sections/evidence_plan.schema.json"},
+    "uncertainty_map": {"$ref": "./state-sections/uncertainty_map.schema.json"},
+    "decision_logic": {"$ref": "./state-sections/decision_logic.schema.json"},
+    "synthesis": {"$ref": "./state-sections/synthesis.schema.json"},
+    "signals": {"$ref": "./state-sections/signals.schema.json"},
+    "monitoring": {"$ref": "./state-sections/monitoring.schema.json"}
+  },
+  "additionalProperties": false
+}

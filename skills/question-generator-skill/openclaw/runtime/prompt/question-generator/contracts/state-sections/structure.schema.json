@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/structure.schema.json",
+  "title": "Structure",
+  "type": "object",
+  "required": [
+    "stakeholders",
+    "decisive_stakeholders",
+    "incentives",
+    "constraints",
+    "causal_mechanism",
+    "killer_variables",
+    "bottlenecks",
+    "threshold_variables",
+    "scarce_resources"
+  ],
+  "properties": {
+    "stakeholders": {"type": "array", "items": {"type": "string"}},
+    "decisive_stakeholders": {"type": "array", "items": {"type": "string"}},
+    "incentives": {"type": "array", "items": {"type": "string"}},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "causal_mechanism": {"type": "array", "items": {"type": "string"}},
+    "killer_variables": {"type": "array", "items": {"type": "string"}},
+    "bottlenecks": {"type": "array", "items": {"type": "string"}},
+    "threshold_variables": {"type": "array", "items": {"type": "string"}},
+    "scarce_resources": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,52 @@
+{
+  "value": "Design / Influence",
+  "prioritize": [
+    "levers",
+    "intervention points",
+    "second-order effects",
+    "implementation constraints",
+    "stakeholder reactions"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Sets the overall job to shaping outcomes rather than merely describing them."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls scope toward levers, intervention points, and implementation constraints."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Prioritizes leverage structure, response dynamics, and second-order effects."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Requires scenarios that show how interventions change path outcomes and stakeholder reactions."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors action-shaping, intervention-design, and reaction-risk questions."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Prefers evidence on leverage, feasibility, response, and implementation friction."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Matters whenever influence requires sequencing, staging, or reversible interventions."
+    },
+    "signal_translation": {
+      "importance": "Moderate",
+      "guidance": "Signals should indicate whether interventions are working or backfiring."
+    },
+    "monitoring": {
+      "importance": "Moderate",
+      "guidance": "Monitoring should watch implementation milestones, stakeholder reactions, and second-order effects."
+    },
+    "render": {
+      "importance": "Important",
+      "guidance": "Pushes the final artifact toward strategy, levers, and intervention logic."
+    }
+  }
+}

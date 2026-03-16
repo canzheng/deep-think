@@ -1,0 +1,80 @@
+{
+  "value": "Technology / Adoption",
+  "typical_ontology": [
+    "technology",
+    "developer",
+    "buyer",
+    "user",
+    "complementors",
+    "incumbents",
+    "infrastructure providers",
+    "substitutes",
+    "cost curves",
+    "diffusion channels"
+  ],
+  "typical_bottlenecks": [
+    "cost",
+    "reliability",
+    "latency",
+    "interoperability",
+    "standards",
+    "trust",
+    "distribution",
+    "switching cost",
+    "ecosystem readiness",
+    "compute/energy/hardware constraints"
+  ],
+  "typical_signals": [
+    "cost per unit",
+    "benchmarks",
+    "deployment rates",
+    "developer activity",
+    "integrations",
+    "enterprise pilots",
+    "retention after trial",
+    "complements",
+    "standards adoption"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as a technology diffusion, substitution, or adoption system."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls in complements, infrastructure, standards, switching costs, and diffusion channels."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Makes cost curves, reliability, interoperability, trust, and ecosystem readiness central structural elements."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors diffusion, stall, substitution, standards split, and complement bottleneck branches."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors bottleneck, complement, threshold, cost/performance, and user-behavior questions."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Prefers benchmark, deployment, developer, pilot, and retention evidence."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Shapes what action means: adoption timing, platform bet, ecosystem sequencing, and staged commitment."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize deployment rates, benchmark improvement, developer activity, integrations, and retention after trial."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track diffusion speed, standards adoption, complement readiness, and usage persistence."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Mainly affects domain vocabulary and examples."
+    }
+  }
+}

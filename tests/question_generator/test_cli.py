@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 
 from tools.question_generator.cli import build_workflow_parser, main
+from tools.question_generator.openclaw_package import default_openclaw_package_dir
 
 
 FIXTURE_PATH = (
@@ -98,6 +99,13 @@ class CliTest(unittest.TestCase):
                 "topic-run",
                 "--pause-after-stage",
                 "routing",
+                "--executor-backend",
+                "openclaw",
+            ]
+        )
+        refresh_package_args = parser.parse_args(
+            [
+                "refresh-openclaw-package",
             ]
         )
 
@@ -105,6 +113,8 @@ class CliTest(unittest.TestCase):
         self.assertEqual(update_routing_args.patch_json, '{"output_mode":"Research Memo"}')
         self.assertEqual(run_on_run_args.start_stage, "boundary")
         self.assertEqual(run_topic_args.pause_after_stage, "routing")
+        self.assertEqual(run_topic_args.executor_backend, "openclaw")
+        self.assertEqual(Path(refresh_package_args.output_dir), default_openclaw_package_dir())
 
     def test_cli_prints_assembled_prompt(self) -> None:
         stdout = io.StringIO()
@@ -224,11 +234,14 @@ class CliTest(unittest.TestCase):
                             str(run_dir),
                             "--stage",
                             "decision_logic",
+                            "--executor-backend",
+                            "openclaw",
                         ]
                     )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_run_stage.called)
+            self.assertEqual(mocked_run_stage.call_args.kwargs["executor_backend"], "openclaw")
             self.assertIn("response.parsed.json", stdout.getvalue())
 
     def test_run_recipe_command_uses_recipe_runner_and_output_dir(self) -> None:
@@ -253,11 +266,14 @@ class CliTest(unittest.TestCase):
                             tmpdir,
                             "--run-id",
                             "demo-run",
+                            "--executor-backend",
+                            "openclaw",
                         ]
                     )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_run_recipe.called)
+            self.assertEqual(mocked_run_recipe.call_args.kwargs["executor_backend"], "openclaw")
             self.assertIn("demo-run", stdout.getvalue())
 
     def test_init_topic_run_command_uses_topic_initializer(self) -> None:
@@ -325,11 +341,14 @@ class CliTest(unittest.TestCase):
                             str(Path(tmpdir) / "topic-run"),
                             "--start-stage",
                             "boundary",
+                            "--executor-backend",
+                            "openclaw",
                         ]
                     )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_run_recipe_on_run.called)
+            self.assertEqual(mocked_run_recipe_on_run.call_args.kwargs["executor_backend"], "openclaw")
             self.assertIn("topic-run", stdout.getvalue())
 
     def test_run_topic_command_uses_topic_runner(self) -> None:
@@ -356,12 +375,37 @@ class CliTest(unittest.TestCase):
                             "topic-run",
                             "--pause-after-stage",
                             "routing",
+                            "--executor-backend",
+                            "openclaw",
                         ]
                     )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_run_topic.called)
+            self.assertEqual(mocked_run_topic.call_args.kwargs["executor_backend"], "openclaw")
             self.assertIn("topic-run", stdout.getvalue())
+
+    def test_refresh_openclaw_package_command_uses_package_builder(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            package_dir = Path(tmpdir) / "openclaw-package"
+            with patch(
+                "tools.question_generator.cli.refresh_openclaw_package",
+                return_value=package_dir,
+            ) as mocked_refresh:
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "refresh-openclaw-package",
+                            "--output-dir",
+                            str(package_dir),
+                        ]
+                    )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(mocked_refresh.called)
+            self.assertEqual(mocked_refresh.call_args.kwargs["output_dir"], package_dir)
+            self.assertIn(str(package_dir), stdout.getvalue())
 
 
 if __name__ == "__main__":

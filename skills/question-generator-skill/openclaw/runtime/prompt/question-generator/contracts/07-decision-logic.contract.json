@@ -1,0 +1,44 @@
+{
+  "stage": "decision_logic",
+  "reads_required": ["routing", "scenarios", "evidence_planning"],
+  "reads_optional": [
+    {
+      "stage": "structure",
+      "kind": "situation",
+      "when": [
+        "action depends on specific bottlenecks or mechanism details",
+        "scenario summaries are too compressed",
+        "portfolio or adversarial logic needs more structural detail"
+      ]
+    },
+    {
+      "stage": "question_generation",
+      "kind": "user_requirement",
+      "when": [
+        "killer questions are directly tied to action gating"
+      ]
+    },
+    {
+      "stage": "boundary",
+      "kind": "situation",
+      "when": [
+        "action scope is still ambiguous"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["decision_logic", "synthesis"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["decision_logic", "synthesis"],
+    "properties": {
+      "decision_logic": {"$ref": "./state-sections/decision_logic.schema.json"},
+      "synthesis": {"$ref": "./state-sections/synthesis.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": false
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/evidence_plan.schema.json",
+  "title": "Evidence Plan",
+  "type": "object",
+  "required": [
+    "evidence_hierarchy",
+    "preferred_source_types",
+    "backup_source_types",
+    "conflict_resolution_rules",
+    "question_to_evidence_mapping"
+  ],
+  "properties": {
+    "evidence_hierarchy": {"type": "array", "items": {"type": "string"}},
+    "preferred_source_types": {"type": "array", "items": {"type": "string"}},
+    "backup_source_types": {"type": "array", "items": {"type": "string"}},
+    "conflict_resolution_rules": {"type": "array", "items": {"type": "string"}},
+    "question_to_evidence_mapping": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question", "preferred_sources", "backup_sources"],
+        "properties": {
+          "question": {"type": "string"},
+          "preferred_sources": {"type": "array", "items": {"type": "string"}},
+          "backup_sources": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

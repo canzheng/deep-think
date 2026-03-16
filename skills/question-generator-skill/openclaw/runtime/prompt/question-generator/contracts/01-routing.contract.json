@@ -1,0 +1,19 @@
+{
+  "stage": "routing",
+  "reads_required": ["topic"],
+  "reads_optional": [],
+  "depends_on": [],
+  "writes": ["routing"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["routing"],
+    "properties": {
+      "routing": {"$ref": "./state-sections/routing.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": false
+  }
+}

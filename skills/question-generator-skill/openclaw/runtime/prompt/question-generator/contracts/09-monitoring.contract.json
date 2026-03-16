@@ -1,0 +1,41 @@
+{
+  "stage": "monitoring",
+  "reads_required": ["routing", "signal_translation"],
+  "reads_optional": [
+    {
+      "stage": "decision_logic",
+      "kind": "user_requirement",
+      "when": [
+        "monitoring must trigger adds, trims, scale, stop, or hedge decisions"
+      ]
+    },
+    {
+      "stage": "scenarios",
+      "kind": "user_requirement",
+      "when": [
+        "monitoring should explicitly track competing paths, not just isolated metrics"
+      ]
+    },
+    {
+      "stage": "evidence_planning",
+      "kind": "situation",
+      "when": [
+        "monitoring cadence depends on source hierarchy or source latency"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["monitoring"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["monitoring"],
+    "properties": {
+      "monitoring": {"$ref": "./state-sections/monitoring.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": false
+  }
+}

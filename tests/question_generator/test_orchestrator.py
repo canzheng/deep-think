@@ -29,6 +29,7 @@ from tools.question_generator.orchestrator import (
     update_routing,
 )
 from tools.question_generator.bootstrap import bootstrap_topic_state
+from tools.question_generator.executors import StageExecutionResult
 
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
@@ -407,7 +408,7 @@ class OrchestratorTest(unittest.TestCase):
                 run_id="demo-run",
             )
 
-            with patch("tools.question_generator.orchestrator.subprocess.run", side_effect=fake_run) as mocked_run:
+            with patch("tools.question_generator.executors.subprocess.run", side_effect=fake_run) as mocked_run:
                 result = run_stage(run_dir, "decision_logic", codex_bin="codex", timeout_seconds=30)
 
             self.assertTrue(mocked_run.called)
@@ -415,8 +416,9 @@ class OrchestratorTest(unittest.TestCase):
             self.assertEqual(result["model"], ANSWERING_MODEL)
             self.assertEqual(result["reasoning_effort"], ANSWERING_REASONING_EFFORT)
             self.assertTrue(result["ephemeral"])
-            self.assertTrue(Path(result["codex_stdout_path"]).is_file())
-            self.assertTrue(Path(result["codex_stderr_path"]).is_file())
+            self.assertEqual(result["executor_backend"], "codex")
+            self.assertTrue(Path(result["executor_trace_path"]).is_file())
+            self.assertTrue(Path(result["executor_error_path"]).is_file())
             self.assertTrue(Path(result["response_raw_path"]).is_file())
             self.assertTrue(Path(result["response_parsed_path"]).is_file())
 
@@ -427,6 +429,54 @@ class OrchestratorTest(unittest.TestCase):
                 "wait for confirmation",
             )
 
+    def test_run_stage_delegates_to_injected_executor_and_records_backend_neutral_artifacts(self) -> None:
+        class FakeExecutor:
+            def __init__(self) -> None:
+                self.calls: list[dict] = []
+
+            def run_stage_prompt(self, **kwargs):
+                self.calls.append(kwargs)
+                return StageExecutionResult(
+                    response_text="""{
+  "decision_logic": {
+    "must_know_before_action": ["confirm valuation discipline"]
+  },
+  "synthesis": {
+    "recommendation_or_action_frame": "wait for confirmation"
+  }
+}""",
+                    backend_name="fake-backend",
+                    trace_text='{"event":"done"}\n',
+                    error_text="",
+                )
+
+        executor = FakeExecutor()
+
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+            )
+
+            result = run_stage(
+                run_dir,
+                "decision_logic",
+                timeout_seconds=30,
+                executor=executor,
+            )
+
+            self.assertEqual(len(executor.calls), 1)
+            self.assertEqual(result["status"], "response_applied")
+            self.assertEqual(result["executor_backend"], "fake-backend")
+            self.assertTrue(Path(result["executor_trace_path"]).is_file())
+            self.assertTrue(Path(result["executor_error_path"]).is_file())
+            self.assertTrue(Path(result["response_raw_path"]).is_file())
+            self.assertTrue(Path(result["response_parsed_path"]).is_file())
+
+            prompt_text = executor.calls[0]["prompt_text"]
+            self.assertIn("Return exactly one JSON object", prompt_text)
+
     def test_run_stage_records_failure_without_merging_state(self) -> None:
         with TemporaryDirectory() as tmpdir:
             run_dir = initialize_run(
@@ -436,7 +486,7 @@ class OrchestratorTest(unittest.TestCase):
             )
 
             with patch(
-                "tools.question_generator.orchestrator.subprocess.run",
+                "tools.question_generator.executors.subprocess.run",
                 return_value=subprocess.CompletedProcess(
                     args=["codex", "exec"],
                     returncode=1,
@@ -449,9 +499,10 @@ class OrchestratorTest(unittest.TestCase):
 
             manifest = load_run_manifest(run_dir)
             stage_record = manifest["stages"]["decision_logic"]
-            self.assertEqual(stage_record["status"], "codex_failed")
+            self.assertEqual(stage_record["status"], "executor_failed")
             self.assertEqual(stage_record["model"], ANSWERING_MODEL)
-            self.assertTrue(Path(stage_record["codex_stderr_path"]).is_file())
+            self.assertEqual(stage_record["executor_backend"], "codex")
+            self.assertTrue(Path(stage_record["executor_error_path"]).is_file())
 
     def test_run_stage_records_timeout_when_timeout_expired_returns_bytes(self) -> None:
         with TemporaryDirectory() as tmpdir:
@@ -469,7 +520,7 @@ class OrchestratorTest(unittest.TestCase):
             )
 
             with patch(
-                "tools.question_generator.orchestrator.subprocess.run",
+                "tools.question_generator.executors.subprocess.run",
                 side_effect=timeout_error,
             ):
                 with self.assertRaises(RuntimeError):
@@ -477,14 +528,72 @@ class OrchestratorTest(unittest.TestCase):
 
             manifest = load_run_manifest(run_dir)
             stage_record = manifest["stages"]["decision_logic"]
-            self.assertEqual(stage_record["status"], "codex_failed")
+            self.assertEqual(stage_record["status"], "executor_failed")
             self.assertEqual(stage_record["failure_reason"], "timeout")
-            stdout_path = Path(stage_record["codex_stdout_path"])
-            stderr_path = Path(stage_record["codex_stderr_path"])
-            self.assertTrue(stdout_path.is_file())
-            self.assertTrue(stderr_path.is_file())
-            self.assertIn('"event":"waiting"', stdout_path.read_text(encoding="utf-8"))
-            self.assertIn("still running", stderr_path.read_text(encoding="utf-8"))
+            trace_path = Path(stage_record["executor_trace_path"])
+            error_path = Path(stage_record["executor_error_path"])
+            self.assertTrue(trace_path.is_file())
+            self.assertTrue(error_path.is_file())
+            self.assertIn('"event":"waiting"', trace_path.read_text(encoding="utf-8"))
+            self.assertIn("still running", error_path.read_text(encoding="utf-8"))
+
+    def test_run_stage_records_unexpected_executor_exception_as_failure(self) -> None:
+        class ExplodingExecutor:
+            def run_stage_prompt(self, **kwargs):
+                raise ValueError("bad response shape")
+
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+            )
+
+            with self.assertRaises(RuntimeError):
+                run_stage(
+                    run_dir,
+                    "decision_logic",
+                    timeout_seconds=30,
+                    executor=ExplodingExecutor(),
+                )
+
+            manifest = load_run_manifest(run_dir)
+            stage_record = manifest["stages"]["decision_logic"]
+            self.assertEqual(stage_record["status"], "executor_failed")
+            self.assertEqual(stage_record["failure_reason"], "unexpected_error")
+            self.assertEqual(stage_record["executor_backend"], "codex")
+
+    def test_run_stage_records_response_apply_failure_without_leaving_executor_completed(self) -> None:
+        class InvalidResponseExecutor:
+            def run_stage_prompt(self, **kwargs):
+                return StageExecutionResult(
+                    response_text='{"wrong_key":"oops"}',
+                    backend_name="fake-backend",
+                    trace_text='{"event":"done"}\n',
+                    error_text="",
+                )
+
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+            )
+
+            with self.assertRaises(RuntimeError):
+                run_stage(
+                    run_dir,
+                    "decision_logic",
+                    timeout_seconds=30,
+                    executor=InvalidResponseExecutor(),
+                )
+
+            manifest = load_run_manifest(run_dir)
+            stage_record = manifest["stages"]["decision_logic"]
+            self.assertEqual(stage_record["status"], "response_apply_failed")
+            self.assertEqual(stage_record["failure_reason"], "invalid_stage_response")
+            self.assertEqual(stage_record["executor_backend"], "fake-backend")
+            self.assertTrue(Path(stage_record["executor_trace_path"]).is_file())
 
     def test_run_recipe_initializes_run_and_executes_stages_in_recipe_order(self) -> None:
         executed_stages: list[str] = []

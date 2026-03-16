@@ -1,0 +1,74 @@
+{
+  "value": "Optionality / Staged Commitment",
+  "use_when": [
+    "the user can buy information in stages",
+    "the initial move can be small and reversible",
+    "later commitment can depend on evidence"
+  ],
+  "research_behavior": [
+    "lower the evidence bar for the first reversible step",
+    "define explicit stage gates",
+    "identify the cheapest informative experiment",
+    "ask what evidence unlocks scaling versus what kills the thesis"
+  ],
+  "key_questions": [
+    "What is the smallest informative action?",
+    "What evidence would justify the next stage?",
+    "What is the option cost?",
+    "What are the kill criteria?",
+    "What should be learned before scaling?"
+  ],
+  "action_logic": [
+    "cheap probes first",
+    "preserve upside, cap downside",
+    "escalate only on validation"
+  ],
+  "monitoring_style": [
+    "milestone and stage-gate based"
+  ],
+  "failure_mode": [
+    "endless small experiments with no scale discipline"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the action problem as stageable and partially reversible."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Pulls in stage gates, probe design, and future commitment points."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Adds reversible versus irreversible moves and low-cost experiment structure."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors branches tied to probe, scale, pause, and stop decisions."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what unlocks the next stage and what kills the thesis."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Ties evidence to explicit stage gates rather than one final proof threshold."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Core stage: must define probe, scale, kill, and learning-before-commitment logic."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should identify probe success, scaling triggers, and stop conditions."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be milestone-based and stage-gate oriented."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Outputs should make staged commitment and option value explicit."
+    }
+  }
+}

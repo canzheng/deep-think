@@ -106,6 +106,39 @@ conda run -n truth-seek python -m tools.question_generator.cli run-topic \
   --pause-after-stage routing
 ```
 
+Run the same workflow through the OpenClaw executor path:
+
+```bash
+conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+  --topic "Should Atlas expand into healthcare next quarter?" \
+  --recipe prompt/question-generator/recipes/non-render.recipe.json \
+  --output-dir tmp/question-runs \
+  --run-id atlas-healthcare \
+  --pause-after-stage routing \
+  --executor-backend openclaw
+```
+
+Notes:
+- prompt assembly and contracts stay unchanged
+- JSON stages prefer OpenClaw `llm-task` when available
+- otherwise they fall back to OpenClaw chat-completions with local validation
+
+Refresh the self-contained OpenClaw bundle artifact:
+
+```bash
+conda run -n truth-seek python -m tools.question_generator.cli refresh-openclaw-package
+```
+
+Packaged OpenClaw bundle notes:
+- the bundle lives under `skills/question-generator-skill/openclaw`
+- it carries its own runtime, prompt assets, recipes, and vendored `chevron`
+- it uses `python3` and does not require `conda`
+- it persists JSON-stage executor choice in `config/runtime.json`
+- bundled entrypoints are:
+  - `python3 {baseDir}/scripts/run_topic.py ...`
+  - `python3 {baseDir}/scripts/update_routing.py ...`
+  - `python3 {baseDir}/scripts/resume_run.py ...`
+
 Resume an existing run after routing confirmation:
 
 ```bash
