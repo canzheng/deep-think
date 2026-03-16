@@ -188,7 +188,7 @@ Current models:
 Key implementation choice:
 - The runtime uses simple frozen dataclasses instead of a heavier validation
   library. The current target is dependency-light and fully compatible with the
-  `truth-seek` Conda environment without extra packages.
+  `deep-think` Conda environment without extra packages.
 
 ### `contracts.py`
 
@@ -1601,19 +1601,19 @@ not:
 
 Environment:
 ```bash
-conda activate truth-seek
+conda activate deep-think
 ```
 
 Assemble a stage prompt:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli \
+conda run -n deep-think python -m tools.question_generator.cli \
   --stage routing \
   --state research-state/problems/iran_war.json
 ```
 
 Include optional stage dependencies:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli \
+conda run -n deep-think python -m tools.question_generator.cli \
   --stage decision_logic \
   --state tests/question_generator/fixtures/minimal_state.json \
   --include-optional structure \
@@ -1634,7 +1634,7 @@ Workflow commands also support:
 Run the suite in the intended environment:
 
 ```bash
-conda run -n truth-seek python -m unittest discover -s tests -p 'test_*.py' -v
+conda run -n deep-think python -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
 The tests currently cover:

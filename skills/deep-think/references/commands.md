@@ -1,14 +1,13 @@
-# Question Generator Skill Commands
+# Deep Think Skill Commands
 
-Run these from the repository root:
-- `/Users/canzheng/Work/sandbox/truth-seek`
+Run these from the repository root.
 
 ## Topic Bootstrap
 
 Initialize a run from a raw topic:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli init-topic-run \
+conda run -n deep-think python -m tools.question_generator.cli init-topic-run \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --output-dir tmp/question-runs \
   --run-id atlas-healthcare
@@ -17,7 +16,7 @@ conda run -n truth-seek python -m tools.question_generator.cli init-topic-run \
 ## Run Routing Only
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-stage \
+conda run -n deep-think python -m tools.question_generator.cli run-stage \
   --run-dir tmp/question-runs/atlas-healthcare \
   --stage routing
 ```
@@ -27,7 +26,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-stage \
 Construct a partial routing patch from the user's feedback and apply it:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli update-routing \
+conda run -n deep-think python -m tools.question_generator.cli update-routing \
   --run-dir tmp/question-runs/atlas-healthcare \
   --patch-json '{"output_mode":"Research Memo","time_horizon":"next 12 months"}'
 ```
@@ -35,7 +34,7 @@ conda run -n truth-seek python -m tools.question_generator.cli update-routing \
 ## Resume Remaining Workflow
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run \
+conda run -n deep-think python -m tools.question_generator.cli run-recipe-on-run \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --run-dir tmp/question-runs/atlas-healthcare \
   --start-stage boundary
@@ -46,7 +45,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run
 Run from topic and pause after routing:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --output-dir tmp/question-runs \

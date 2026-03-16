@@ -21,7 +21,7 @@ _DEFAULT_RUNTIME_CONFIG = {
 
 
 def default_openclaw_package_dir() -> Path:
-    return repo_root() / "skills" / "question-generator-skill" / "openclaw"
+    return repo_root() / "skills" / "deep-think" / "openclaw"
 
 
 def build_openclaw_package(*, output_dir: Path | None = None) -> Path:

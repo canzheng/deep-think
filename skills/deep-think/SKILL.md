@@ -1,11 +1,11 @@
 ---
-name: question-generator-skill
+name: deep-think
 description: Use when a user wants to analyze a topic, generate a research or decision artifact, or structure an uncertain question into a memo, scenario tree, monitoring plan, or research prompt.
 ---
 
-# Question Generator Skill
+# Deep Think Skill
 
-Use this skill to run the truth-seek question-generator from a raw user topic.
+Use this skill to run Deep Think from a raw user topic.
 
 This workflow involves back-and-forth interaction with AI models across
 multiple stages, so it can take time to complete. The runtime now uses a
@@ -66,7 +66,7 @@ If the user's correction is ambiguous:
 
 ## Command Rules
 
-- Always run Python via `conda run -n truth-seek`
+- Always run Python via `conda run -n deep-think`
 - Use the repo CLI/orchestrator helpers instead of hand-editing run artifacts
 - Keep `shared_state.json` as the only workflow state
 

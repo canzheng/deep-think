@@ -19,7 +19,7 @@ class OpenClawPackageTest(unittest.TestCase):
 
         self.assertEqual(
             package_dir,
-            Path(__file__).resolve().parents[2] / "skills" / "question-generator-skill" / "openclaw",
+            Path(__file__).resolve().parents[2] / "skills" / "deep-think" / "openclaw",
         )
 
     def test_runtime_root_env_override_repoints_pathing_helpers(self) -> None:

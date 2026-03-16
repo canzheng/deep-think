@@ -27,7 +27,7 @@ def resolve_runtime_config_path(config_path: str | Path | None = None) -> Path:
     env_override = os.environ.get(OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR)
     if env_override:
         return Path(env_override).expanduser().resolve()
-    return repo_root() / "skills" / "question-generator-skill" / "openclaw" / "config" / RUNTIME_CONFIG_FILENAME
+    return repo_root() / "skills" / "deep-think" / "openclaw" / "config" / RUNTIME_CONFIG_FILENAME
 
 
 def normalize_executor_mode(mode: str | None) -> OpenClawExecutorMode:

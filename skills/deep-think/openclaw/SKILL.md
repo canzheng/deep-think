@@ -1,14 +1,14 @@
 ---
-name: question-generator-skill
+name: deep-think
 description: Use when a user wants to analyze a topic, generate a research or decision artifact, or structure an uncertain question into a memo, scenario tree, monitoring plan, or research prompt.
 metadata: {"openclaw":{"requires":{"bins":["python3"]}}}
 ---
 
-# Question Generator Skill For OpenClaw
+# Deep Think For OpenClaw
 
-Use this packaging artifact when the truth-seek question-generator should run
-inside an OpenClaw environment as a self-contained bundle instead of relying on
-the repo-local Codex runtime.
+Use this packaging artifact when Deep Think should run inside an OpenClaw
+environment as a self-contained bundle instead of relying on the repo-local
+Codex runtime.
 
 This artifact preserves the same workflow:
 - topic-first input

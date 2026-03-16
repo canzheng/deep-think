@@ -58,7 +58,7 @@ Consistency rules:
 Environment setup (run these from the repository root):
 ```bash
 conda env create -f environment.yml
-conda activate truth-seek
+conda activate deep-think
 ```
 The current assembler target is dependency-light and relies on the Python
 standard library plus `chevron` and `unittest`.
@@ -143,7 +143,7 @@ Current orchestration behavior:
 
 CLI usage:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli \
+conda run -n deep-think python -m tools.question_generator.cli \
   --stage decision_logic \
   --state tests/question_generator/fixtures/minimal_state.json \
   --include-optional structure \
@@ -152,19 +152,19 @@ conda run -n truth-seek python -m tools.question_generator.cli \
 
 Automatic stage workflow:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli init-run \
+conda run -n deep-think python -m tools.question_generator.cli init-run \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
   --run-id demo-run
 
-conda run -n truth-seek python -m tools.question_generator.cli run-stage \
+conda run -n deep-think python -m tools.question_generator.cli run-stage \
   --run-dir tmp/question-runs/demo-run \
   --stage decision_logic
 ```
 
 Recipe workflow:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
+conda run -n deep-think python -m tools.question_generator.cli run-recipe \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
@@ -173,18 +173,18 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
 
 Topic-first workflow with routing confirmation:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --output-dir tmp/question-runs \
   --run-id atlas-healthcare \
   --pause-after-stage routing
 
-conda run -n truth-seek python -m tools.question_generator.cli update-routing \
+conda run -n deep-think python -m tools.question_generator.cli update-routing \
   --run-dir tmp/question-runs/atlas-healthcare \
   --patch-json '{"output_mode":"Research Memo"}'
 
-conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run \
+conda run -n deep-think python -m tools.question_generator.cli run-recipe-on-run \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --run-dir tmp/question-runs/atlas-healthcare \
   --start-stage boundary
@@ -192,7 +192,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run
 
 OpenClaw execution path:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --output-dir tmp/question-runs \
@@ -208,19 +208,19 @@ OpenClaw notes:
   with JSON hardening, one repair pass, and local validation
 - `Render` remains plain text
 - the self-contained package is refreshed with:
-  `conda run -n truth-seek python -m tools.question_generator.cli refresh-openclaw-package`
+  `conda run -n deep-think python -m tools.question_generator.cli refresh-openclaw-package`
 - the packaged OpenClaw artifact runs with plain `python3` from
-  `skills/question-generator-skill/openclaw/scripts/*.py`
+  `skills/deep-think/openclaw/scripts/*.py`
 - the packaged artifact persists JSON executor mode in
-  `skills/question-generator-skill/openclaw/config/runtime.json`
+  `skills/deep-think/openclaw/config/runtime.json`
 
 Manual debug workflow:
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli prepare-stage \
+conda run -n deep-think python -m tools.question_generator.cli prepare-stage \
   --run-dir tmp/question-runs/demo-run \
   --stage decision_logic
 
-conda run -n truth-seek python -m tools.question_generator.cli apply-response \
+conda run -n deep-think python -m tools.question_generator.cli apply-response \
   --run-dir tmp/question-runs/demo-run \
   --stage decision_logic \
   --response tmp/question-runs/demo-run/decision_logic.response.md

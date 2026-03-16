@@ -1,6 +1,7 @@
-# Truth Seek
+# Deep Think
 
-This repository contains prompt, contract, and runtime tooling for the `question-generator` workflow.
+This repository contains prompt, contract, and runtime tooling for Deep Think,
+powered by the internal `question-generator` workflow.
 
 The main working area today is:
 - [prompt/question-generator/README.md](prompt/question-generator/README.md)
@@ -57,13 +58,13 @@ Create the Conda environment:
 
 ```bash
 conda env create -f environment.yml
-conda activate truth-seek
+conda activate deep-think
 ```
 
 Per repo guidance, run Python through the Conda-managed environment:
 
 ```bash
-conda run -n truth-seek python -m unittest
+conda run -n deep-think python -m unittest
 ```
 
 ## Common Commands
@@ -71,7 +72,7 @@ conda run -n truth-seek python -m unittest
 Assemble one stage prompt:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli \
+conda run -n deep-think python -m tools.question_generator.cli \
   --stage decision_logic \
   --state tests/question_generator/fixtures/minimal_state.json
 ```
@@ -79,7 +80,7 @@ conda run -n truth-seek python -m tools.question_generator.cli \
 Run the full question-generator recipe:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
+conda run -n deep-think python -m tools.question_generator.cli run-recipe \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --state tests/question_generator/fixtures/minimal_state.json \
   --output-dir tmp/question-runs \
@@ -89,7 +90,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe \
 Initialize a run directly from a raw topic:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli init-topic-run \
+conda run -n deep-think python -m tools.question_generator.cli init-topic-run \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --output-dir tmp/question-runs \
   --run-id atlas-healthcare
@@ -98,7 +99,7 @@ conda run -n truth-seek python -m tools.question_generator.cli init-topic-run \
 Run from a raw topic and stop after routing for user verification:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --output-dir tmp/question-runs \
@@ -109,7 +110,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-topic \
 Run the same workflow through the OpenClaw executor path:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-topic \
+conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --output-dir tmp/question-runs \
@@ -126,11 +127,11 @@ Notes:
 Refresh the self-contained OpenClaw bundle artifact:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli refresh-openclaw-package
+conda run -n deep-think python -m tools.question_generator.cli refresh-openclaw-package
 ```
 
 Packaged OpenClaw bundle notes:
-- the bundle lives under `skills/question-generator-skill/openclaw`
+- the bundle lives under `skills/deep-think/openclaw`
 - it carries its own runtime, prompt assets, recipes, and vendored `chevron`
 - it uses `python3` and does not require `conda`
 - it persists JSON-stage executor choice in `config/runtime.json`
@@ -142,7 +143,7 @@ Packaged OpenClaw bundle notes:
 Resume an existing run after routing confirmation:
 
 ```bash
-conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run \
+conda run -n deep-think python -m tools.question_generator.cli run-recipe-on-run \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --run-dir tmp/question-runs/atlas-healthcare \
   --start-stage boundary
@@ -151,7 +152,7 @@ conda run -n truth-seek python -m tools.question_generator.cli run-recipe-on-run
 Run the question-generator test suite:
 
 ```bash
-conda run -n truth-seek python -m unittest \
+conda run -n deep-think python -m unittest \
   tests.question_generator.test_adapter_rendering \
   tests.question_generator.test_adapter_resolution \
   tests.question_generator.test_assembler \
