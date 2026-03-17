@@ -36,11 +36,13 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--state", required=True)
     init_parser.add_argument("--output-dir", required=True)
     init_parser.add_argument("--run-id", required=True)
+    init_parser.add_argument("--output-language")
 
     init_topic_parser = subparsers.add_parser("init-topic-run")
     init_topic_parser.add_argument("--topic", required=True)
     init_topic_parser.add_argument("--output-dir", required=True)
     init_topic_parser.add_argument("--run-id", required=True)
+    init_topic_parser.add_argument("--output-language")
 
     prepare_parser = subparsers.add_parser("prepare-stage")
     prepare_parser.add_argument("--run-dir", required=True)
@@ -65,6 +67,7 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     recipe_parser.add_argument("--state", required=True)
     recipe_parser.add_argument("--output-dir", required=True)
     recipe_parser.add_argument("--run-id", required=True)
+    recipe_parser.add_argument("--output-language")
     recipe_parser.add_argument("--codex-bin", default="codex")
     recipe_parser.add_argument("--executor-backend", default="codex", choices=["codex", "openclaw"])
     recipe_parser.add_argument("--timeout-seconds", type=int, default=500)
@@ -87,6 +90,7 @@ def build_workflow_parser() -> argparse.ArgumentParser:
     run_topic_parser.add_argument("--recipe", required=True)
     run_topic_parser.add_argument("--output-dir", required=True)
     run_topic_parser.add_argument("--run-id", required=True)
+    run_topic_parser.add_argument("--output-language")
     run_topic_parser.add_argument("--pause-after-stage")
     run_topic_parser.add_argument("--codex-bin", default="codex")
     run_topic_parser.add_argument("--executor-backend", default="codex", choices=["codex", "openclaw"])
@@ -120,6 +124,7 @@ def main(argv: list[str] | None = None) -> int:
             state_path=Path(args.state),
             output_dir=Path(args.output_dir),
             run_id=args.run_id,
+            output_language=args.output_language,
         )
         print(run_dir)
         return 0
@@ -129,6 +134,7 @@ def main(argv: list[str] | None = None) -> int:
             topic=args.topic,
             output_dir=Path(args.output_dir),
             run_id=args.run_id,
+            output_language=args.output_language,
         )
         print(run_dir)
         return 0
@@ -169,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
             state_path=Path(args.state),
             output_dir=Path(args.output_dir),
             run_id=args.run_id,
+            output_language=args.output_language,
             codex_bin=args.codex_bin,
             executor_backend=args.executor_backend,
             timeout_seconds=args.timeout_seconds,
@@ -204,6 +211,7 @@ def main(argv: list[str] | None = None) -> int:
             recipe_path=Path(args.recipe),
             output_dir=Path(args.output_dir),
             run_id=args.run_id,
+            output_language=args.output_language,
             pause_after_stage=args.pause_after_stage,
             codex_bin=args.codex_bin,
             executor_backend=args.executor_backend,

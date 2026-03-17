@@ -57,6 +57,7 @@ def initialize_run(
     state_path: Path,
     output_dir: Path,
     run_id: str,
+    output_language: str | None = None,
 ) -> Path:
     run_dir = output_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -71,6 +72,8 @@ def initialize_run(
         "state_path": str(shared_state_path),
         "stages": {},
     }
+    if output_language:
+        manifest["output_language"] = output_language
     _write_json(run_dir / MANIFEST_FILENAME, manifest)
     return run_dir
 
@@ -80,6 +83,7 @@ def initialize_topic_run(
     topic: str,
     output_dir: Path,
     run_id: str,
+    output_language: str | None = None,
 ) -> Path:
     run_dir = output_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -94,6 +98,8 @@ def initialize_topic_run(
         "state_path": str(shared_state_path),
         "stages": {},
     }
+    if output_language:
+        manifest["output_language"] = output_language
     _write_json(run_dir / MANIFEST_FILENAME, manifest)
     return run_dir
 
@@ -114,10 +120,12 @@ def prepare_stage(
     stage_dir.mkdir(parents=True, exist_ok=True)
 
     state = _load_shared_state(run_dir)
+    run_manifest = load_run_manifest(run_dir)
     prompt = assemble_stage_prompt(
         normalized_stage,
         state,
         optional_reads=optional_reads,
+        run_manifest=run_manifest,
     )
     prompt_path = stage_dir / PROMPT_FILENAME
     prompt_path.write_text(prompt, encoding="utf-8")
@@ -356,6 +364,7 @@ def run_recipe(
     state_path: Path,
     output_dir: Path,
     run_id: str,
+    output_language: str | None = None,
     codex_bin: str = DEFAULT_CODEX_BIN,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     workspace_dir: Path | None = None,
@@ -365,6 +374,7 @@ def run_recipe(
         state_path=state_path,
         output_dir=output_dir,
         run_id=run_id,
+        output_language=output_language,
     )
 
     return run_recipe_on_run(
@@ -428,6 +438,7 @@ def run_topic(
     recipe_path: Path,
     output_dir: Path,
     run_id: str,
+    output_language: str | None = None,
     pause_after_stage: str | None = None,
     codex_bin: str = DEFAULT_CODEX_BIN,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
@@ -438,6 +449,7 @@ def run_topic(
         topic=topic,
         output_dir=output_dir,
         run_id=run_id,
+        output_language=output_language,
     )
 
     return run_recipe_on_run(

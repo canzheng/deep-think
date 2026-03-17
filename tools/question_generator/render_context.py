@@ -82,6 +82,7 @@ def build_render_context(
     stage_guidance: dict[str, list[dict[str, str]]],
     required_output_schema: str,
     feedback_schema: str,
+    run_manifest: dict | None = None,
 ) -> dict[str, object]:
     contract = load_contract("render")
     output_mode = state["routing"]["output_mode"]
@@ -91,6 +92,7 @@ def build_render_context(
         "feedback_schema": feedback_schema,
         "render_mode": output_mode,
         "render_template_path": str(select_render_template(output_mode)),
+        "output_language_instruction": _build_output_language_instruction(run_manifest),
     }
     context.update(
         _build_render_reads_context(
@@ -105,6 +107,17 @@ def build_render_context(
         )
     )
     return context
+
+
+def _build_output_language_instruction(run_manifest: dict | None) -> str:
+    if not run_manifest:
+        return ""
+
+    output_language = run_manifest.get("output_language")
+    if not output_language:
+        return ""
+
+    return f"Produce the final deliverable in {output_language}."
 
 
 def _build_routing_context(routing: dict) -> dict:

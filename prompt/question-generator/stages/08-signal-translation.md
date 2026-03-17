@@ -28,6 +28,8 @@ Working rules:
 - Separate evidence from signals, and signals from decisions.
 - Distinguish narrative from diagnostic signals.
 - Prefer signals that can meaningfully change branch weights, confidence, monitoring, or action.
+- Prefer a compact set of high-value signals over broad coverage.
+- Avoid repeating upstream evidence detail unless it changes signal design.
 - Make update logic explicit enough that someone could actually use the signals.
 - For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
 - If the condition is not clearly met, ignore that input entirely.

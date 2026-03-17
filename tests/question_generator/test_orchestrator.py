@@ -82,6 +82,18 @@ class OrchestratorTest(unittest.TestCase):
             self.assertEqual(manifest["state_path"], str(run_dir / SHARED_STATE_FILENAME))
             self.assertEqual(manifest["stages"], {})
 
+    def test_initialize_run_persists_output_language_in_manifest(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+                output_language="Simplified Chinese",
+            )
+
+            manifest = load_run_manifest(run_dir)
+            self.assertEqual(manifest["output_language"], "Simplified Chinese")
+
     def test_initialize_topic_run_creates_manifest_and_topic_only_shared_state(self) -> None:
         with TemporaryDirectory() as tmpdir:
             run_dir = initialize_topic_run(
@@ -105,6 +117,18 @@ class OrchestratorTest(unittest.TestCase):
             self.assertEqual(manifest["run_id"], "topic-run")
             self.assertEqual(manifest["state_path"], str(run_dir / SHARED_STATE_FILENAME))
             self.assertEqual(manifest["stages"], {})
+
+    def test_initialize_topic_run_persists_output_language_in_manifest(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_topic_run(
+                topic="Should Atlas expand into healthcare?",
+                output_dir=Path(tmpdir),
+                run_id="topic-run",
+                output_language="Japanese",
+            )
+
+            manifest = load_run_manifest(run_dir)
+            self.assertEqual(manifest["output_language"], "Japanese")
 
     def test_prepare_stage_writes_prompt_artifact(self) -> None:
         with TemporaryDirectory() as tmpdir:
@@ -145,6 +169,21 @@ class OrchestratorTest(unittest.TestCase):
             stage_record = manifest["stages"]["render"]
             self.assertEqual(stage_record["status"], "prompt_prepared")
             self.assertNotIn("response_schema_path", stage_record)
+
+    def test_prepare_stage_for_render_includes_output_language_instruction(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            run_dir = initialize_run(
+                state_path=MINIMAL_STATE_PATH,
+                output_dir=Path(tmpdir),
+                run_id="demo-run",
+                output_language="French",
+            )
+
+            result = prepare_stage(run_dir, "render")
+
+            prompt_path = Path(result["prompt_path"])
+            prompt_text = prompt_path.read_text(encoding="utf-8")
+            self.assertIn("Produce the final deliverable in French.", prompt_text)
 
     def test_build_stage_response_schema_adds_optional_feedback_when_supported(self) -> None:
         schema = build_stage_response_schema("question_generation")
@@ -707,6 +746,26 @@ class OrchestratorTest(unittest.TestCase):
                 state,
                 {"topic": "Should Atlas expand into healthcare?"},
             )
+
+    def test_run_topic_persists_output_language_in_manifest(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            with patch(
+                "tools.question_generator.orchestrator.run_recipe_on_run",
+                return_value={
+                    "run_dir": str(Path(tmpdir) / "topic-run"),
+                    "stages": [],
+                },
+            ):
+                run_topic(
+                    topic="Should Atlas expand into healthcare?",
+                    recipe_path=RECIPE_PATH,
+                    output_dir=Path(tmpdir),
+                    run_id="topic-run",
+                    output_language="Spanish",
+                )
+
+            manifest = load_run_manifest(Path(tmpdir) / "topic-run")
+            self.assertEqual(manifest["output_language"], "Spanish")
 
 
 if __name__ == "__main__":

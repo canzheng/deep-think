@@ -32,6 +32,8 @@ Working rules:
 - Distinguish narrative from diagnostic signals.
 - Focus on what would force an update in belief, branch weighting, or action.
 - Prefer a small number of high-value watch items over a long unfocused list.
+- Prefer a compact watchlist with the fewest items needed for useful coverage.
+- Avoid repeating full signal definitions unless needed for actionability.
 - For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
 - If the condition is not clearly met, ignore that input entirely.
 - Do not force conditional inputs into the analysis just because they are provided.

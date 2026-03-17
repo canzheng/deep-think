@@ -23,12 +23,13 @@ def assemble_stage_prompt(
     stage: str,
     state: dict,
     optional_reads: list[str] | None = None,
+    run_manifest: dict | None = None,
 ) -> str:
     normalized_stage = normalize_stage_name(stage)
     if normalized_stage != "render":
         return _assemble_non_render_stage_prompt(stage, state)
 
-    return _assemble_render_stage_prompt(stage, state)
+    return _assemble_render_stage_prompt(stage, state, run_manifest=run_manifest)
 
 
 def _assemble_non_render_stage_prompt(stage: str, state: dict) -> str:
@@ -53,6 +54,8 @@ def _assemble_non_render_stage_prompt(stage: str, state: dict) -> str:
 def _assemble_render_stage_prompt(
     stage: str,
     state: dict,
+    *,
+    run_manifest: dict | None = None,
 ) -> str:
     contract_file = contract_path(stage)
     contract = load_contract(stage)
@@ -67,6 +70,7 @@ def _assemble_render_stage_prompt(
             if contract.feedback.supported
             else ""
         ),
+        run_manifest=run_manifest,
     )
     body_template = select_render_template(state["routing"]["output_mode"]).read_text().strip()
     wrapper_template = render_wrapper_template().read_text().strip()

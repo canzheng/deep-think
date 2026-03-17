@@ -55,6 +55,19 @@ class CliTest(unittest.TestCase):
     def test_new_workflow_commands_parse_expected_arguments(self) -> None:
         parser = build_workflow_parser()
 
+        init_args = parser.parse_args(
+            [
+                "init-run",
+                "--state",
+                str(FIXTURE_PATH),
+                "--output-dir",
+                "/tmp/question-runs",
+                "--run-id",
+                "demo-run",
+                "--output-language",
+                "French",
+            ]
+        )
         init_topic_args = parser.parse_args(
             [
                 "init-topic-run",
@@ -64,6 +77,8 @@ class CliTest(unittest.TestCase):
                 "/tmp/question-runs",
                 "--run-id",
                 "topic-run",
+                "--output-language",
+                "Japanese",
             ]
         )
         update_routing_args = parser.parse_args(
@@ -101,6 +116,23 @@ class CliTest(unittest.TestCase):
                 "routing",
                 "--executor-backend",
                 "openclaw",
+                "--output-language",
+                "Simplified Chinese",
+            ]
+        )
+        run_recipe_args = parser.parse_args(
+            [
+                "run-recipe",
+                "--recipe",
+                str(RECIPE_PATH),
+                "--state",
+                str(FIXTURE_PATH),
+                "--output-dir",
+                "/tmp/question-runs",
+                "--run-id",
+                "demo-run",
+                "--output-language",
+                "Spanish",
             ]
         )
         refresh_package_args = parser.parse_args(
@@ -109,11 +141,15 @@ class CliTest(unittest.TestCase):
             ]
         )
 
+        self.assertEqual(init_args.output_language, "French")
         self.assertEqual(init_topic_args.run_id, "topic-run")
+        self.assertEqual(init_topic_args.output_language, "Japanese")
         self.assertEqual(update_routing_args.patch_json, '{"output_mode":"Research Memo"}')
         self.assertEqual(run_on_run_args.start_stage, "boundary")
+        self.assertEqual(run_recipe_args.output_language, "Spanish")
         self.assertEqual(run_topic_args.pause_after_stage, "routing")
         self.assertEqual(run_topic_args.executor_backend, "openclaw")
+        self.assertEqual(run_topic_args.output_language, "Simplified Chinese")
         self.assertEqual(Path(refresh_package_args.output_dir), default_openclaw_package_dir())
 
     def test_cli_prints_assembled_prompt(self) -> None:
@@ -293,11 +329,14 @@ class CliTest(unittest.TestCase):
                             tmpdir,
                             "--run-id",
                             "topic-run",
+                            "--output-language",
+                            "Italian",
                         ]
                     )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_initialize_topic_run.called)
+            self.assertEqual(mocked_initialize_topic_run.call_args.kwargs["output_language"], "Italian")
             self.assertIn("topic-run", stdout.getvalue())
 
     def test_update_routing_command_uses_routing_patcher(self) -> None:
@@ -377,12 +416,15 @@ class CliTest(unittest.TestCase):
                             "routing",
                             "--executor-backend",
                             "openclaw",
+                            "--output-language",
+                            "German",
                         ]
                     )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(mocked_run_topic.called)
             self.assertEqual(mocked_run_topic.call_args.kwargs["executor_backend"], "openclaw")
+            self.assertEqual(mocked_run_topic.call_args.kwargs["output_language"], "German")
             self.assertIn("topic-run", stdout.getvalue())
 
     def test_refresh_openclaw_package_command_uses_package_builder(self) -> None:
