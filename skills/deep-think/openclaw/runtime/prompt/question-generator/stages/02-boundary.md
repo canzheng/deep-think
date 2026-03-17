@@ -27,6 +27,8 @@ Working rules:
 - Keep adjacent systems visible only if they materially affect the core system.
 - Exclude factors that are interesting but not necessary for this run.
 - State scope assumptions explicitly when they are needed to keep the boundary workable.
+- Prefer compact boundary definitions that make downstream scope clear.
+- Avoid repeating topic background unless it is needed to sharpen scope or exclusions.
 - For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
 - If the condition is not clearly met, ignore that input entirely.
 - Do not force conditional inputs into the analysis just because they are provided.

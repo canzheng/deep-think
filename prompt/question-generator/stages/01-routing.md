@@ -34,6 +34,8 @@ Working rules:
 - Assign a secondary classification only when it materially changes downstream analysis.
 - If a field is not relevant, leave it empty rather than inventing detail.
 - State assumptions explicitly when classification requires inference.
+- Prefer concise normalized outputs over long explanatory prose.
+- Keep assumptions and rationales brief unless extra detail changes downstream framing.
 
 Routing rules:
 - Task defines the objective.

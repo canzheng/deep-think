@@ -224,6 +224,18 @@ class AssemblerTest(unittest.TestCase):
         self.assertIn("## Feedback", prompt)
         self.assertIn('"required": [', prompt)
 
+    def test_routing_prompt_requests_concise_normalized_output(self) -> None:
+        prompt = assemble_stage_prompt("routing", load_populated_state())
+
+        self.assertIn("Prefer concise normalized outputs over long explanatory prose.", prompt)
+        self.assertIn("Keep assumptions and rationales brief unless extra detail changes downstream framing.", prompt)
+
+    def test_boundary_prompt_requests_compact_scope_normalization(self) -> None:
+        prompt = assemble_stage_prompt("boundary", load_populated_state())
+
+        self.assertIn("Prefer compact boundary definitions that make downstream scope clear.", prompt)
+        self.assertIn("Avoid repeating topic background unless it is needed to sharpen scope or exclusions.", prompt)
+
     def test_decision_logic_prompt_expands_required_output_schema_refs(self) -> None:
         prompt = assemble_stage_prompt("decision_logic", load_populated_state())
 
