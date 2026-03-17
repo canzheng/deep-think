@@ -25,6 +25,26 @@ class OpenClawExecutorTest(unittest.TestCase):
 
             self.assertEqual(runtime_config.executor_mode, "session")
 
+    def test_openclaw_executor_bootstraps_missing_runtime_config_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "runtime.json"
+
+            OpenClawStageExecutor(
+                config=OpenClawExecutorConfig(
+                    base_url="http://127.0.0.1:18789",
+                    token="secret",
+                    agent_id="main",
+                    runtime_config_path=config_path,
+                ),
+                gateway_caller=lambda **kwargs: self.fail("gateway should not be called during config bootstrap"),
+            )
+
+            self.assertTrue(config_path.is_file())
+            self.assertEqual(
+                json.loads(config_path.read_text(encoding="utf-8")),
+                {"json_executor": "session"},
+            )
+
     def test_openclaw_runtime_config_normalizes_legacy_modes_to_session(self) -> None:
         self.assertEqual(normalize_executor_mode(None), "session")
         self.assertEqual(normalize_executor_mode("auto"), "session")

@@ -5,3 +5,4 @@
 tests/question_generator/artifacts/*
 tmp/
 docs/superpowers/
+skills/deep-think/openclaw/config/runtime.json

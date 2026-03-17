@@ -63,6 +63,7 @@ class OpenClawStageExecutor:
             if config.runtime_mode is not None
             else None
         )
+        self._ensure_runtime_config_exists()
 
     @classmethod
     def from_env(cls) -> "OpenClawStageExecutor":
@@ -194,6 +195,19 @@ class OpenClawStageExecutor:
             write_runtime_config(
                 config_path=self._runtime_config_path,
                 executor_mode=mode,
+            )
+        except OSError:
+            return
+
+    def _ensure_runtime_config_exists(self) -> None:
+        if self._runtime_mode_override is not None:
+            return
+        if self._runtime_config_path.is_file():
+            return
+        try:
+            write_runtime_config(
+                config_path=self._runtime_config_path,
+                executor_mode=self._runtime_mode,
             )
         except OSError:
             return

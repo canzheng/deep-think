@@ -56,6 +56,16 @@ class OpenClawPackageTest(unittest.TestCase):
             runtime_config = json.loads((package_dir / "config" / "runtime.json").read_text(encoding="utf-8"))
             self.assertEqual(runtime_config, {"json_executor": "session"})
 
+    def test_openclaw_runtime_config_is_gitignored(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        gitignore = (repo_root / ".gitignore").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "skills/deep-think/openclaw/config/runtime.json",
+            gitignore,
+            msg="expected runtime config path to be gitignored",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
