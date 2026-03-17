@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 from tools.question_generator.assembler import assemble_stage_prompt
+from tools.question_generator.codex_package import default_codex_package_dir, refresh_codex_package
 from tools.question_generator.openclaw_package import default_openclaw_package_dir, refresh_openclaw_package
 from tools.question_generator.orchestrator import (
     apply_stage_response,
@@ -98,6 +99,9 @@ def build_workflow_parser() -> argparse.ArgumentParser:
 
     refresh_package_parser = subparsers.add_parser("refresh-openclaw-package")
     refresh_package_parser.add_argument("--output-dir", default=str(default_openclaw_package_dir()))
+
+    refresh_codex_package_parser = subparsers.add_parser("refresh-codex-package")
+    refresh_codex_package_parser.add_argument("--output-dir", default=str(default_codex_package_dir()))
 
     return parser
 
@@ -223,6 +227,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "refresh-openclaw-package":
         output_dir = Path(args.output_dir) if args.output_dir else None
         package_dir = refresh_openclaw_package(output_dir=output_dir)
+        print(package_dir)
+        return 0
+
+    if args.command == "refresh-codex-package":
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        package_dir = refresh_codex_package(output_dir=output_dir)
         print(package_dir)
         return 0
 

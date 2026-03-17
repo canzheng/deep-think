@@ -3,8 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import os
+import subprocess
+import time
 import urllib.error
 import urllib.request
+import uuid
 from dataclasses import dataclass
 
 from tools.question_generator.executors import (
@@ -28,6 +31,7 @@ class OpenClawExecutorConfig:
     base_url: str
     token: str
     agent_id: str = "main"
+    gateway_bin: str = "openclaw"
     runtime_config_path: str | Path | None = None
     runtime_mode: str | None = None
 
@@ -45,11 +49,11 @@ class OpenClawStageExecutor:
         *,
         config: OpenClawExecutorConfig,
         tool_invoker=None,
-        chat_completion_caller=None,
+        gateway_caller=None,
     ) -> None:
         self.config = config
         self._tool_invoker = tool_invoker
-        self._chat_completion_caller = chat_completion_caller
+        self._gateway_caller = gateway_caller
         self._runtime_config_path = resolve_runtime_config_path(config.runtime_config_path)
         self._runtime_mode = read_runtime_config(
             config_path=self._runtime_config_path
@@ -65,12 +69,13 @@ class OpenClawStageExecutor:
         base_url = os.environ.get("OPENCLAW_BASE_URL", "http://127.0.0.1:18789")
         token = os.environ.get("OPENCLAW_TOKEN", "")
         agent_id = os.environ.get("OPENCLAW_AGENT_ID", "main")
+        gateway_bin = os.environ.get("OPENCLAW_BIN", "openclaw")
         runtime_mode = os.environ.get("OPENCLAW_EXECUTOR_MODE")
         if runtime_mode is None:
             prefer_llm_task = os.environ.get("OPENCLAW_PREFER_LLM_TASK")
             if prefer_llm_task is not None:
                 runtime_mode = (
-                    "llm-task" if prefer_llm_task not in {"0", "false", "False"} else "chat_fallback"
+                    "llm-task" if prefer_llm_task not in {"0", "false", "False"} else "session"
                 )
 
         runtime_config_path = os.environ.get(OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR)
@@ -79,6 +84,7 @@ class OpenClawStageExecutor:
                 base_url=base_url,
                 token=token,
                 agent_id=agent_id,
+                gateway_bin=gateway_bin,
                 runtime_config_path=runtime_config_path,
                 runtime_mode=runtime_mode,
             )
@@ -93,14 +99,14 @@ class OpenClawStageExecutor:
         response_schema: dict | None = None,
     ) -> StageExecutionResult:
         if response_schema is None or stage == "render":
-            return self._run_plain_text_chat(
+            return self._run_plain_text_session(
                 prompt_text=prompt_text,
                 stage=stage,
                 timeout_seconds=timeout_seconds,
             )
 
         executor_mode = self._resolve_executor_mode()
-        if executor_mode in {"auto", "llm-task"}:
+        if executor_mode == "llm-task":
             try:
                 raw_result = self._invoke_llm_task(
                     prompt_text=prompt_text,
@@ -117,7 +123,7 @@ class OpenClawStageExecutor:
                     error_text="",
                 )
             except _OpenClawCapabilityUnavailable:
-                self._update_cached_executor_mode("chat_fallback")
+                self._update_cached_executor_mode("session")
             except ExecutorInvocationError:
                 raise
             except Exception as exc:  # noqa: BLE001
@@ -128,42 +134,46 @@ class OpenClawStageExecutor:
                     error_text=str(exc),
                 ) from exc
 
-        return self._run_chat_json_with_repair(
+        return self._run_session_json_with_repair(
             stage=stage,
             prompt_text=prompt_text,
             timeout_seconds=timeout_seconds,
             response_schema=response_schema,
         )
 
-    def _run_plain_text_chat(
+    def _run_plain_text_session(
         self,
         *,
         prompt_text: str,
         stage: str,
         timeout_seconds: int,
     ) -> StageExecutionResult:
-        response = self._run_chat_completion(
+        response = self._run_session_prompt(
             prompt_text=prompt_text,
             stage=stage,
             timeout_seconds=timeout_seconds,
         )
-        trace_text = json.dumps(response, ensure_ascii=True)
+        trace_text = json.dumps(response["trace"], ensure_ascii=True)
         try:
-            response_text = _extract_chat_content(response)
+            response_text = response["response_text"]
         except Exception as exc:  # noqa: BLE001
             raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
+                backend_name="openclaw-session",
                 failure_reason="invalid_response",
-                message=f"OpenClaw chat-completions returned an invalid response shape for {stage}",
+                message=f"OpenClaw native session returned an invalid response shape for {stage}",
                 trace_text=trace_text,
                 error_text=str(exc),
             ) from exc
 
         return StageExecutionResult(
             response_text=response_text,
-            backend_name="openclaw-chat",
+            backend_name="openclaw-session",
             trace_text=trace_text,
             error_text="",
+            metadata={
+                "session_key": response["session_key"],
+                "gateway_run_id": response.get("run_id"),
+            },
         )
 
     def _resolve_executor_mode(self) -> str:
@@ -188,7 +198,7 @@ class OpenClawStageExecutor:
         except OSError:
             return
 
-    def _run_chat_json_with_repair(
+    def _run_session_json_with_repair(
         self,
         *,
         stage: str,
@@ -197,19 +207,19 @@ class OpenClawStageExecutor:
         response_schema: dict,
     ) -> StageExecutionResult:
         initial_prompt = _wrap_json_fallback_prompt(prompt_text, response_schema)
-        initial_response = self._run_chat_completion(
+        initial_response = self._run_session_prompt(
             prompt_text=initial_prompt,
             stage=stage,
             timeout_seconds=timeout_seconds,
         )
-        initial_trace = json.dumps(initial_response, ensure_ascii=True)
+        initial_trace = json.dumps(initial_response["trace"], ensure_ascii=True)
         try:
-            initial_content = _extract_chat_content(initial_response)
+            initial_content = initial_response["response_text"]
         except Exception as exc:  # noqa: BLE001
             raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
+                backend_name="openclaw-session",
                 failure_reason="invalid_response",
-                message=f"OpenClaw chat-completions returned an invalid response shape for {stage}",
+                message=f"OpenClaw native session returned an invalid response shape for {stage}",
                 trace_text=initial_trace,
                 error_text=str(exc),
             ) from exc
@@ -217,9 +227,13 @@ class OpenClawStageExecutor:
         if error_message is None:
             return StageExecutionResult(
                 response_text=initial_content,
-                backend_name="openclaw-chat",
+                backend_name="openclaw-session",
                 trace_text=initial_trace,
                 error_text="",
+                metadata={
+                    "session_key": initial_response["session_key"],
+                    "gateway_run_id": initial_response.get("run_id"),
+                },
             )
 
         repair_prompt = _build_repair_prompt(
@@ -228,36 +242,40 @@ class OpenClawStageExecutor:
             error_message=error_message,
             response_schema=response_schema,
         )
-        repaired_response = self._run_chat_completion(
+        repaired_response = self._run_session_prompt(
             prompt_text=repair_prompt,
             stage=stage,
             timeout_seconds=timeout_seconds,
         )
-        repaired_trace = json.dumps(repaired_response, ensure_ascii=True)
+        repaired_trace = json.dumps(repaired_response["trace"], ensure_ascii=True)
         try:
-            repaired_content = _extract_chat_content(repaired_response)
+            repaired_content = repaired_response["response_text"]
         except Exception as exc:  # noqa: BLE001
             raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
+                backend_name="openclaw-session",
                 failure_reason="invalid_response",
-                message=f"OpenClaw chat-completions returned an invalid repair response shape for {stage}",
+                message=f"OpenClaw native session returned an invalid repair response shape for {stage}",
                 trace_text=repaired_trace,
                 error_text=str(exc),
             ) from exc
         repair_error = _json_validation_error(repaired_content, response_schema)
         if repair_error is not None:
             raise ExecutorInvocationError(
-                backend_name="openclaw-chat",
+                backend_name="openclaw-session",
                 failure_reason="invalid_response",
-                message=f"OpenClaw chat-completions repair output was invalid for {stage}",
+                message=f"OpenClaw native session repair output was invalid for {stage}",
                 trace_text=repaired_trace,
                 error_text=repair_error,
             )
         return StageExecutionResult(
             response_text=repaired_content,
-            backend_name="openclaw-chat",
+            backend_name="openclaw-session",
             trace_text=repaired_trace,
             error_text="",
+            metadata={
+                "session_key": repaired_response["session_key"],
+                "gateway_run_id": repaired_response.get("run_id"),
+            },
         )
 
     def _invoke_llm_task(
@@ -304,72 +322,140 @@ class OpenClawStageExecutor:
             error_text=json.dumps(error, ensure_ascii=True),
         )
 
-    def _run_chat_completion(
+    def _run_session_prompt(
         self,
         *,
         prompt_text: str,
         stage: str,
         timeout_seconds: int,
     ) -> dict:
-        if self._chat_completion_caller is not None:
-            return self._chat_completion_caller(
-                prompt_text=prompt_text,
-                stage=stage,
-                timeout_seconds=timeout_seconds,
-                config=self.config,
-            )
-
-        payload = {
-            "model": f"openclaw:{self.config.agent_id}",
-            "messages": [{"role": "user", "content": prompt_text}],
-        }
-        request = urllib.request.Request(
-            f"{self.config.base_url.rstrip('/')}/v1/chat/completions",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.config.token}",
+        session_key = _build_session_key(agent_id=self.config.agent_id, stage=stage)
+        send_result = self._call_gateway(
+            method="chat.send",
+            params={
+                "sessionKey": session_key,
+                "message": prompt_text,
+                "idempotencyKey": uuid.uuid4().hex,
             },
-            method="POST",
+            timeout_seconds=timeout_seconds,
         )
-        for attempt in range(2):
-            try:
-                with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-                    return json.loads(response.read().decode("utf-8"))
-            except urllib.error.HTTPError as exc:
-                body = exc.read().decode("utf-8", errors="replace")
-                raise ExecutorInvocationError(
-                    backend_name="openclaw-chat",
-                    failure_reason="http_error",
-                    message=f"OpenClaw chat-completions failed: HTTP {exc.code}",
-                    trace_text=body,
-                    error_text=body,
-                ) from exc
-            except urllib.error.URLError as exc:
-                if attempt == 0 and _is_connection_reset_error(exc):
-                    continue
-                raise ExecutorInvocationError(
-                    backend_name="openclaw-chat",
-                    failure_reason="transport_error",
-                    message=f"OpenClaw chat-completions request failed for {stage}",
-                    error_text=str(exc),
-                ) from exc
-            except OSError as exc:
-                if attempt == 0 and _is_connection_reset_error(exc):
-                    continue
-                raise ExecutorInvocationError(
-                    backend_name="openclaw-chat",
-                    failure_reason="transport_error",
-                    message=f"OpenClaw chat-completions request failed for {stage}",
-                    error_text=str(exc),
-                ) from exc
-            except json.JSONDecodeError as exc:
-                raise ExecutorInvocationError(
-                    backend_name="openclaw-chat",
-                    failure_reason="invalid_response",
-                    message=f"OpenClaw chat-completions returned invalid JSON envelope for {stage}",
-                    error_text=str(exc),
-                ) from exc
+        run_id = _extract_gateway_run_id(send_result)
+        deadline = time.monotonic() + timeout_seconds
+        last_history = None
+        while time.monotonic() < deadline:
+            last_history = self._call_gateway(
+                method="chat.history",
+                params={"sessionKey": session_key},
+                timeout_seconds=max(1, min(timeout_seconds, int(deadline - time.monotonic()) or 1)),
+            )
+            response_text = _extract_history_response_text(last_history)
+            if response_text is not None:
+                return {
+                    "session_key": session_key,
+                    "run_id": run_id,
+                    "response_text": response_text,
+                    "trace": {
+                        "send": send_result,
+                        "history": last_history,
+                        "session_key": session_key,
+                        "run_id": run_id,
+                    },
+                }
+            time.sleep(0.25)
+
+        raise ExecutorInvocationError(
+            backend_name="openclaw-session",
+            failure_reason="timeout",
+            message=f"OpenClaw native session timed out for {stage}",
+            trace_text=json.dumps(
+                {
+                    "send": send_result,
+                    "history": last_history,
+                    "session_key": session_key,
+                    "run_id": run_id,
+                },
+                ensure_ascii=True,
+            ),
+            error_text="Timed out waiting for an assistant message in chat.history",
+        )
+
+    def _call_gateway(
+        self,
+        *,
+        method: str,
+        params: dict,
+        timeout_seconds: int,
+    ) -> dict:
+        if self._gateway_caller is not None:
+            return self._gateway_caller(
+                method=method,
+                params=params,
+                timeout_seconds=timeout_seconds,
+            )
+        return self._call_gateway_cli(
+            method=method,
+            params=params,
+            timeout_seconds=timeout_seconds,
+        )
+
+    def _call_gateway_cli(
+        self,
+        *,
+        method: str,
+        params: dict,
+        timeout_seconds: int,
+    ) -> dict:
+        command = [
+            self.config.gateway_bin,
+            "gateway",
+            "call",
+            method,
+            "--params",
+            json.dumps(params, ensure_ascii=True),
+            "--json",
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                text=True,
+                capture_output=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
+        except FileNotFoundError as exc:
+            raise ExecutorInvocationError(
+                backend_name="openclaw-session",
+                failure_reason="transport_error",
+                message=f"OpenClaw CLI not found while calling native gateway method {method}",
+                error_text=str(exc),
+            ) from exc
+        except subprocess.TimeoutExpired as exc:
+            raise ExecutorInvocationError(
+                backend_name="openclaw-session",
+                failure_reason="timeout",
+                message=f"OpenClaw native gateway call timed out for {method}",
+                trace_text=_coerce_subprocess_text(exc.stdout),
+                error_text=_coerce_subprocess_text(exc.stderr),
+            ) from exc
+
+        if completed.returncode != 0:
+            raise ExecutorInvocationError(
+                backend_name="openclaw-session",
+                failure_reason="transport_error",
+                message=f"OpenClaw native gateway call failed for {method}",
+                trace_text=completed.stdout,
+                error_text=completed.stderr,
+            )
+        try:
+            return json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            raise ExecutorInvocationError(
+                backend_name="openclaw-session",
+                failure_reason="invalid_response",
+                message=f"OpenClaw native gateway call returned invalid JSON for {method}",
+                trace_text=completed.stdout,
+                error_text=str(exc),
+            ) from exc
 
     def _invoke_tool_http(
         self,
@@ -454,21 +540,85 @@ def _is_connection_reset_error(exc: BaseException) -> bool:
     return "connection reset by peer" in str(exc).lower()
 
 
-def _extract_chat_content(response: dict) -> str:
-    choices = response.get("choices", [])
-    if not choices:
-        raise ValueError("OpenClaw chat-completions response had no choices")
-    message = choices[0].get("message", {})
-    content = message.get("content", "")
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        text_parts = []
-        for item in content:
-            if isinstance(item, dict) and item.get("type") == "text":
-                text_parts.append(item.get("text", ""))
-        return "".join(text_parts)
-    raise ValueError("Unsupported OpenClaw chat-completions content shape")
+def _build_session_key(*, agent_id: str, stage: str) -> str:
+    return f"agent:{agent_id}:deep-think:{stage}:{uuid.uuid4().hex[:12]}"
+
+
+def _extract_gateway_run_id(raw_result: dict) -> str | None:
+    payload = _extract_gateway_payload(raw_result)
+    for key in ("runId", "run_id"):
+        value = payload.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return None
+
+
+def _extract_gateway_payload(raw_result: dict) -> dict:
+    payload = raw_result.get("result")
+    if isinstance(payload, dict):
+        return payload
+    return raw_result
+
+
+def _extract_history_response_text(raw_result: dict) -> str | None:
+    payload = _extract_gateway_payload(raw_result)
+    for key in ("messages", "history", "items"):
+        messages = payload.get(key)
+        if isinstance(messages, list):
+            for message in reversed(messages):
+                if not isinstance(message, dict):
+                    continue
+                role = str(message.get("role") or message.get("kind") or message.get("type") or "").lower()
+                if role not in {"assistant", "model"}:
+                    continue
+                text = _extract_message_text(message)
+                if text.strip():
+                    return text
+            return None
+    return None
+
+
+def _extract_message_text(message: dict) -> str:
+    for key in ("content", "text", "message"):
+        value = message.get(key)
+        text = _coerce_message_text(value)
+        if text is not None:
+            return text
+    return ""
+
+
+def _coerce_message_text(value: object) -> str | None:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        for key in ("text", "content", "value"):
+            nested = value.get(key)
+            if isinstance(nested, str):
+                return nested
+    if isinstance(value, list):
+        parts: list[str] = []
+        for item in value:
+            if isinstance(item, str):
+                parts.append(item)
+                continue
+            if not isinstance(item, dict):
+                continue
+            item_type = str(item.get("type") or "").lower()
+            if item_type in {"text", "output_text"}:
+                part = item.get("text") or item.get("content") or item.get("value")
+                if isinstance(part, str):
+                    parts.append(part)
+        if parts:
+            return "".join(parts)
+    return None
+
+
+def _coerce_subprocess_text(value: str | bytes | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value
 
 
 def _wrap_json_fallback_prompt(prompt_text: str, response_schema: dict) -> str:

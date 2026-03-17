@@ -151,8 +151,10 @@ conda run -n deep-think python -m tools.question_generator.cli run-topic \
 
 Notes:
 - prompt assembly and contracts stay unchanged
-- JSON stages prefer OpenClaw `llm-task` when available
-- otherwise they fall back to OpenClaw chat-completions with local validation
+- OpenClaw answering defaults to native Gateway session RPC
+- JSON stages keep local validation and a single repair pass in session mode
+- `llm-task` remains available as an explicit opt-in via runtime config or
+  `OPENCLAW_PREFER_LLM_TASK=1`
 
 Refresh the self-contained OpenClaw bundle artifact:
 
@@ -169,7 +171,7 @@ conda run -n deep-think python -m tools.question_generator.cli refresh-codex-pac
 Packaged OpenClaw bundle notes:
 - the bundle lives under `skills/deep-think/openclaw`
 - it carries its own runtime, prompt assets, recipes, and vendored `chevron`
-- it uses `python3` and does not require `conda`
+- it uses `python3` plus the `openclaw` CLI and does not require `conda`
 - it persists JSON-stage executor choice in `config/runtime.json`
 - bundled entrypoints are:
   - `python3 {baseDir}/scripts/run_topic.py ...`

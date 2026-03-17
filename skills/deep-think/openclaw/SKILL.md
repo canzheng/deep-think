@@ -1,7 +1,7 @@
 ---
 name: deep-think
 description: Use this deep think skill when a user wants to analyze a topic, generate a research or decision artifact, or structure an uncertain question into a memo, scenario tree, monitoring plan, or research prompt.
-metadata: {"openclaw":{"requires":{"bins":["python3"]}}}
+metadata: {"openclaw":{"requires":{"bins":["python3","openclaw"]}}}
 ---
 
 # Deep Think For OpenClaw
@@ -30,15 +30,15 @@ Use this skill for requests like:
 - The bundle carries its own Python runtime modules, prompt assets, contracts,
   recipes, and vendored `chevron`.
 - Prompt assembly, contracts, and shared-state behavior stay unchanged.
-- JSON-returning stages have a soft dependency on OpenClaw `llm-task`.
+- Answering runs through native OpenClaw Gateway session RPC by default.
+- JSON-returning stages have an optional OpenClaw `llm-task` fast path.
 - The packaged runtime keeps a persistent executor capability config in
   `config/runtime.json`.
-- If that config is `auto`, the first run tries `llm-task` once and persists
-  either `llm-task` or `chat_fallback`.
-- If `llm-task` is unavailable, JSON-returning stages fall back to OpenClaw
-  Gateway chat-completions with JSON hardening, one repair pass, and local
-  validation.
-- `render` uses plain text chat-completions.
+- The default executor mode is `session`.
+- If the executor is set to `llm-task` and that capability is unavailable,
+  JSON-returning stages fall back to the native session path with JSON
+  hardening, one repair pass, and local validation.
+- `render` also uses the native session path.
 
 ## Workflow
 

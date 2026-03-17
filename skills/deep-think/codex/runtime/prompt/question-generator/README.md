@@ -203,10 +203,11 @@ conda run -n deep-think python -m tools.question_generator.cli run-topic \
 
 OpenClaw notes:
 - prompt assembly does not change
-- JSON-returning stages prefer `llm-task` when available
-- if `llm-task` is unavailable, they fall back to Gateway chat-completions
-  with JSON hardening, one repair pass, and local validation
-- `Render` remains plain text
+- answering defaults to native Gateway session RPC
+- JSON-returning stages use JSON hardening, one repair pass, and local
+  validation in session mode
+- `llm-task` remains available as an explicit opt-in
+- `Render` also runs through the native session path
 - the self-contained package is refreshed with:
   `conda run -n deep-think python -m tools.question_generator.cli refresh-openclaw-package`
 - the packaged OpenClaw artifact runs with plain `python3` from

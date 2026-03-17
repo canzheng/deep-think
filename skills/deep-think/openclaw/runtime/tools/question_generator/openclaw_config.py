@@ -9,8 +9,8 @@ from typing import Literal
 from tools.question_generator.pathing import repo_root
 
 
-OpenClawExecutorMode = Literal["auto", "llm-task", "chat_fallback"]
-DEFAULT_OPENCLAW_EXECUTOR_MODE: OpenClawExecutorMode = "auto"
+OpenClawExecutorMode = Literal["session", "llm-task"]
+DEFAULT_OPENCLAW_EXECUTOR_MODE: OpenClawExecutorMode = "session"
 OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR = "QUESTION_GENERATOR_OPENCLAW_CONFIG_PATH"
 RUNTIME_CONFIG_FILENAME = "runtime.json"
 RUNTIME_EXECUTOR_MODE_KEY = "json_executor"
@@ -37,10 +37,10 @@ def normalize_executor_mode(mode: str | None) -> OpenClawExecutorMode:
     normalized = str(mode).strip().lower().replace("-", "_")
     if normalized in {"llm_task", "llm-task", "llmtask"}:
         return "llm-task"
-    if normalized in {"chat_fallback", "chat-fallback", "chatfallback"}:
-        return "chat_fallback"
-    if normalized == "auto":
-        return "auto"
+    if normalized in {"session", "native_session", "native-session", "session_fallback", "session-fallback"}:
+        return "session"
+    if normalized in {"chat_fallback", "chat-fallback", "chatfallback", "auto"}:
+        return "session"
     return DEFAULT_OPENCLAW_EXECUTOR_MODE
 
 

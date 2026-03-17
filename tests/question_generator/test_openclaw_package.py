@@ -1,4 +1,5 @@
 import os
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -52,6 +53,8 @@ class OpenClawPackageTest(unittest.TestCase):
             )
             self.assertTrue((package_dir / "vendor" / "chevron" / "chevron" / "__init__.py").is_file())
             self.assertTrue((package_dir / "scripts" / "run_topic.py").is_file())
+            runtime_config = json.loads((package_dir / "config" / "runtime.json").read_text(encoding="utf-8"))
+            self.assertEqual(runtime_config, {"json_executor": "session"})
 
 
 if __name__ == "__main__":

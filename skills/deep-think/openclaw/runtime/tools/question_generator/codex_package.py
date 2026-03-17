@@ -1,35 +1,24 @@
 from __future__ import annotations
 
 import inspect
-import json
 import os
 import shutil
 from pathlib import Path
 
 import chevron
 
-from tools.question_generator.openclaw_config import OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR
-from tools.question_generator.pathing import repo_root
+from tools.question_generator.pathing import PACKAGE_RUNTIME_ROOT_ENV_VAR, repo_root
 
 
-PACKAGE_RUNTIME_ROOT_ENV_VAR = "QUESTION_GENERATOR_RUNTIME_ROOT"
-PACKAGE_CONFIG_PATH_ENV_VAR = OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR
-
-_DEFAULT_RUNTIME_CONFIG = {
-    "json_executor": "session",
-}
+def default_codex_package_dir() -> Path:
+    return repo_root() / "skills" / "deep-think" / "codex"
 
 
-def default_openclaw_package_dir() -> Path:
-    return repo_root() / "skills" / "deep-think" / "openclaw"
-
-
-def build_openclaw_package(*, output_dir: Path | None = None) -> Path:
-    package_dir = output_dir or default_openclaw_package_dir()
+def build_codex_package(*, output_dir: Path | None = None) -> Path:
+    package_dir = output_dir or default_codex_package_dir()
     package_dir.mkdir(parents=True, exist_ok=True)
 
     _copy_skill_markdown(package_dir)
-    _write_runtime_config(package_dir)
     _write_scripts(package_dir)
     _copy_runtime_tree(package_dir)
     _copy_prompt_assets(package_dir)
@@ -38,20 +27,11 @@ def build_openclaw_package(*, output_dir: Path | None = None) -> Path:
 
 
 def _copy_skill_markdown(package_dir: Path) -> None:
-    source_path = default_openclaw_package_dir() / "SKILL.md"
+    source_path = default_codex_package_dir() / "SKILL.md"
     destination_path = package_dir / "SKILL.md"
     if source_path.resolve() == destination_path.resolve():
         return
     shutil.copy2(source_path, destination_path)
-
-
-def _write_runtime_config(package_dir: Path) -> None:
-    config_dir = package_dir / "config"
-    config_dir.mkdir(parents=True, exist_ok=True)
-    (config_dir / "runtime.json").write_text(
-        json.dumps(_DEFAULT_RUNTIME_CONFIG, indent=2, ensure_ascii=True) + "\n",
-        encoding="utf-8",
-    )
 
 
 def _write_scripts(package_dir: Path) -> None:
@@ -102,10 +82,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = BASE_DIR / "runtime"
 VENDOR_ROOT = BASE_DIR / "vendor" / "chevron"
-CONFIG_PATH = BASE_DIR / "config" / "runtime.json"
 
 os.environ.setdefault("QUESTION_GENERATOR_RUNTIME_ROOT", str(RUNTIME_ROOT))
-os.environ.setdefault("QUESTION_GENERATOR_OPENCLAW_CONFIG_PATH", str(CONFIG_PATH))
 sys.path.insert(0, str(VENDOR_ROOT))
 sys.path.insert(0, str(RUNTIME_ROOT))
 
@@ -126,8 +104,6 @@ def _build_args() -> list[str]:
         args.extend(["--recipe", str(DEFAULT_RECIPE)])
     if "--output-dir" not in args:
         args.extend(["--output-dir", str(DEFAULT_OUTPUT_DIR)])
-    if "--executor-backend" not in args:
-        args.extend(["--executor-backend", "openclaw"])
     return ["run-topic", *args]
 
 
@@ -154,8 +130,6 @@ def _build_args() -> list[str]:
     args = sys.argv[1:]
     if "--recipe" not in args:
         args.extend(["--recipe", str(DEFAULT_RECIPE)])
-    if "--executor-backend" not in args:
-        args.extend(["--executor-backend", "openclaw"])
     return ["run-recipe-on-run", *args]
 
 
@@ -164,5 +138,5 @@ if __name__ == "__main__":
 """
 
 
-def refresh_openclaw_package(*, output_dir: Path | None = None) -> Path:
-    return build_openclaw_package(output_dir=output_dir)
+def refresh_codex_package(*, output_dir: Path | None = None) -> Path:
+    return build_codex_package(output_dir=output_dir)
