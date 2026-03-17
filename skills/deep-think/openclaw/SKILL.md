@@ -1,6 +1,6 @@
 ---
 name: deep-think
-description: Use when a user wants to analyze a topic, generate a research or decision artifact, or structure an uncertain question into a memo, scenario tree, monitoring plan, or research prompt.
+description: Use this deep think skill when a user wants to analyze a topic, generate a research or decision artifact, or structure an uncertain question into a memo, scenario tree, monitoring plan, or research prompt.
 metadata: {"openclaw":{"requires":{"bins":["python3"]}}}
 ---
 
