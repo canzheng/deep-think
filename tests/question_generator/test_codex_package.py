@@ -49,6 +49,9 @@ class CodexPackageTest(unittest.TestCase):
                 (package_dir / "runtime" / "prompt" / "question-generator" / "contracts" / "01-routing.contract.json").is_file()
             )
             self.assertTrue((package_dir / "vendor" / "chevron" / "chevron" / "__init__.py").is_file())
+            self.assertTrue((package_dir / "scripts" / "init_topic_run.py").is_file())
+            self.assertTrue((package_dir / "scripts" / "prepare_stage.py").is_file())
+            self.assertTrue((package_dir / "scripts" / "apply_response.py").is_file())
             self.assertTrue((package_dir / "scripts" / "run_topic.py").is_file())
             self.assertTrue((package_dir / "scripts" / "update_routing.py").is_file())
             self.assertTrue((package_dir / "scripts" / "resume_run.py").is_file())
@@ -57,9 +60,16 @@ class CodexPackageTest(unittest.TestCase):
         with TemporaryDirectory() as tmpdir:
             package_dir = build_codex_package(output_dir=Path(tmpdir) / "bundle")
 
+            init_topic_run = (package_dir / "scripts" / "init_topic_run.py").read_text(encoding="utf-8")
+            prepare_stage = (package_dir / "scripts" / "prepare_stage.py").read_text(encoding="utf-8")
+            apply_response = (package_dir / "scripts" / "apply_response.py").read_text(encoding="utf-8")
             run_topic = (package_dir / "scripts" / "run_topic.py").read_text(encoding="utf-8")
             resume_run = (package_dir / "scripts" / "resume_run.py").read_text(encoding="utf-8")
 
+            self.assertIn('os.environ.setdefault("QUESTION_GENERATOR_RUNTIME_ROOT"', init_topic_run)
+            self.assertIn('raise SystemExit(main(["init-topic-run", *sys.argv[1:]]))', init_topic_run)
+            self.assertIn('raise SystemExit(main(["prepare-stage", *sys.argv[1:]]))', prepare_stage)
+            self.assertIn('raise SystemExit(main(["apply-response", *sys.argv[1:]]))', apply_response)
             self.assertIn('os.environ.setdefault("QUESTION_GENERATOR_RUNTIME_ROOT"', run_topic)
             self.assertIn(
                 'DEFAULT_RECIPE = BASE_DIR / "runtime" / "prompt" / "question-generator" / "recipes" / "non-render.recipe.json"',

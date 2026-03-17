@@ -80,11 +80,11 @@ Use this loop unless the user explicitly wants the optional OpenClaw executor pa
 Canonical command pattern:
 
 - Initialize only the run artifacts:
-  - `python3 {baseDir}/runtime/tools/question_generator/cli.py init-topic-run --topic "<topic>" --output-dir {baseDir}/tmp/question-runs --run-id <run-id>`
+  - `python3 {baseDir}/scripts/init_topic_run.py --topic "<topic>" --output-dir {baseDir}/tmp/question-runs --run-id <run-id>`
 - Inspect the current shared state when needed:
   - read `{baseDir}/tmp/question-runs/<run-id>/shared_state.json`
 - Prepare one stage prompt from the current run state:
-  - `python3 {baseDir}/runtime/tools/question_generator/cli.py prepare-stage --run-dir {baseDir}/tmp/question-runs/<run-id> --stage routing`
+  - `python3 {baseDir}/scripts/prepare_stage.py --run-dir {baseDir}/tmp/question-runs/<run-id> --stage routing`
 - Read the prepared prompt from the path returned by `prepare-stage`, for
   example:
   - `{baseDir}/tmp/question-runs/<run-id>/stages/routing/prompt.md`
@@ -92,7 +92,7 @@ Canonical command pattern:
   - read `{baseDir}/tmp/question-runs/<run-id>/stages/routing/response.schema.json`
 - Save the current agent's stage response to a file, then apply it back into
   the run state:
-  - `python3 {baseDir}/runtime/tools/question_generator/cli.py apply-response --run-dir {baseDir}/tmp/question-runs/<run-id> --stage routing --response <response-file>`
+  - `python3 {baseDir}/scripts/apply_response.py --run-dir {baseDir}/tmp/question-runs/<run-id> --stage routing --response <response-file>`
 - Continue later stages with the same `prepare-stage` then `apply-response`
   pattern:
   - `boundary`
@@ -105,10 +105,29 @@ Canonical command pattern:
   - `monitoring`
   - `render`
 
+## Progress Updates
+
+- Send a short standalone progress update before each stage after `Routing`.
+- Put each progress update in its own message or paragraph. Do not concatenate multiple stage updates together.
+- Use plain, compact wording such as `Proceeding to Boundary stage.` or `Proceeding to Structure stage.`
+- Do not narrate acceleration or compression. Do not say you are "skipping", "accelerating", "moving quickly", or "doing the rest more efficiently".
+
 ## Critical Rules
 
 - Never assume a hidden executor is running the stage loop for you.
 - Never rerun `Routing`.
+- Execute every stage in order:
+  - `boundary`
+  - `structure`
+  - `scenarios`
+  - `question_generation`
+  - `evidence_planning`
+  - `decision_logic`
+  - `signal_translation`
+  - `monitoring`
+  - `render`
+- Do not skip stages, merge stages, jump ahead to `render`, or compress the remaining workflow into a summary step.
+- Start the next stage only after the current stage response has been applied successfully.
 - After `Routing`, inspect `stages/routing/response.parsed.json` and the updated `shared_state.json`.
 - Show the user these routing fields:
   - normalized question

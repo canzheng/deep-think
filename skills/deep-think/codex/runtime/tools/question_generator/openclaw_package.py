@@ -57,6 +57,9 @@ def _write_runtime_config(package_dir: Path) -> None:
 def _write_scripts(package_dir: Path) -> None:
     scripts_dir = package_dir / "scripts"
     scripts_dir.mkdir(parents=True, exist_ok=True)
+    _write_script(scripts_dir / "init_topic_run.py", _init_topic_run_script())
+    _write_script(scripts_dir / "prepare_stage.py", _prepare_stage_script())
+    _write_script(scripts_dir / "apply_response.py", _apply_response_script())
     _write_script(scripts_dir / "run_topic.py", _run_topic_script())
     _write_script(scripts_dir / "update_routing.py", _update_routing_script())
     _write_script(scripts_dir / "resume_run.py", _resume_run_script())
@@ -133,6 +136,30 @@ def _build_args() -> list[str]:
 
 if __name__ == "__main__":
     raise SystemExit(main(_build_args()))
+"""
+
+
+def _init_topic_run_script() -> str:
+    return _script_prelude() + """
+
+if __name__ == "__main__":
+    raise SystemExit(main(["init-topic-run", *sys.argv[1:]]))
+"""
+
+
+def _prepare_stage_script() -> str:
+    return _script_prelude() + """
+
+if __name__ == "__main__":
+    raise SystemExit(main(["prepare-stage", *sys.argv[1:]]))
+"""
+
+
+def _apply_response_script() -> str:
+    return _script_prelude() + """
+
+if __name__ == "__main__":
+    raise SystemExit(main(["apply-response", *sys.argv[1:]]))
 """
 
 
