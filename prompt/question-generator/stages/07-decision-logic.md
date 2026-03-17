@@ -31,6 +31,8 @@ Working rules:
 - Be explicit about what would change the conclusion.
 - Be explicit about when reversibility, staging, or diversification should lower commitment and when evidence strength should raise it.
 - If the task is action-oriented, do not hide behind generic balance.
+- Prefer compact decision logic over exhaustive restatement.
+- Avoid repeating scenario or evidence detail unless it changes action.
 - For any input marked `[CONDITIONAL]`, use it only if you strongly believe the stated condition is met for the current task.
 - If the condition is not clearly met, ignore that input entirely.
 - Do not force conditional inputs into the analysis just because they are provided.

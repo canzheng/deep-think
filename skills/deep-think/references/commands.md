@@ -10,7 +10,8 @@ Initialize a run from a raw topic:
 conda run -n deep-think python -m tools.question_generator.cli init-topic-run \
   --topic "Should Atlas expand into healthcare next quarter?" \
   --output-dir tmp/question-runs \
-  --run-id atlas-healthcare
+  --run-id atlas-healthcare \
+  --output-language "Japanese"
 ```
 
 ## Run Routing Only
@@ -50,7 +51,9 @@ conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --recipe prompt/question-generator/recipes/non-render.recipe.json \
   --output-dir tmp/question-runs \
   --run-id atlas-healthcare \
-  --pause-after-stage routing
+  --pause-after-stage routing \
+  --output-language "Japanese"
 ```
 
 If no pause is needed, omit `--pause-after-stage`.
+If no language preference is needed, omit `--output-language`.

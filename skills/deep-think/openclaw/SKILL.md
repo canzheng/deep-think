@@ -43,14 +43,17 @@ Use this skill for requests like:
 ## Workflow
 
 1. Treat the user's natural-language topic of interest as the raw `topic`.
-2. Derive `run-id` by slugifying the topic into a short lowercase hyphenated label and appending a timestamp suffix for uniqueness, for example `atlas-expand-healthcare-20260317-101530`.
-3. Start the workflow with `python3 {baseDir}/scripts/run_topic.py` and always pass both `--run-id <run-id>` and `--pause-after-stage routing`.
-4. Let that command run through `Routing` and stop.
-5. Present the inferred routing summary to the user for confirmation.
-6. If the user gives clear corrections, apply them with `python3 {baseDir}/scripts/update_routing.py`.
-7. Never rerun `Routing`.
-8. Resume the workflow from `Boundary` with `python3 {baseDir}/scripts/resume_run.py`.
-9. Return the final rendered artifact.
+2. If the user clearly asks for the final deliverable in a specific language, capture that as `output_language` for the run.
+3. Set `output_language` only when the run starts. Do not change it later in the run.
+4. The language preference affects only the final render stage, not upstream analysis.
+5. Derive `run-id` by slugifying the topic into a short lowercase hyphenated label and appending a timestamp suffix for uniqueness, for example `atlas-expand-healthcare-20260317-101530`.
+6. Start the workflow with `python3 {baseDir}/scripts/run_topic.py` and always pass both `--run-id <run-id>` and `--pause-after-stage routing`.
+7. Let that command run through `Routing` and stop.
+8. Present the inferred routing summary to the user for confirmation.
+9. If the user gives clear corrections, apply them with `python3 {baseDir}/scripts/update_routing.py`.
+10. Never rerun `Routing`.
+11. Resume the workflow from `Boundary` with `python3 {baseDir}/scripts/resume_run.py`.
+12. Return the final rendered artifact.
 
 ## Routing Review Rules
 
@@ -90,6 +93,8 @@ If the user's correction is ambiguous:
   - example: `atlas-expand-healthcare-20260317-101530`
 - Start with:
   - `python3 {baseDir}/scripts/run_topic.py --topic "<topic>" --run-id <run-id> --pause-after-stage routing`
+- If the user requested a final output language, add:
+  - `--output-language "<language>"`
 - If the user confirms routing as-is:
   - `python3 {baseDir}/scripts/resume_run.py --run-dir {baseDir}/tmp/question-runs/<run-id>`
 - If the user corrects routing fields:

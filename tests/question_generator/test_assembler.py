@@ -67,6 +67,16 @@ class AssemblerTest(unittest.TestCase):
         state["routing"]["output_mode"] = output_mode
         return assemble_stage_prompt("render", state)
 
+    def _render_prompt_for_mode_with_manifest(
+        self,
+        output_mode: str,
+        *,
+        run_manifest: dict | None = None,
+    ) -> str:
+        state = load_populated_state()
+        state["routing"]["output_mode"] = output_mode
+        return assemble_stage_prompt("render", state, run_manifest=run_manifest)
+
     def _render_guidance_for_mode(self, output_mode: str) -> dict:
         state = load_populated_state()
         state["routing"]["output_mode"] = output_mode
@@ -306,6 +316,15 @@ class AssemblerTest(unittest.TestCase):
         self.assertNotIn("{{active_steering}}", prompt)
         self.assertNotIn("## Feedback", prompt)
 
+    def test_render_prompt_injects_output_language_from_run_manifest(self) -> None:
+        prompt = self._render_prompt_for_mode_with_manifest(
+            "Decision Memo",
+            run_manifest={"output_language": "Simplified Chinese"},
+        )
+
+        self.assertIn("Produce the final deliverable in Simplified Chinese.", prompt)
+        self.assertIn("Working framing:", prompt)
+
     def test_render_selects_mode_specific_templates(self) -> None:
         from tools.question_generator.render_context import select_render_template
 
@@ -487,6 +506,33 @@ class AssemblerTest(unittest.TestCase):
         prompt = self._render_prompt_for_mode("Monitoring Dashboard")
 
         self.assertIn("Do not drift into essay form.", prompt)
+
+    def test_decision_logic_prompt_requests_compact_non_redundant_output(self) -> None:
+        prompt = assemble_stage_prompt("decision_logic", load_populated_state())
+
+        self.assertIn("Prefer compact decision logic over exhaustive restatement.", prompt)
+        self.assertIn("Avoid repeating scenario or evidence detail unless it changes action.", prompt)
+
+    def test_signal_translation_prompt_requests_selective_high_value_signals(self) -> None:
+        prompt = assemble_stage_prompt("signal_translation", load_populated_state())
+
+        self.assertIn("Prefer a compact set of high-value signals over broad coverage.", prompt)
+        self.assertIn("Avoid repeating upstream evidence detail unless it changes signal design.", prompt)
+
+    def test_monitoring_prompt_requests_compact_selective_watchlist(self) -> None:
+        prompt = assemble_stage_prompt("monitoring", load_populated_state())
+
+        self.assertIn("Prefer a compact watchlist with the fewest items needed for useful coverage.", prompt)
+        self.assertIn("Avoid repeating full signal definitions unless needed for actionability.", prompt)
+
+    def test_render_prompt_requests_selective_synthesis_over_recap(self) -> None:
+        prompt = self._render_prompt_for_mode("Decision Memo")
+
+        self.assertIn("Synthesize rather than recap upstream analysis.", prompt)
+        self.assertIn(
+            "Include only the assumptions, uncertainties, signals, and next steps that materially improve the deliverable.",
+            prompt,
+        )
 
     def test_deep_research_render_requires_directly_executable_final_prompt(self) -> None:
         prompt = self._render_prompt_for_mode("Deep-Research Prompt")

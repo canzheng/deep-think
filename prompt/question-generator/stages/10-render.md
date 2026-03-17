@@ -30,7 +30,14 @@ Working rules:
 - Follow the selected output mode for the final deliverable structure.
 - Include assumptions, unknowns, and what would change the conclusion when they materially help the final deliverable.
 - Be explicit when the available context is incomplete instead of inventing certainty.
+- Synthesize rather than recap upstream analysis.
+- Include only the assumptions, uncertainties, signals, and next steps that materially improve the deliverable.
+- Omit low-value detail that does not change the recommendation, interpretation, or usefulness of the artifact.
 
+{{#output_language_instruction}}
+Output language:
+- {{output_language_instruction}}
+{{/output_language_instruction}}
 
 
 Working framing:
