@@ -1,0 +1,52 @@
+{
+  "stage": "question_generation",
+  "reads_required": ["routing", "structure", "scenarios"],
+  "reads_optional": [
+    {
+      "stage": "boundary",
+      "kind": "situation",
+      "when": [
+        "scope is still fragile",
+        "unit of analysis may be confused",
+        "time horizon ambiguity still matters",
+        "multiple workers may have caused scope drift"
+      ]
+    },
+    {
+      "stage": "decision_logic",
+      "kind": "user_requirement",
+      "when": [
+        "you want explicitly action-sensitive questions"
+      ]
+    },
+    {
+      "stage": "evidence_planning",
+      "kind": "user_requirement",
+      "when": [
+        "you want questions constrained by available proof paths"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["questions"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["questions"],
+    "properties": {
+      "questions": {"$ref": "./state-sections/questions.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": true,
+    "field": "feedback",
+    "schema": {
+      "needed": false,
+      "target_stage": "structure",
+      "reason": "",
+      "state_sections_to_revisit": ["structure"],
+      "invalidate_downstream_sections": ["questions", "evidence_plan", "uncertainty_map", "decision_logic", "signals", "monitoring", "synthesis"]
+    }
+  }
+}

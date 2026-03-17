@@ -1,0 +1,517 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import os
+import urllib.error
+import urllib.request
+from dataclasses import dataclass
+
+from tools.question_generator.executors import (
+    ExecutorInvocationError,
+    StageExecutionResult,
+    extract_json_payload_text,
+    validate_payload_against_output_schema,
+)
+from tools.question_generator.openclaw_config import (
+    DEFAULT_OPENCLAW_EXECUTOR_MODE,
+    OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR,
+    normalize_executor_mode,
+    read_runtime_config,
+    resolve_runtime_config_path,
+    write_runtime_config,
+)
+
+
+@dataclass(frozen=True)
+class OpenClawExecutorConfig:
+    base_url: str
+    token: str
+    agent_id: str = "main"
+    runtime_config_path: str | Path | None = None
+    runtime_mode: str | None = None
+
+
+class _OpenClawCapabilityUnavailable(RuntimeError):
+    pass
+
+
+_CONNECTION_RESET_ERRNOS = {54, 104}
+
+
+class OpenClawStageExecutor:
+    def __init__(
+        self,
+        *,
+        config: OpenClawExecutorConfig,
+        tool_invoker=None,
+        chat_completion_caller=None,
+    ) -> None:
+        self.config = config
+        self._tool_invoker = tool_invoker
+        self._chat_completion_caller = chat_completion_caller
+        self._runtime_config_path = resolve_runtime_config_path(config.runtime_config_path)
+        self._runtime_mode = read_runtime_config(
+            config_path=self._runtime_config_path
+        ).executor_mode
+        self._runtime_mode_override = (
+            normalize_executor_mode(config.runtime_mode)
+            if config.runtime_mode is not None
+            else None
+        )
+
+    @classmethod
+    def from_env(cls) -> "OpenClawStageExecutor":
+        base_url = os.environ.get("OPENCLAW_BASE_URL", "http://127.0.0.1:18789")
+        token = os.environ.get("OPENCLAW_TOKEN", "")
+        agent_id = os.environ.get("OPENCLAW_AGENT_ID", "main")
+        runtime_mode = os.environ.get("OPENCLAW_EXECUTOR_MODE")
+        if runtime_mode is None:
+            prefer_llm_task = os.environ.get("OPENCLAW_PREFER_LLM_TASK")
+            if prefer_llm_task is not None:
+                runtime_mode = (
+                    "llm-task" if prefer_llm_task not in {"0", "false", "False"} else "chat_fallback"
+                )
+
+        runtime_config_path = os.environ.get(OPENCLAW_RUNTIME_CONFIG_PATH_ENV_VAR)
+        return cls(
+            config=OpenClawExecutorConfig(
+                base_url=base_url,
+                token=token,
+                agent_id=agent_id,
+                runtime_config_path=runtime_config_path,
+                runtime_mode=runtime_mode,
+            )
+        )
+
+    def run_stage_prompt(
+        self,
+        *,
+        stage: str,
+        prompt_text: str,
+        timeout_seconds: int,
+        response_schema: dict | None = None,
+    ) -> StageExecutionResult:
+        if response_schema is None or stage == "render":
+            return self._run_plain_text_chat(
+                prompt_text=prompt_text,
+                stage=stage,
+                timeout_seconds=timeout_seconds,
+            )
+
+        executor_mode = self._resolve_executor_mode()
+        if executor_mode in {"auto", "llm-task"}:
+            try:
+                raw_result = self._invoke_llm_task(
+                    prompt_text=prompt_text,
+                    response_schema=response_schema,
+                    timeout_seconds=timeout_seconds,
+                )
+                parsed_json = _extract_llm_task_json(raw_result)
+                validate_payload_against_output_schema(parsed_json, response_schema)
+                self._update_cached_executor_mode("llm-task")
+                return StageExecutionResult(
+                    response_text=json.dumps(parsed_json, ensure_ascii=True),
+                    backend_name="openclaw-llm-task",
+                    trace_text=json.dumps(raw_result, ensure_ascii=True),
+                    error_text="",
+                )
+            except _OpenClawCapabilityUnavailable:
+                self._update_cached_executor_mode("chat_fallback")
+            except ExecutorInvocationError:
+                raise
+            except Exception as exc:  # noqa: BLE001
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="invalid_response",
+                    message=f"OpenClaw llm-task returned invalid structured output for {stage}",
+                    error_text=str(exc),
+                ) from exc
+
+        return self._run_chat_json_with_repair(
+            stage=stage,
+            prompt_text=prompt_text,
+            timeout_seconds=timeout_seconds,
+            response_schema=response_schema,
+        )
+
+    def _run_plain_text_chat(
+        self,
+        *,
+        prompt_text: str,
+        stage: str,
+        timeout_seconds: int,
+    ) -> StageExecutionResult:
+        response = self._run_chat_completion(
+            prompt_text=prompt_text,
+            stage=stage,
+            timeout_seconds=timeout_seconds,
+        )
+        trace_text = json.dumps(response, ensure_ascii=True)
+        try:
+            response_text = _extract_chat_content(response)
+        except Exception as exc:  # noqa: BLE001
+            raise ExecutorInvocationError(
+                backend_name="openclaw-chat",
+                failure_reason="invalid_response",
+                message=f"OpenClaw chat-completions returned an invalid response shape for {stage}",
+                trace_text=trace_text,
+                error_text=str(exc),
+            ) from exc
+
+        return StageExecutionResult(
+            response_text=response_text,
+            backend_name="openclaw-chat",
+            trace_text=trace_text,
+            error_text="",
+        )
+
+    def _resolve_executor_mode(self) -> str:
+        if self._runtime_mode_override is not None:
+            return self._runtime_mode_override
+        if self._runtime_mode:
+            return self._runtime_mode
+        return DEFAULT_OPENCLAW_EXECUTOR_MODE
+
+    def _update_cached_executor_mode(self, executor_mode: str) -> None:
+        mode = normalize_executor_mode(executor_mode)
+        if self._runtime_mode_override is not None:
+            return
+        if self._runtime_mode == mode:
+            return
+        self._runtime_mode = mode
+        try:
+            write_runtime_config(
+                config_path=self._runtime_config_path,
+                executor_mode=mode,
+            )
+        except OSError:
+            return
+
+    def _run_chat_json_with_repair(
+        self,
+        *,
+        stage: str,
+        prompt_text: str,
+        timeout_seconds: int,
+        response_schema: dict,
+    ) -> StageExecutionResult:
+        initial_prompt = _wrap_json_fallback_prompt(prompt_text, response_schema)
+        initial_response = self._run_chat_completion(
+            prompt_text=initial_prompt,
+            stage=stage,
+            timeout_seconds=timeout_seconds,
+        )
+        initial_trace = json.dumps(initial_response, ensure_ascii=True)
+        try:
+            initial_content = _extract_chat_content(initial_response)
+        except Exception as exc:  # noqa: BLE001
+            raise ExecutorInvocationError(
+                backend_name="openclaw-chat",
+                failure_reason="invalid_response",
+                message=f"OpenClaw chat-completions returned an invalid response shape for {stage}",
+                trace_text=initial_trace,
+                error_text=str(exc),
+            ) from exc
+        error_message = _json_validation_error(initial_content, response_schema)
+        if error_message is None:
+            return StageExecutionResult(
+                response_text=initial_content,
+                backend_name="openclaw-chat",
+                trace_text=initial_trace,
+                error_text="",
+            )
+
+        repair_prompt = _build_repair_prompt(
+            original_prompt=prompt_text,
+            invalid_output=initial_content,
+            error_message=error_message,
+            response_schema=response_schema,
+        )
+        repaired_response = self._run_chat_completion(
+            prompt_text=repair_prompt,
+            stage=stage,
+            timeout_seconds=timeout_seconds,
+        )
+        repaired_trace = json.dumps(repaired_response, ensure_ascii=True)
+        try:
+            repaired_content = _extract_chat_content(repaired_response)
+        except Exception as exc:  # noqa: BLE001
+            raise ExecutorInvocationError(
+                backend_name="openclaw-chat",
+                failure_reason="invalid_response",
+                message=f"OpenClaw chat-completions returned an invalid repair response shape for {stage}",
+                trace_text=repaired_trace,
+                error_text=str(exc),
+            ) from exc
+        repair_error = _json_validation_error(repaired_content, response_schema)
+        if repair_error is not None:
+            raise ExecutorInvocationError(
+                backend_name="openclaw-chat",
+                failure_reason="invalid_response",
+                message=f"OpenClaw chat-completions repair output was invalid for {stage}",
+                trace_text=repaired_trace,
+                error_text=repair_error,
+            )
+        return StageExecutionResult(
+            response_text=repaired_content,
+            backend_name="openclaw-chat",
+            trace_text=repaired_trace,
+            error_text="",
+        )
+
+    def _invoke_llm_task(
+        self,
+        *,
+        prompt_text: str,
+        response_schema: dict,
+        timeout_seconds: int,
+    ) -> dict:
+        if self._tool_invoker is not None:
+            result = self._tool_invoker(
+                tool="llm-task",
+                action="json",
+                args={
+                    "prompt": prompt_text,
+                    "schema": response_schema,
+                    "timeoutMs": timeout_seconds * 1000,
+                },
+            )
+        else:
+            result = self._invoke_tool_http(
+                tool="llm-task",
+                action="json",
+                args={
+                    "prompt": prompt_text,
+                    "schema": response_schema,
+                    "timeoutMs": timeout_seconds * 1000,
+                },
+                timeout_seconds=timeout_seconds,
+            )
+
+        if result.get("ok"):
+            return result
+
+        error = result.get("error", {})
+        if result.get("status_code") == 404 or error.get("type") == "not_found":
+            raise _OpenClawCapabilityUnavailable("llm-task unavailable")
+
+        raise ExecutorInvocationError(
+            backend_name="openclaw-llm-task",
+            failure_reason="tool_error",
+            message=f"OpenClaw llm-task failed: {error.get('message', 'unknown error')}",
+            trace_text=json.dumps(result, ensure_ascii=True),
+            error_text=json.dumps(error, ensure_ascii=True),
+        )
+
+    def _run_chat_completion(
+        self,
+        *,
+        prompt_text: str,
+        stage: str,
+        timeout_seconds: int,
+    ) -> dict:
+        if self._chat_completion_caller is not None:
+            return self._chat_completion_caller(
+                prompt_text=prompt_text,
+                stage=stage,
+                timeout_seconds=timeout_seconds,
+                config=self.config,
+            )
+
+        payload = {
+            "model": f"openclaw:{self.config.agent_id}",
+            "messages": [{"role": "user", "content": prompt_text}],
+        }
+        request = urllib.request.Request(
+            f"{self.config.base_url.rstrip('/')}/v1/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.config.token}",
+            },
+            method="POST",
+        )
+        for attempt in range(2):
+            try:
+                with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="http_error",
+                    message=f"OpenClaw chat-completions failed: HTTP {exc.code}",
+                    trace_text=body,
+                    error_text=body,
+                ) from exc
+            except urllib.error.URLError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="transport_error",
+                    message=f"OpenClaw chat-completions request failed for {stage}",
+                    error_text=str(exc),
+                ) from exc
+            except OSError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="transport_error",
+                    message=f"OpenClaw chat-completions request failed for {stage}",
+                    error_text=str(exc),
+                ) from exc
+            except json.JSONDecodeError as exc:
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-chat",
+                    failure_reason="invalid_response",
+                    message=f"OpenClaw chat-completions returned invalid JSON envelope for {stage}",
+                    error_text=str(exc),
+                ) from exc
+
+    def _invoke_tool_http(
+        self,
+        *,
+        tool: str,
+        action: str,
+        args: dict,
+        timeout_seconds: int,
+    ) -> dict:
+        payload = {
+            "tool": tool,
+            "action": action,
+            "args": args,
+        }
+        request = urllib.request.Request(
+            f"{self.config.base_url.rstrip('/')}/tools/invoke",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.config.token}",
+            },
+            method="POST",
+        )
+        for attempt in range(2):
+            try:
+                with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                try:
+                    parsed = json.loads(body)
+                except json.JSONDecodeError:
+                    parsed = {"ok": False, "error": {"type": "http_error", "message": body}}
+                parsed["status_code"] = exc.code
+                return parsed
+            except urllib.error.URLError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="transport_error",
+                    message="OpenClaw llm-task request failed",
+                    error_text=str(exc),
+                ) from exc
+            except OSError as exc:
+                if attempt == 0 and _is_connection_reset_error(exc):
+                    continue
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="transport_error",
+                    message="OpenClaw llm-task request failed",
+                    error_text=str(exc),
+                ) from exc
+            except json.JSONDecodeError as exc:
+                raise ExecutorInvocationError(
+                    backend_name="openclaw-llm-task",
+                    failure_reason="invalid_response",
+                    message="OpenClaw llm-task returned invalid JSON envelope",
+                    error_text=str(exc),
+                ) from exc
+
+
+def _extract_llm_task_json(raw_result: dict) -> dict:
+    result = raw_result.get("result", {})
+    if isinstance(result.get("details"), dict) and isinstance(result["details"].get("json"), dict):
+        return result["details"]["json"]
+    if isinstance(result.get("json"), dict):
+        return result["json"]
+    if isinstance(raw_result.get("json"), dict):
+        return raw_result["json"]
+    raise ValueError("OpenClaw llm-task response did not include parsed JSON details")
+
+
+def _is_connection_reset_error(exc: BaseException) -> bool:
+    if isinstance(exc, urllib.error.URLError) and exc.reason is not None:
+        return _is_connection_reset_error(exc.reason)
+    if isinstance(exc, ConnectionResetError):
+        return True
+    errno_value = getattr(exc, "errno", None)
+    if errno_value in _CONNECTION_RESET_ERRNOS:
+        return True
+    return "connection reset by peer" in str(exc).lower()
+
+
+def _extract_chat_content(response: dict) -> str:
+    choices = response.get("choices", [])
+    if not choices:
+        raise ValueError("OpenClaw chat-completions response had no choices")
+    message = choices[0].get("message", {})
+    content = message.get("content", "")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if isinstance(item, dict) and item.get("type") == "text":
+                text_parts.append(item.get("text", ""))
+        return "".join(text_parts)
+    raise ValueError("Unsupported OpenClaw chat-completions content shape")
+
+
+def _wrap_json_fallback_prompt(prompt_text: str, response_schema: dict) -> str:
+    return "\n\n".join(
+        [
+            "JSON fallback contract:",
+            "Return exactly one JSON object.",
+            "Do not include markdown fences.",
+            "Any non-JSON output will be rejected and repaired.",
+            "Required output schema:",
+            json.dumps(response_schema, indent=2, ensure_ascii=True),
+            prompt_text,
+        ]
+    )
+
+
+def _build_repair_prompt(
+    *,
+    original_prompt: str,
+    invalid_output: str,
+    error_message: str,
+    response_schema: dict,
+) -> str:
+    return "\n\n".join(
+        [
+            "Repair the previous response.",
+            "Return exactly one corrected JSON object and nothing else.",
+            "The previous response was rejected.",
+            f"Validation error: {error_message}",
+            "Required output schema:",
+            json.dumps(response_schema, indent=2, ensure_ascii=True),
+            "Previous invalid output:",
+            invalid_output,
+            "Original task prompt:",
+            original_prompt,
+        ]
+    )
+
+
+def _json_validation_error(response_text: str, response_schema: dict) -> str | None:
+    try:
+        payload = extract_json_payload_text(response_text)
+        validate_payload_against_output_schema(payload, response_schema)
+    except Exception as exc:  # noqa: BLE001
+        return str(exc)
+    return None

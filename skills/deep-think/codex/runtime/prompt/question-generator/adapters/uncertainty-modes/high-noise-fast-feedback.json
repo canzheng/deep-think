@@ -1,0 +1,53 @@
+{
+  "value": "High-Noise / Fast-Feedback",
+  "research_behavior": [
+    "filter aggressively",
+    "require persistence or signal combinations",
+    "avoid updating on every twitch"
+  ],
+  "risk": [
+    "whipsaw from over-updating"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one with abundant but noisy short-cycle signals."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Usually does not widen ontology much, but does narrow attention toward confirmation logic."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Forces the stage to distinguish diagnostic structure from visible but low-value noise."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Prefers disciplined branching without overreacting to every short-term move."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about confirmation, persistence, and combinations of signals."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Requires confirmation rules, noise penalties, and pattern-over-print logic."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Pushes action logic toward waiting for persistence and avoiding twitchy reactivity."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should require confirmation and persistence rather than isolated datapoints."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be frequent but pattern-based, not hyper-reactive."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should make the confirmation standard explicit."
+    }
+  }
+}

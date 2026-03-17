@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "domain-adapter.schema.json",
+  "title": "Domain Adapter",
+  "type": "object",
+  "required": [
+    "value",
+    "typical_ontology",
+    "typical_bottlenecks",
+    "typical_signals",
+    "stage_guidance"
+  ],
+  "properties": {
+    "value": { "type": "string" },
+    "typical_ontology": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "typical_bottlenecks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "typical_signals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stage_guidance": { "$ref": "./stage-guidance.schema.json" }
+  },
+  "additionalProperties": false
+}

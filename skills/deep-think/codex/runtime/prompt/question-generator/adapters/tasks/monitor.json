@@ -1,0 +1,52 @@
+{
+  "value": "Monitor",
+  "prioritize": [
+    "leading indicators",
+    "signal density",
+    "thresholds",
+    "update cadence",
+    "noise filtering"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Sets the overall job to ongoing watch rather than one-shot explanation or decision."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls scope toward live variables, update cadence, and the systems that emit diagnostic signals."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Prioritizes signal-generating structure and threshold behavior."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Requires competing live paths that monitoring can distinguish in real time."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors signal-selection questions, threshold questions, and update-rule questions."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Prefers early, high-signal, repeatable evidence over exhaustive evidence."
+    },
+    "decision_logic": {
+      "importance": "Light",
+      "guidance": "Matters when monitoring is tied to escalation or action triggers."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "This is a core stage for the adapter and should be first-class."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "This is the core operational stage: cadence, escalation, action triggers, and noise filtering."
+    },
+    "render": {
+      "importance": "Important",
+      "guidance": "Pushes the final artifact toward dashboard-like outputs and concise update logic."
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "value": "Primary-Source-Heavy",
+  "prioritize": [
+    "official filings",
+    "transcripts",
+    "speeches",
+    "budgets",
+    "official statistics",
+    "product documentation",
+    "court records",
+    "primary disclosures"
+  ],
+  "strengths": [
+    "defensible factual base"
+  ],
+  "weaknesses": [
+    "may lag reality",
+    "may omit hidden behavior"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Selects a primary-source-heavy proof style."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can slightly narrow scope toward what can be evidenced directly."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Keeps mechanism claims close to observable and documented evidence."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Prefers branches that can be justified by direct disclosures and formal behavior."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions answerable through filings, transcripts, official statistics, or direct disclosures."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Sets the hierarchy toward direct documents and revealed formal behavior."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Raises the action threshold when primary evidence is expected before committing."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Favors signals from guidance changes, filings, official language, and formal disclosures."
+    },
+    "monitoring": {
+      "importance": "Moderate",
+      "guidance": "Monitoring should emphasize official updates and disclosed behavior, while noting lag risk."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Usually warrants explicit source hierarchy and source-quality rationale."
+    }
+  }
+}

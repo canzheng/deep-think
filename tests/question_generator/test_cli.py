@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 
 from tools.question_generator.cli import build_workflow_parser, main
+from tools.question_generator.codex_package import default_codex_package_dir
 from tools.question_generator.openclaw_package import default_openclaw_package_dir
 
 
@@ -140,6 +141,11 @@ class CliTest(unittest.TestCase):
                 "refresh-openclaw-package",
             ]
         )
+        refresh_codex_package_args = parser.parse_args(
+            [
+                "refresh-codex-package",
+            ]
+        )
 
         self.assertEqual(init_args.output_language, "French")
         self.assertEqual(init_topic_args.run_id, "topic-run")
@@ -151,6 +157,7 @@ class CliTest(unittest.TestCase):
         self.assertEqual(run_topic_args.executor_backend, "openclaw")
         self.assertEqual(run_topic_args.output_language, "Simplified Chinese")
         self.assertEqual(Path(refresh_package_args.output_dir), default_openclaw_package_dir())
+        self.assertEqual(Path(refresh_codex_package_args.output_dir), default_codex_package_dir())
 
     def test_cli_prints_assembled_prompt(self) -> None:
         stdout = io.StringIO()
@@ -439,6 +446,28 @@ class CliTest(unittest.TestCase):
                     exit_code = main(
                         [
                             "refresh-openclaw-package",
+                            "--output-dir",
+                            str(package_dir),
+                        ]
+                    )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(mocked_refresh.called)
+            self.assertEqual(mocked_refresh.call_args.kwargs["output_dir"], package_dir)
+            self.assertIn(str(package_dir), stdout.getvalue())
+
+    def test_refresh_codex_package_command_uses_package_builder(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            package_dir = Path(tmpdir) / "codex-package"
+            with patch(
+                "tools.question_generator.cli.refresh_codex_package",
+                return_value=package_dir,
+            ) as mocked_refresh:
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "refresh-codex-package",
                             "--output-dir",
                             str(package_dir),
                         ]

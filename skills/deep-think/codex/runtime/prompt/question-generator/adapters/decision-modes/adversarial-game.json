@@ -1,0 +1,73 @@
+{
+  "value": "Adversarial Game",
+  "use_when": [
+    "other actors react strategically",
+    "signaling, concealment, commitment, and countermoves matter",
+    "your action changes their behavior"
+  ],
+  "research_behavior": [
+    "model responses, not just states of the world",
+    "separate cheap talk from costly signals",
+    "ask what the other side believes you believe",
+    "test commitment credibility and second-order moves"
+  ],
+  "key_questions": [
+    "What will each counterparty likely do after we move?",
+    "What information are we revealing by acting?",
+    "Which signals are strategic rather than informative?",
+    "What would be too costly to fake?",
+    "What countermove most damages our plan?"
+  ],
+  "action_logic": [
+    "decision = move in a game, not passive forecast",
+    "plan for reactions and adaptation"
+  ],
+  "monitoring_style": [
+    "reaction-pattern based"
+  ],
+  "failure_mode": [
+    "mirror-imaging or over-rationalizing opponents"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the action problem as one where other actors react strategically."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Pulls in counterparty reactions, information revelation, and signaling effects."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Adds counter-move logic, signaling games, and commitment credibility."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors branches defined by responses and countermoves, not just passive states of the world."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about reactions, revealed intentions, and costly versus cheap signals."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Prefers evidence that survives strategic deception and response incentives."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Core stage: must treat action as a move in a game, not a passive bet."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize counterparty reactions and costly commitments."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should watch reaction patterns and second-order behavior."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Decision outputs should make reaction logic and countermove risk explicit."
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "value": "Latent / No Immediate Commitment",
+  "use_when": [
+    "the user is mainly framing the problem",
+    "action is deferred",
+    "preserving option value matters more than immediate choice"
+  ],
+  "research_behavior": [
+    "optimize for clarity, not premature action",
+    "identify the future decision that this research is setting up",
+    "distinguish \"good to know\" from \"must know later\""
+  ],
+  "key_questions": [
+    "What future decision is this analysis preparing for?",
+    "What must be known before that decision becomes live?",
+    "What information can be gathered cheaply now?",
+    "What uncertainty is irrelevant unless commitment approaches?"
+  ],
+  "action_logic": [
+    "preserve flexibility",
+    "build the decision frame",
+    "avoid fake precision"
+  ],
+  "monitoring_style": [
+    "watch for threshold-crossing signals that turn a framing exercise into a live decision"
+  ],
+  "failure_mode": [
+    "treating a preparatory frame as sufficient when commitment conditions have already arrived"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the action problem as preparatory rather than immediately executable."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Keeps scope focused on framing the future decision, not forcing action now."
+    },
+    "structure": {
+      "importance": "Light",
+      "guidance": "Adds action-relevant framing only where it clarifies the later decision."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Favors scenarios that clarify what future decision may become live."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what will matter later and what can be learned cheaply now."
+    },
+    "evidence_planning": {
+      "importance": "Moderate",
+      "guidance": "Lowers pressure for immediate proof while prioritizing cheap informative evidence."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Core stage: should define the future decision frame without premature commitment."
+    },
+    "signal_translation": {
+      "importance": "Moderate",
+      "guidance": "Signals should indicate when the latent decision becomes active."
+    },
+    "monitoring": {
+      "importance": "Moderate",
+      "guidance": "Monitoring should watch for transition from optional framing to live decision."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should make clear that the output is a decision frame, not an immediate commitment."
+    }
+  }
+}

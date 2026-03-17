@@ -86,7 +86,7 @@ Codex install:
 
 ```bash
 mkdir -p ~/.codex/skills
-ln -s ~/.deep-think/skills/deep-think ~/.codex/skills/deep-think
+ln -s ~/.deep-think/skills/deep-think/codex ~/.codex/skills/deep-think
 ```
 
 Install docs:
