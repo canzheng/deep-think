@@ -9,11 +9,14 @@ metadata: {"openclaw":{"requires":{"bins":["python3","openclaw"]}}}
 Use this packaging artifact when Deep Think should run inside an OpenClaw
 environment as a self-contained bundle.
 
+`{baseDir}` means the root of the installed OpenClaw skill bundle, the
+directory that contains this `SKILL.md`.
+
 This artifact preserves the same workflow:
 - topic-first input
 - routing confirmation pause
 - direct routing patching
-- resume from `Boundary`
+- continue from `Boundary`
 
 ## Trigger Examples
 
@@ -29,16 +32,23 @@ Use this skill for requests like:
 
 - The bundle carries its own Python runtime modules, prompt assets, contracts,
   recipes, and vendored `chevron`.
-- Prompt assembly, contracts, and shared-state behavior stay unchanged.
-- Answering runs through native OpenClaw Gateway session RPC by default.
-- JSON-returning stages have an optional OpenClaw `llm-task` fast path.
+- Prefer the current OpenClaw agent as the default execution path.
+- Treat this skill as instructions plus workflow tools for the active agent,
+  not as a place to invoke a second model client by default.
+- Use `prepare-stage` as the canonical prompt assembly step.
+- Use `apply-response` as the validation and state-write step for structured
+  stages.
+- For `render`, produce raw text or markdown, not JSON.
+- OpenClaw `llm-task` is optional and should be treated as an opt-in fallback
+  or enhancement for strict structured extraction when it is available and
+  materially helpful.
 - The packaged runtime keeps a persistent executor capability config in
   `config/runtime.json`.
-- The default executor mode is `session`.
-- If the executor is set to `llm-task` and that capability is unavailable,
-  JSON-returning stages fall back to the native session path with JSON
-  hardening, one repair pass, and local validation.
-- `render` also uses the native session path.
+- The default executor mode is `session`, but the skill should not depend on
+  it for normal operation.
+- If a workflow command is run with `--executor-backend openclaw` and
+  `llm-task` is explicitly enabled, that is a fallback path rather than the
+  baseline design.
 
 ## Workflow
 
@@ -47,63 +57,79 @@ Use this skill for requests like:
 3. Set `output_language` only when the run starts. Do not change it later in the run.
 4. The language preference affects only the final render stage, not upstream analysis.
 5. Derive `run-id` by slugifying the topic into a short lowercase hyphenated label and appending a timestamp suffix for uniqueness, for example `atlas-expand-healthcare-20260317-101530`.
-6. Start the workflow with `python3 {baseDir}/scripts/run_topic.py` and always pass both `--run-id <run-id>` and `--pause-after-stage routing`.
-7. Treat the stop after `Routing` as a successful review checkpoint, not a stall or failed run.
-8. Let that command run through `Routing` and stop.
-9. Immediately read the routing output from the run artifacts and present the inferred routing summary to the user for confirmation.
-10. Do not keep waiting for additional model output after a routing pause.
-11. If the user gives clear corrections, apply them with `python3 {baseDir}/scripts/update_routing.py`.
-12. Never rerun `Routing`.
-13. Resume the workflow from `Boundary` with `python3 {baseDir}/scripts/resume_run.py`.
-14. Return the final rendered artifact.
+6. Initialize the run artifacts, complete `Routing`, and pause for user review.
+7. Summarize the routing result from the run artifacts and ask for confirmation or corrections.
+8. If the user corrects routing, patch it directly and continue from `Boundary`.
+9. Complete the remaining stages one by one.
+10. Return the final rendered artifact.
 
-## Routing Review Rules
+## Agent-First Stage Loop
 
-Show the user these inferred routing fields:
-- normalized question
-- task
-- domain
-- output mode
-- evidence mode
-- uncertainty mode
-- decision mode
-- time horizon
-- unit of analysis
-- decision context
-- assumptions
+Use this loop unless the user explicitly wants the optional OpenClaw executor path:
 
-If the user confirms, continue immediately.
+1. Initialize the run artifacts from the raw topic.
+2. Read `shared_state.json` when needed for context.
+3. Run `prepare-stage` to generate the canonical prompt for the next stage.
+4. Read the generated prompt and answer it as the current agent.
+5. For structured stages, return contract-conforming JSON.
+6. For `render`, return raw final text or markdown.
+7. Run `apply-response` to persist the result.
+8. Move to the next stage only after `apply-response` succeeds.
+9. Pause after `Routing` for user review, then continue from `Boundary`.
 
-If the user corrects fields:
-- interpret the correction directly
-- update only the clearly affected `routing` fields
-- preserve all unaffected fields
-- update `classification_rationales` when the user clearly changed the reason
-- update `assumptions` only when the user explicitly replaced or removed them
+Canonical command pattern:
 
-If the user's correction is ambiguous:
-- ask one focused follow-up question
-- do not guess
-- do not rerun `Routing`
+- Initialize only the run artifacts:
+  - `python3 {baseDir}/runtime/tools/question_generator/cli.py init-topic-run --topic "<topic>" --output-dir {baseDir}/tmp/question-runs --run-id <run-id>`
+- Inspect the current shared state when needed:
+  - read `{baseDir}/tmp/question-runs/<run-id>/shared_state.json`
+- Prepare one stage prompt from the current run state:
+  - `python3 {baseDir}/runtime/tools/question_generator/cli.py prepare-stage --run-dir {baseDir}/tmp/question-runs/<run-id> --stage routing`
+- Read the prepared prompt from the path returned by `prepare-stage`, for
+  example:
+  - `{baseDir}/tmp/question-runs/<run-id>/stages/routing/prompt.md`
+- Inspect the structured-output schema when the stage is not `render`:
+  - read `{baseDir}/tmp/question-runs/<run-id>/stages/routing/response.schema.json`
+- Save the current agent's stage response to a file, then apply it back into
+  the run state:
+  - `python3 {baseDir}/runtime/tools/question_generator/cli.py apply-response --run-dir {baseDir}/tmp/question-runs/<run-id> --stage routing --response <response-file>`
+- Continue later stages with the same `prepare-stage` then `apply-response`
+  pattern:
+  - `boundary`
+  - `structure`
+  - `scenarios`
+  - `question_generation`
+  - `evidence_planning`
+  - `decision_logic`
+  - `signal_translation`
+  - `monitoring`
+  - `render`
 
-## Command Rules
+## Critical Rules
 
-- Derive `run-id` from the topic with:
-  - a short slug from the first meaningful words
-  - lowercase letters, numbers, and hyphens only
-  - a timestamp suffix for uniqueness
-  - example: `atlas-expand-healthcare-20260317-101530`
-- Start with:
-  - `python3 {baseDir}/scripts/run_topic.py --topic "<topic>" --run-id <run-id> --pause-after-stage routing`
-- If the user requested a final output language, add:
-  - `--output-language "<language>"`
-- If the command returns with `Routing` completed and later stages not started, treat that as expected and move immediately into routing review
-- If the user confirms routing as-is:
-  - `python3 {baseDir}/scripts/resume_run.py --run-dir {baseDir}/tmp/question-runs/<run-id>`
-- If the user corrects routing fields:
+- Never assume a hidden executor is running the stage loop for you.
+- Never rerun `Routing`.
+- After `Routing`, inspect `stages/routing/response.parsed.json` and the updated `shared_state.json`.
+- Show the user these routing fields:
+  - normalized question
+  - task
+  - domain
+  - output mode
+  - evidence mode
+  - uncertainty mode
+  - decision mode
+  - time horizon
+  - unit of analysis
+  - decision context
+  - assumptions
+- If the user confirms routing, continue immediately from `Boundary`.
+- If the user corrects routing fields, patch only the affected `routing` fields with:
   - `python3 {baseDir}/scripts/update_routing.py --run-dir {baseDir}/tmp/question-runs/<run-id> --patch-json '<json patch>'`
-  - then `python3 {baseDir}/scripts/resume_run.py --run-dir {baseDir}/tmp/question-runs/<run-id>`
-- After a routing pause, inspect the run artifacts, summarize the inferred routing fields for the user, and wait for confirmation or corrections before resuming
+- Preserve all unaffected routing fields.
+- Update `classification_rationales` only when the user clearly changed the reason.
+- Update `assumptions` only when the user explicitly replaced or removed them.
+- If the user's correction is ambiguous, ask one focused follow-up question.
+- Use `llm-task` only when it is enabled and allowlisted, and only when strict structured output materially helps.
 - Do not rely on `conda` or a separate repo checkout
 - Keep `shared_state.json` as the only workflow state
 - Keep run artifacts under `{baseDir}/tmp/question-runs`
