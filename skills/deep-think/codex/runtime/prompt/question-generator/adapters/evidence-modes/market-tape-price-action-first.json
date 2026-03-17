@@ -1,0 +1,63 @@
+{
+  "value": "Market-Tape / Price-Action-First",
+  "prioritize": [
+    "price action",
+    "relative moves",
+    "volatility",
+    "options skew",
+    "flows",
+    "spreads",
+    "revisions",
+    "dispersion"
+  ],
+  "strengths": [
+    "fast",
+    "useful for expectation mapping and timing"
+  ],
+  "weaknesses": [
+    "noisy",
+    "technical distortion risk"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Selects a tape-first proof style oriented around expectation mapping."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Slightly narrows attention toward what should show up in market behavior."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Encourages structure that stays close to tradable expectation shifts and timing."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Prefers scenarios that can be expressed through revisions, spreads, volatility, and price response."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions like what will show up in revisions, spreads, or relative price action."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Sets freshness bias, price-action priority, and conflict rules for noisy signals."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Can justify action on tape confirmation even when direct evidence is incomplete."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Favors price, vol, flows, revisions, skew, and relative-move signals."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track confirmation, rejection, persistence, and crowding rather than one-off prints."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Usually only changes how explicitly expectation mapping is shown."
+    }
+  }
+}

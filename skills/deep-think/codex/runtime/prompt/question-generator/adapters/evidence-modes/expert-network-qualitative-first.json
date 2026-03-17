@@ -1,0 +1,62 @@
+{
+  "value": "Expert-Network / Qualitative-First",
+  "prioritize": [
+    "interviews",
+    "channel checks",
+    "customer behavior",
+    "operator views",
+    "partner feedback",
+    "revealed field behavior"
+  ],
+  "strengths": [
+    "fast",
+    "useful for hidden frictions"
+  ],
+  "weaknesses": [
+    "anecdotal bias",
+    "sample bias",
+    "triangulation required"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Selects a qualitative and field-intelligence proof style."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can widen scope toward hidden frictions and off-balance-sheet behavior."
+    },
+    "structure": {
+      "importance": "Moderate",
+      "guidance": "Allows more hypotheses about field behavior, friction, and hidden operational reality."
+    },
+    "scenarios": {
+      "importance": "Moderate",
+      "guidance": "Prefers branches supported by repeated operator behavior and field evidence."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what practitioners are seeing that is absent from official reporting."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Sets triangulation rules, freshness bias, and bias controls for anecdotal evidence."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Can support action when triangulated field behavior is more current than formal reporting."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Favors channel checks, customer behavior, partner feedback, and operator observations."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should watch repeated qualitative pattern shifts, not isolated anecdotes."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Usually requires explicit caveats about sample bias and triangulation."
+    }
+  }
+}

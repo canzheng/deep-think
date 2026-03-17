@@ -1,0 +1,36 @@
+{
+  "stage": "structure",
+  "reads_required": ["routing", "boundary"],
+  "reads_optional": [
+    {
+      "stage": "scenarios",
+      "kind": "situation",
+      "when": [
+        "scenario stress-testing exposed a structural weakness"
+      ]
+    },
+    {
+      "stage": "question_generation",
+      "kind": "situation",
+      "when": [
+        "killer questions exposed a missing stakeholder",
+        "killer questions exposed a broken mechanism",
+        "killer questions exposed a hidden bottleneck"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["structure"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["structure"],
+    "properties": {
+      "structure": {"$ref": "./state-sections/structure.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": false
+  }
+}

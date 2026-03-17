@@ -1,0 +1,54 @@
+{
+  "value": "Slow-Feedback / Irreversible-Decision",
+  "research_behavior": [
+    "emphasize pre-mortems",
+    "stage decisions where possible",
+    "seek disconfirming evidence early",
+    "separate what must be known before acting from what can be learned later"
+  ],
+  "risk": [
+    "excessive caution or delayed action"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one where learning is slow and errors may be hard to reverse."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can widen scope toward reversibility, path dependence, and pre-decision kill criteria."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Forces the stage to identify what matters before commitment and what can wait."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors robust downside-aware branches rather than fragile fine-grained distinctions."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what must be known before irreversible action."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Requires pre-mortem evidence, disconfirming evidence, and clear distinction between before-action and after-action learning."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Strongly raises the bar for action and favors staging, reversibility, and kill criteria."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should identify disconfirming milestones, stage gates, and stop-loss logic."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should be milestone-based and tied to irreversible-decision checkpoints."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should explicitly separate reducible uncertainty from uncertainty that must be borne."
+    }
+  }
+}

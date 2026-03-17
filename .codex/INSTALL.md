@@ -8,7 +8,7 @@ skills.
 ```bash
 git clone https://github.com/canzheng/deep-think.git ~/.deep-think
 mkdir -p ~/.codex/skills
-ln -s ~/.deep-think/skills/deep-think ~/.codex/skills/deep-think
+ln -s ~/.deep-think/skills/deep-think/codex ~/.codex/skills/deep-think
 ```
 
 If `~/.deep-think` already exists:
@@ -21,7 +21,7 @@ If `~/.codex/skills/deep-think` already exists and should be replaced:
 
 ```bash
 rm ~/.codex/skills/deep-think
-ln -s ~/.deep-think/skills/deep-think ~/.codex/skills/deep-think
+ln -s ~/.deep-think/skills/deep-think/codex ~/.codex/skills/deep-think
 ```
 
 ## Update
@@ -36,6 +36,6 @@ enough.
 ## Notes
 
 - Codex discovers the installed skill from `~/.codex/skills/deep-think`.
-- The Codex skill root is `skills/deep-think`.
+- The Codex skill root is `skills/deep-think/codex`.
 - Start a new Codex session after install or update if the skill does not
   appear immediately.

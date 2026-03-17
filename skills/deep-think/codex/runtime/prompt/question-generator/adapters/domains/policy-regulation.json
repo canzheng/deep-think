@@ -1,0 +1,78 @@
+{
+  "value": "Policy / Regulation",
+  "typical_ontology": [
+    "elected officials",
+    "agencies",
+    "regulated entities",
+    "courts",
+    "lobby groups",
+    "voters",
+    "bureaucracies",
+    "industries",
+    "legal authority",
+    "coalitions"
+  ],
+  "typical_bottlenecks": [
+    "legal authority",
+    "enforcement capacity",
+    "budget",
+    "political support",
+    "administrative complexity",
+    "compliance burden",
+    "judicial risk",
+    "coalition fracture"
+  ],
+  "typical_signals": [
+    "bill text changes",
+    "rulemaking",
+    "litigation",
+    "implementation guidance",
+    "appropriations",
+    "compliance behavior",
+    "enforcement actions",
+    "lobbying activity",
+    "election outcomes"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as a policy, legal, or implementation system."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls in agencies, courts, implementation chains, appropriations, and coalition politics."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Makes legal authority, enforcement capacity, coalition support, and implementation mechanics central."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors pass/fail, enforcement, litigation, implementation delay, and coalition-fracture branches."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors authority, enforceability, discretion, implementation, and judicial-risk questions."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Prefers legal text, agency guidance, procedural timing, litigation, and enforcement evidence."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Shapes what action means: intervention feasibility, compliance planning, timing, and leverage points."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize bill text changes, rulemaking, litigation, appropriations, and compliance behavior."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track implementation chain progress, enforcement intensity, and coalition shifts."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Mainly affects domain vocabulary and examples."
+    }
+  }
+}

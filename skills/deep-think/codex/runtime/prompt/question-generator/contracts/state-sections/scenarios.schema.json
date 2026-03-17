@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/scenarios.schema.json",
+  "title": "Scenarios",
+  "type": "object",
+  "required": ["base_case", "alternative_scenarios"],
+  "properties": {
+    "base_case": {"$ref": "#/$defs/scenario"},
+    "alternative_scenarios": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/scenario"}
+    }
+  },
+  "$defs": {
+    "scenario": {
+      "type": "object",
+      "required": [
+        "name",
+        "summary",
+        "branch_points",
+        "branch_triggers",
+        "reversibility",
+        "probability_logic",
+        "decision_mode_implications"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "summary": {"type": "string"},
+        "branch_points": {"type": "array", "items": {"type": "string"}},
+        "branch_triggers": {"type": "array", "items": {"type": "string"}},
+        "reversibility": {"type": "string"},
+        "probability_logic": {"type": "string"},
+        "decision_mode_implications": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

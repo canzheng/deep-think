@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state-sections/uncertainty_map.schema.json",
+  "title": "Uncertainty Map",
+  "type": "object",
+  "required": [
+    "reducible_unknowns",
+    "partially_reducible_unknowns",
+    "irreducible_uncertainties",
+    "task_material_uncertainties"
+  ],
+  "properties": {
+    "reducible_unknowns": {"type": "array", "items": {"type": "string"}},
+    "partially_reducible_unknowns": {"type": "array", "items": {"type": "string"}},
+    "irreducible_uncertainties": {"type": "array", "items": {"type": "string"}},
+    "task_material_uncertainties": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

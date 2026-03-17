@@ -1,0 +1,44 @@
+{
+  "stage": "evidence_planning",
+  "reads_required": ["routing", "structure", "scenarios", "question_generation"],
+  "reads_optional": [
+    {
+      "stage": "boundary",
+      "kind": "situation",
+      "when": [
+        "source selection depends strongly on what is in vs out of scope",
+        "adjacent systems could create source creep"
+      ]
+    },
+    {
+      "stage": "decision_logic",
+      "kind": "user_requirement",
+      "when": [
+        "evidence planning must already align to stage-gates or action thresholds"
+      ]
+    }
+  ],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["evidence_plan", "uncertainty_map"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["evidence_plan", "uncertainty_map"],
+    "properties": {
+      "evidence_plan": {"$ref": "./state-sections/evidence_plan.schema.json"},
+      "uncertainty_map": {"$ref": "./state-sections/uncertainty_map.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": true,
+    "field": "feedback",
+    "schema": {
+      "needed": false,
+      "target_stage": "scenarios",
+      "reason": "",
+      "state_sections_to_revisit": ["scenarios"],
+      "invalidate_downstream_sections": ["evidence_plan", "uncertainty_map", "decision_logic", "signals", "monitoring", "synthesis"]
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "value": "Investing / Markets",
+  "typical_ontology": [
+    "assets",
+    "securities",
+    "sectors",
+    "management teams",
+    "customers",
+    "competitors",
+    "investors",
+    "regulators",
+    "market expectations",
+    "positioning",
+    "catalysts",
+    "valuation regimes"
+  ],
+  "typical_bottlenecks": [
+    "growth durability",
+    "margins",
+    "liquidity",
+    "customer budgets",
+    "pricing power",
+    "adoption rates",
+    "multiple compression",
+    "crowding"
+  ],
+  "typical_signals": [
+    "earnings/guidance",
+    "bookings/RPO/NRR/churn",
+    "revisions",
+    "flows",
+    "spreads",
+    "usage indicators",
+    "management commentary",
+    "capex trends",
+    "options skew"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as a market or capital-allocation problem shaped by expectations and price."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls in customers, management, regulation, valuation regime, positioning, and capital flows."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Makes expectations, catalysts, liquidity, and capital flows structural forces, not side notes."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors rerating, derating, execution miss, demand durability, and catalyst unlock branches."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors expectation-versus-reality, catalyst timing, crowding, and valuation questions."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Prefers filings, guidance, revisions, tape, spreads, and operating confirmation."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Shapes what action means: sizing, timing, hedge, add, trim, or avoid."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize revisions, spreads, relative price action, positioning, and operating confirmation."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track expectation shifts, crowding, catalysts, and correlation stress."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Mainly affects domain vocabulary and examples, not structure by itself."
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "stage": "boundary",
+  "reads_required": ["routing"],
+  "reads_optional": [],
+  "depends_on": ["task", "domain", "output_mode", "evidence_mode", "uncertainty_mode", "decision_mode"],
+  "writes": ["boundary"],
+  "output_format": "json_state_update",
+  "output_schema": {
+    "type": "object",
+    "required": ["boundary"],
+    "properties": {
+      "boundary": {"$ref": "./state-sections/boundary.schema.json"}
+    },
+    "additionalProperties": false
+  },
+  "feedback": {
+    "supported": false
+  }
+}

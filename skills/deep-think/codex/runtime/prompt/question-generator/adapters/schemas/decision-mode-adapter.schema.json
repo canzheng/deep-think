@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision-mode-adapter.schema.json",
+  "title": "Decision Mode Adapter",
+  "type": "object",
+  "required": [
+    "value",
+    "use_when",
+    "research_behavior",
+    "key_questions",
+    "action_logic",
+    "monitoring_style",
+    "failure_mode",
+    "stage_guidance"
+  ],
+  "properties": {
+    "value": { "type": "string" },
+    "use_when": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "research_behavior": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "key_questions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "action_logic": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "monitoring_style": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "failure_mode": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stage_guidance": { "$ref": "./stage-guidance.schema.json" }
+  },
+  "additionalProperties": false
+}

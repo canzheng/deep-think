@@ -1,0 +1,81 @@
+{
+  "value": "Company / Product Strategy",
+  "typical_ontology": [
+    "company",
+    "product",
+    "customer segment",
+    "buyer",
+    "user",
+    "competitor",
+    "channel",
+    "partner ecosystem",
+    "workflow",
+    "pricing model",
+    "internal execution"
+  ],
+  "typical_bottlenecks": [
+    "PMF",
+    "onboarding friction",
+    "switching costs",
+    "pricing",
+    "distribution",
+    "trust",
+    "ecosystem dependence",
+    "execution bandwidth",
+    "integration complexity"
+  ],
+  "typical_signals": [
+    "win rates",
+    "churn",
+    "expansion",
+    "activation",
+    "time-to-value",
+    "sales cycle",
+    "usage depth",
+    "feature adoption",
+    "support burden",
+    "channel behavior"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as a company, product, or go-to-market system."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls in buyer, user, workflow, channel, ecosystem, and execution context."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Makes PMF, switching cost, trust, onboarding friction, and channel behavior central structural elements."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors adoption, stall, competitor displacement, channel leverage, and execution-miss branches."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions on buyer behavior, distribution, adoption bottlenecks, pricing, and retention quality."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Prefers operating metrics, customer behavior, workflow evidence, and field friction evidence."
+    },
+    "decision_logic": {
+      "importance": "Moderate",
+      "guidance": "Shapes what action means: resource allocation, sequencing, investment, pricing, or GTM change."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize churn, activation, win rates, adoption depth, and time-to-value."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should track segment behavior, usage quality, feature adoption, and sales-cycle change."
+    },
+    "render": {
+      "importance": "Light",
+      "guidance": "Mainly affects examples and operational vocabulary."
+    }
+  }
+}

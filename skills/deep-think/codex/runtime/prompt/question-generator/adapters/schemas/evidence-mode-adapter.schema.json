@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-mode-adapter.schema.json",
+  "title": "Evidence Mode Adapter",
+  "type": "object",
+  "required": ["value", "prioritize", "strengths", "weaknesses", "stage_guidance"],
+  "properties": {
+    "value": { "type": "string" },
+    "prioritize": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "strengths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stage_guidance": { "$ref": "./stage-guidance.schema.json" }
+  },
+  "additionalProperties": false
+}

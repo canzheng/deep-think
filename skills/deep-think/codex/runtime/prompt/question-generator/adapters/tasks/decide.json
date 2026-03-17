@@ -1,0 +1,53 @@
+{
+  "value": "Decide",
+  "prioritize": [
+    "action relevance",
+    "payoff asymmetry",
+    "timing",
+    "triggers",
+    "failure modes",
+    "minimum sufficient evidence"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Sets the overall job to determining what action should be taken."
+    },
+    "boundary": {
+      "importance": "Important",
+      "guidance": "Pulls scope toward payoff-relevant factors, timing constraints, and practical decision context."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Prioritizes decision-relevant structure, not just causal completeness."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Requires scenarios that matter for action, downside, timing, and failure modes."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions whose answers would change action, timing, sizing, staging, or hedging."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Pushes the proof standard toward minimum sufficient evidence to act."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "This is a core stage for the adapter and should make action thresholds explicit."
+    },
+    "signal_translation": {
+      "importance": "Moderate",
+      "guidance": "Signals should indicate when to act, wait, add, trim, hedge, or stop."
+    },
+    "monitoring": {
+      "importance": "Moderate",
+      "guidance": "Monitoring should track action triggers, not only belief updates."
+    },
+    "render": {
+      "importance": "Important",
+      "guidance": "Pushes the final artifact toward recommendation, evidence threshold, and triggers."
+    }
+  }
+}

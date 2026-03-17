@@ -1,0 +1,53 @@
+{
+  "value": "Adversarial / Deception Dominated",
+  "research_behavior": [
+    "prioritize revealed behavior over rhetoric",
+    "test for signaling games",
+    "discount cheap talk"
+  ],
+  "risk": [
+    "excessive skepticism"
+  ],
+  "stage_guidance": {
+    "routing": {
+      "importance": "Important",
+      "guidance": "Classifies the problem as one where actors may manipulate perception."
+    },
+    "boundary": {
+      "importance": "Light",
+      "guidance": "Can widen scope toward signaling channels, countermoves, and deception incentives."
+    },
+    "structure": {
+      "importance": "Important",
+      "guidance": "Forces the stage to distinguish rhetoric from costly signals and capability from narrative."
+    },
+    "scenarios": {
+      "importance": "Important",
+      "guidance": "Favors branches that depend on revealed behavior and strategic response, not cheap talk."
+    },
+    "question_generation": {
+      "importance": "Important",
+      "guidance": "Favors questions about what cannot be cheaply faked and who benefits from belief error."
+    },
+    "evidence_planning": {
+      "importance": "Important",
+      "guidance": "Requires skepticism, conflict handling, and revealed-behavior preference."
+    },
+    "decision_logic": {
+      "importance": "Important",
+      "guidance": "Pushes action logic toward waiting for costly signals and avoiding rhetoric-driven overreaction."
+    },
+    "signal_translation": {
+      "importance": "Important",
+      "guidance": "Signals should emphasize costly commitments and durable behavior over statements."
+    },
+    "monitoring": {
+      "importance": "Important",
+      "guidance": "Monitoring should downgrade rhetoric and watch for strategic behavior patterns."
+    },
+    "render": {
+      "importance": "Moderate",
+      "guidance": "Should make deception risk and skepticism level explicit."
+    }
+  }
+}

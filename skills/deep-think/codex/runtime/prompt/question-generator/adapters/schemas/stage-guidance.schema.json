@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stage-guidance.schema.json",
+  "title": "Stage Guidance",
+  "description": "Stage guidance keyed by normalized runtime stage ids rather than user-facing stage labels.",
+  "type": "object",
+  "properties": {
+    "routing": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "boundary": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "structure": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "scenarios": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "question_generation": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "evidence_planning": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "decision_logic": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "signal_translation": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "monitoring": { "$ref": "#/$defs/stageGuidanceEntry" },
+    "render": { "$ref": "#/$defs/stageGuidanceEntry" }
+  },
+  "$defs": {
+    "stageGuidanceEntry": {
+      "type": "object",
+      "required": ["importance", "guidance"],
+      "properties": {
+        "importance": {
+          "type": "string",
+          "enum": ["Important", "Moderate", "Light", "None"]
+        },
+        "guidance": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

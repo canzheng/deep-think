@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "uncertainty-mode-adapter.schema.json",
+  "title": "Uncertainty Mode Adapter",
+  "type": "object",
+  "required": ["value", "research_behavior", "risk", "stage_guidance"],
+  "properties": {
+    "value": { "type": "string" },
+    "research_behavior": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risk": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stage_guidance": { "$ref": "./stage-guidance.schema.json" }
+  },
+  "additionalProperties": false
+}
