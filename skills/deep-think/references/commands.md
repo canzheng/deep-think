@@ -55,5 +55,7 @@ conda run -n deep-think python -m tools.question_generator.cli run-topic \
   --output-language "Japanese"
 ```
 
+If this command returns with `Routing` completed and later stages not started, that is expected. Treat it as a successful review checkpoint, read the routing output from the run artifacts, present the inferred routing fields to the user, and only then resume from `Boundary`.
+
 If no pause is needed, omit `--pause-after-stage`.
 If no language preference is needed, omit `--output-language`.

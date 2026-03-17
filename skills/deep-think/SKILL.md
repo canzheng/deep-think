@@ -32,11 +32,13 @@ Use this skill for requests like:
    workflow state is the minimal payload `{"topic": "..."}` rather than a
    copy of `shared_state_schema.json`.
 6. Execute `Routing` first and stop.
-7. Present the inferred routing summary to the user for confirmation.
-8. If the user gives clear corrections, update only those `routing` fields directly.
-9. Never rerun `Routing`.
-10. Resume the workflow from `Boundary`.
-11. Return the final rendered artifact.
+7. Treat the stop after `Routing` as a successful review checkpoint, not a stall or failed run.
+8. Immediately read the routing output from the run artifacts and present the inferred routing summary to the user for confirmation.
+9. Do not keep waiting for additional model output after a routing pause.
+10. If the user gives clear corrections, update only those `routing` fields directly.
+11. Never rerun `Routing`.
+12. Resume the workflow from `Boundary`.
+13. Return the final rendered artifact.
 
 ## Routing Review Rules
 
@@ -73,5 +75,7 @@ If the user's correction is ambiguous:
 - Use the repo CLI/orchestrator helpers instead of hand-editing run artifacts
 - Keep `shared_state.json` as the only workflow state
 - If the user requested a final output language, pass `--output-language "<language>"` when creating the run
+- If `run-topic --pause-after-stage routing` returns with `Routing` completed and later stages not started, treat that as expected and move immediately into routing review
+- After a routing pause, inspect the run artifacts, summarize the inferred routing fields for the user, and wait for confirmation or corrections before resuming
 
 Read [references/commands.md](references/commands.md) for the exact commands.

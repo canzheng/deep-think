@@ -67,6 +67,36 @@ Per repo guidance, run Python through the Conda-managed environment:
 conda run -n deep-think python -m unittest
 ```
 
+## Install As A Skill
+
+For GitHub-based skill installation, use one shared local checkout:
+
+```bash
+git clone https://github.com/canzheng/deep-think.git ~/.deep-think
+```
+
+OpenClaw install:
+
+```bash
+mkdir -p ~/.openclaw/workspace/skills
+ln -s ~/.deep-think/skills/deep-think/openclaw ~/.openclaw/workspace/skills/deep-think
+```
+
+Codex install:
+
+```bash
+mkdir -p ~/.codex/skills
+ln -s ~/.deep-think/skills/deep-think ~/.codex/skills/deep-think
+```
+
+Install docs:
+- [.openclaw/INSTALL.md](.openclaw/INSTALL.md)
+- [.codex/INSTALL.md](.codex/INSTALL.md)
+
+Raw install docs for tool-driven setup:
+- [OpenClaw install](https://raw.githubusercontent.com/canzheng/deep-think/main/.openclaw/INSTALL.md)
+- [Codex install](https://raw.githubusercontent.com/canzheng/deep-think/main/.codex/INSTALL.md)
+
 ## Common Commands
 
 Assemble one stage prompt:
