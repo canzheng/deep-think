@@ -160,11 +160,26 @@ Refresh the self-contained OpenClaw bundle artifact:
 conda run -n deep-think python -m tools.question_generator.cli refresh-openclaw-package
 ```
 
+Refresh the self-contained Codex bundle artifact:
+
+```bash
+conda run -n deep-think python -m tools.question_generator.cli refresh-codex-package
+```
+
 Packaged OpenClaw bundle notes:
 - the bundle lives under `skills/deep-think/openclaw`
 - it carries its own runtime, prompt assets, recipes, and vendored `chevron`
 - it uses `python3` and does not require `conda`
 - it persists JSON-stage executor choice in `config/runtime.json`
+- bundled entrypoints are:
+  - `python3 {baseDir}/scripts/run_topic.py ...`
+  - `python3 {baseDir}/scripts/update_routing.py ...`
+  - `python3 {baseDir}/scripts/resume_run.py ...`
+
+Packaged Codex bundle notes:
+- the bundle lives under `skills/deep-think/codex`
+- it carries its own runtime, prompt assets, recipes, and vendored `chevron`
+- it uses `python3` and does not require `conda`
 - bundled entrypoints are:
   - `python3 {baseDir}/scripts/run_topic.py ...`
   - `python3 {baseDir}/scripts/update_routing.py ...`
